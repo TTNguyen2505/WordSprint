@@ -1,33 +1,204 @@
+@import "tailwindcss";
+
+@font-face {
+    font-family: "Space Grotesk";
+    src: url("./assets/fonts/space-grotesk-regular.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Space Grotesk";
+    src: url("./assets/fonts/space-grotesk-medium.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Space Grotesk";
+    src: url("./assets/fonts/space-grotesk-bold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Space Mono";
+    src: url("./assets/fonts/space-mono-regular.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Space Mono";
+    src: url("./assets/fonts/space-mono-bold.woff2") format("woff2");
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+}
+
+@theme inline {
+    --font-sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+    --font-mono: "Space Mono", ui-monospace, Consolas, monospace;
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    --spacing-2xs: 0.25rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+    --spacing-3xl: 4rem;
+
+    --color-ui-text: var(--text);
+    --color-ui-heading: var(--text-h);
+    --color-ui-background: var(--bg);
+    --color-ui-border: var(--border);
+    --color-ui-code: var(--code-bg);
+    --color-ui-accent: var(--accent);
+    --color-ui-accent-bg: var(--accent-bg);
+    --color-ui-accent-border: var(--accent-border);
+    --color-ui-social: var(--social-bg);
+
+    --shadow-social: var(--shadow);
+
+    --text-display-hero: var(--font-size-44);
+    --text-display-hero--line-height: var(--line-height-50);
+    --text-display-hero--font-weight: 700;
+
+    --text-heading-xl: var(--font-size-36);
+    --text-heading-xl--line-height: var(--line-height-40);
+    --text-heading-xl--font-weight: 700;
+    --text-heading-xl--letter-spacing: var(--letter-spacing-tight-36);
+
+    --text-heading-lg: var(--font-size-24);
+    --text-heading-lg--line-height: var(--line-height-30);
+    --text-heading-lg--font-weight: 700;
+    --text-heading-lg--letter-spacing: var(--letter-spacing-tight-24);
+
+    --text-heading-md: var(--font-size-18);
+    --text-heading-md--line-height: var(--line-height-24);
+    --text-heading-md--font-weight: 700;
+
+    --text-heading-sm: var(--font-size-16);
+    --text-heading-sm--line-height: var(--line-height-22);
+    --text-heading-sm--font-weight: 700;
+
+    --text-subheading-lg: var(--font-size-24);
+    --text-subheading-lg--line-height: var(--line-height-30);
+    --text-subheading-lg--font-weight: 500;
+
+    --text-subheading-md: var(--font-size-18);
+    --text-subheading-md--line-height: var(--line-height-24);
+    --text-subheading-md--font-weight: 500;
+
+    --text-subtitle: var(--font-size-16);
+    --text-subtitle--line-height: var(--line-height-24);
+
+    --text-body: var(--font-size-14);
+    --text-body--line-height: var(--line-height-20);
+
+    --text-body-medium: var(--font-size-14);
+    --text-body-medium--line-height: var(--line-height-20);
+    --text-body-medium--font-weight: 500;
+
+    --text-body-sm: var(--font-size-11);
+    --text-body-sm--line-height: var(--line-height-16);
+    --text-body-sm--font-weight: 500;
+
+    --text-btn: var(--font-size-14);
+    --text-btn--line-height: var(--line-height-18);
+    --text-btn--font-weight: 700;
+
+    --text-btn-sm: var(--font-size-11);
+    --text-btn-sm--line-height: var(--line-height-14);
+    --text-btn-sm--font-weight: 700;
+
+    --text-mono-data: var(--font-size-14);
+    --text-mono-data--line-height: var(--line-height-20);
+
+    --text-mono-badge: var(--font-size-11);
+    --text-mono-badge--line-height: var(--line-height-14);
+    --text-mono-badge--font-weight: 700;
+    --text-mono-badge--letter-spacing: var(--letter-spacing-wide-badge);
+
+    --text-mono-shortcut: var(--font-size-10);
+    --text-mono-shortcut--line-height: var(--line-height-14);
+    --text-mono-shortcut--font-weight: 700;
+    --text-mono-shortcut--letter-spacing: var(--letter-spacing-wide-shortcut);
+
+    --breakpoint-lg: 64.0625rem;
+}
+
 :root {
-    --text: #6b6375;
-    --text-h: #08060d;
-    --bg: #fff;
-    --border: #e5e4e7;
-    --code-bg: #f4f3ec;
-    --accent: #aa3bff;
-    --accent-bg: rgba(170, 59, 255, 0.1);
-    --accent-border: rgba(170, 59, 255, 0.5);
-    --social-bg: rgba(244, 243, 236, 0.5);
+    --font-size-10: 0.625rem;
+    --font-size-11: 0.6875rem;
+    --font-size-14: 0.875rem;
+    --font-size-16: 1rem;
+    --font-size-18: 1.125rem;
+    --font-size-24: 1.5rem;
+    --font-size-36: 2.25rem;
+    --font-size-44: 2.75rem;
+
+    --line-height-14: 0.875rem;
+    --line-height-16: 1rem;
+    --line-height-18: 1.125rem;
+    --line-height-20: 1.25rem;
+    --line-height-22: 1.375rem;
+    --line-height-24: 1.5rem;
+    --line-height-30: 1.875rem;
+    --line-height-40: 2.5rem;
+    --line-height-50: 3.125rem;
+
+    --letter-spacing-tight-36: -0.02em;
+    --letter-spacing-tight-24: -0.02em;
+    --letter-spacing-wide-badge: 0.05em;
+    --letter-spacing-wide-shortcut: 0.05em;
+
+    --shadow-elevation-depth-0: 0 0 #0000;
+    --shadow-elevation-depth-50: 1px 1px 0 0 #000;
+    --shadow-elevation-depth-100: 2px 2px 0 0 #000;
+    --shadow-elevation-depth-200: 4px 4px 0 0 #000;
+    --shadow-elevation-depth-300: 6px 6px 0 0 #000;
+    --shadow-elevation-depth-400: 8px 8px 0 0 #000;
+    --blur-background-20: 20px;
+
+    --color-fg-default: #000000;
+    --color-fg-default-dark: #ffffff;
+    --color-fg-secondary: #737373;
+
+    --color-text: #6b6375;
+    --color-text-heading: #08060d;
+    --color-bg: #ffffff;
+    --color-border: #e5e4e7;
+    --color-code-bg: #f4f3ec;
+    --color-accent: #aa3bff;
+    --color-accent-bg: rgba(170, 59, 255, 0.1);
+    --color-accent-border: rgba(170, 59, 255, 0.5);
+    --color-social-bg: rgba(244, 243, 236, 0.5);
+
+    --text: var(--color-text);
+    --text-h: var(--color-text-heading);
+    --bg: var(--color-bg);
+    --border: var(--color-border);
+    --code-bg: var(--color-code-bg);
+    --accent: var(--color-accent);
+    --accent-bg: var(--color-accent-bg);
+    --accent-border: var(--color-accent-border);
+    --social-bg: var(--color-social-bg);
     --shadow:
         rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
 
-    --sans: system-ui, "Segoe UI", Roboto, sans-serif;
-    --heading: system-ui, "Segoe UI", Roboto, sans-serif;
-    --mono: ui-monospace, Consolas, monospace;
-
-    font: 18px/145% var(--sans);
-    letter-spacing: 0.18px;
     color-scheme: light dark;
-    color: var(--text);
-    background: var(--bg);
     font-synthesis: none;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-
-    @media (max-width: 1024px) {
-        font-size: 16px;
-    }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -45,68 +216,4 @@
             rgba(0, 0, 0, 0.4) 0 10px 15px -3px,
             rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
     }
-
-    #social .button-icon {
-        filter: invert(1) brightness(2);
-    }
-}
-
-body {
-    margin: 0;
-}
-
-#root {
-    width: 1126px;
-    max-width: 100%;
-    margin: 0 auto;
-    text-align: center;
-    border-inline: 1px solid var(--border);
-    min-height: 100svh;
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-}
-
-h1,
-h2 {
-    font-family: var(--heading);
-    font-weight: 500;
-    color: var(--text-h);
-}
-
-h1 {
-    font-size: 56px;
-    letter-spacing: -1.68px;
-    margin: 32px 0;
-    @media (max-width: 1024px) {
-        font-size: 36px;
-        margin: 20px 0;
-    }
-}
-h2 {
-    font-size: 24px;
-    line-height: 118%;
-    letter-spacing: -0.24px;
-    margin: 0 0 8px;
-    @media (max-width: 1024px) {
-        font-size: 20px;
-    }
-}
-p {
-    margin: 0;
-}
-
-code,
-.counter {
-    font-family: var(--mono);
-    display: inline-flex;
-    border-radius: 4px;
-    color: var(--text-h);
-}
-
-code {
-    font-size: 15px;
-    line-height: 135%;
-    padding: 4px 8px;
-    background: var(--code-bg);
 }
