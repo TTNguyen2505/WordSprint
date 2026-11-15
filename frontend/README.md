@@ -1,16 +1,86 @@
-# React + Vite
+# WordSprint Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This directory contains WordSprint's React frontend. It can be installed, run, checked, and built independently of the Qt desktop application. The same frontend is also used by the root project, where Qt WebEngine displays it inside the desktop shell.
 
-Currently, two official plugins are available:
+> **Current status:** The frontend still shows the React/Vite starter screen. The vocabulary puzzles and gameplay described in the [product overview](../english-vocabulary-puzzle-game.md) are planned features, not completed functionality.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Requirements
 
-## React Compiler
+- Node.js 22.12 or newer.
+- pnpm 9 or newer (the project uses `pnpm-lock.yaml`).
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Qt, CMake, and a C++ compiler are **not** required to work on or build the frontend by itself.
 
-## Expanding the ESLint configuration
+Check that Node.js and pnpm are available:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```powershell
+node --version
+pnpm --version
+```
+
+## Clone and install
+
+From a directory where you want the repository:
+
+```powershell
+git clone https://github.com/TTNguyen2505/WordSprint.git
+cd WordSprint\frontend
+pnpm install --frozen-lockfile
+```
+
+If you have already cloned the repository, run `cd frontend` from the repository root, then install dependencies with `pnpm install --frozen-lockfile`.
+
+## Develop in a browser
+
+Start the Vite development server from this directory:
+
+```powershell
+pnpm dev
+```
+
+Open `http://localhost:5173` in a browser. The server uses port 5173 and fails to start if that port is already in use.
+
+## Build and check
+
+Run these commands from `frontend/`:
+
+| Command             | Purpose                                                      |
+| ------------------- | ------------------------------------------------------------ |
+| `pnpm build`        | Create the production frontend in `dist/`                    |
+| `pnpm preview`      | Preview the production build locally; run `pnpm build` first |
+| `pnpm lint`         | Run ESLint                                                   |
+| `pnpm format:check` | Check formatting with Prettier                               |
+| `pnpm format`       | Format files with Prettier                                   |
+
+`dist/` is generated output and is excluded from version control.
+
+## Use the frontend in the desktop app
+
+The root project builds the C++/Qt application in `backend/`. Its QML window hosts this frontend in a Qt `WebEngineView`:
+
+- **Development:** Start `pnpm dev`, then run the Qt application with `--debug`. The desktop app loads the Vite server at `http://localhost:5173`.
+- **Production:** Run `pnpm build` before configuring/building the root CMake project. The Qt build includes the generated `dist/` files as application resources.
+
+The root CMake configuration can invoke the frontend build when `dist/index.html` is missing, but dependencies must already be installed in this directory. Building `dist/` explicitly first makes the integration step predictable.
+
+The frontend can also be built without Qt:
+
+```powershell
+pnpm install --frozen-lockfile
+pnpm build
+```
+
+For complete desktop prerequisites and CMake instructions, see the [root README](../README.md). The academic report is a separate LaTeX document and is not part of the frontend build; see the [report README](../report/README.md).
+
+## Frontend structure
+
+```text
+frontend/
+├── public/       # Static assets served/copied by Vite
+├── src/          # React application source and styles
+├── index.html    # Vite entry page
+├── package.json  # Dependencies and scripts
+└── vite.config.js
+```
+
+Vite is configured with a relative asset base (`./`) so the production bundle can load from the Qt application's embedded resources as well as from a web server.
