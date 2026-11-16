@@ -1,54 +1,90 @@
-%%!
+%!
 % @file 02_literature_review.tex
-% @brief Template for Chapter 2 demonstrating inline and display mathematical formulas.
+% @brief Literature review chapter for WordSprint report.
 
-\chapter{Tiêu đề chương 2}
-\label{chap:chapter_2}
+\chapter{Cơ sở lý thuyết và công nghệ}
+\label{chap:literature_review}
 
-Nội dung mở đầu của chương 2 trình bày tổng quan các nghiên cứu liên quan, cơ sở lý thuyết nền tảng và các mô hình toán học hoặc kỹ thuật ứng dụng trong phạm vi đề tài nghiên cứu.
+% -------------------------------------------------
+% Lý thuyết lập trình hướng đối tượng (OOP)
+% -------------------------------------------------
+\section{Lập trình hướng đối tượng}
+\label{sec:oop}
+\textit{Lập trình hướng đối tượng} (Object‑Oriented Programming – OOP) là phương pháp thiết kế phần mềm dựa trên các ``đối tượng'' (class) mô tả dữ liệu và hành vi. Ở dự án WordSprint, mô‑đun \textbf{backend} được triển khai bằng C++20 và tuân thủ nguyên tắc OOP:
+\begin{itemize}
+    \item \textbf{Encapsulation}: các thành phần giao diện người dùng và logic trò chơi được đóng gói trong các lớp riêng biệt (ví dụ lớp \texttt{GameEngine}, \texttt{ScoreManager}).
+    \item \textbf{Inheritance}: các lớp câu đố như \texttt{ScramblePuzzle}, \texttt{FillInPuzzle} kế thừa từ lớp trừu tượng \texttt{BasePuzzle} để chia sẻ giao diện và các phương thức chung.
+    \item \textbf{Polymorphism}: hàm \texttt{processAnswer()} được khai báo ảo trong \texttt{BasePuzzle} và được ghi đè trong các lớp con, cho phép thực thi đa hình tại thời gian chạy.
+\end{itemize}
 
-Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+% -------------------------------------------------
+% Ngôn ngữ C++ và hệ thống xây dựng CMake
+% -------------------------------------------------
+\section{Ngôn ngữ C++ và CMake}
+\label{sec:cpp_cmake}
+Backend sử dụng \textbf{C++20} để khai thác các tính năng hiện đại như \texttt{concepts}, \texttt{coroutines} (khi mở rộng), và \texttt{constexpr} để tối ưu hoá thời gian biên dịch.  Các tùy chọn biên dịch được định nghĩa trong \texttt{CMakeLists.txt}:
+\begin{verbatim}
+cmake_minimum_required(VERSION 3.22)
+project(WordSprint LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+add_subdirectory(backend)
+\end{verbatim}
+CMake cung cấp khả năng phát hiện tự động vị trí Qt SDK (đường dẫn \texttt{C:/Qt/6.11.3/msvc2022\_64}) và tạo ra target \texttt{WordSprint} liên kết với \texttt{Qt6::Core}, \texttt{Qt6::Gui}, \texttt{Qt6::Qml}, \texttt{Qt6::WebEngineQuick}.
 
-\section{Tiêu đề mục 2.1}
-\label{sec:section_2_1}
+% -------------------------------------------------
+% Frontend: React, Vite, Tailwind CSS
+% -------------------------------------------------
+\section{Giao diện người dùng (frontend)}
+\label{sec:frontend}
+Phần giao diện được xây dựng bằng \textbf{React 19} và công cụ xây dựng nhanh \textbf{Vite}.  Kiến trúc dự án frontend tuân thủ mô hình component‑based, mỗi màn hình trò chơi được biểu diễn bằng một component React độc lập (\texttt{Game.jsx}, \texttt{ScoreBoard.jsx}).  Tailwind CSS 4 được tích hợp để tạo kiểu nhanh chóng, hỗ trợ thiết kế \textit{neo‑brutalism} với màu sắc và đường viền mạnh mẽ.
 
-Nội dung chi tiết của mục 2.1 tổng hợp các lý thuyết chính, phương pháp luận và các mô hình toán học nền tảng. Dưới đây là các định dạng công thức toán học mẫu theo chuẩn học thuật.
+% -------------------------------------------------
+% Cơ chế giao tiếp giữa backend và frontend
+% -------------------------------------------------
+\section{Cơ chế giao tiếp giữa backend và frontend}
+\label{sec:communication}
+Qt WebEngineView được sử dụng để nhúng ứng dụng web React vào ứng dụng desktop Qt. Ứng dụng khởi tạo một \texttt{QUrl} tới URL Vite dev server (\texttt{http://localhost:5173}) hoặc tới file tĩnh \texttt{index.html} đã được build. Trong \texttt{main.cpp}:
+\begin{verbatim}
+QUrl initialUrl;
+if (isDebug) {
+    const QString devUrl = qEnvironmentVariable("VITE_DEV_SERVER_URL", "http://localhost:5173");
+    initialUrl = QUrl(devUrl);
+} else {
+    // load built index.html
+    initialUrl = QUrl::fromLocalFile(distFile.canonicalFilePath());
+}
+engine.setInitialProperties({{"initialUrl", initialUrl}});
+\end{verbatim}
+Frontend và backend trao đổi dữ liệu thông qua WebChannel (\texttt{QtWebChannel}) – các đối tượng C++ được đăng ký vào context, cho phép JavaScript gọi các phương thức C++ (ví dụ \texttt{saveScore()}, \texttt{loadProfile()}).
 
-\subsection{Tiêu đề mục 2.1.1}
-\label{subsec:subsection_2_1_1}
-
-Tiểu mục này minh họa công thức toán học trong dòng văn bản (\textit{inline math}) và công thức toán học hiển thị riêng biệt (\textit{display math}).
-
-Trong dòng văn bản, ta có thể biểu diễn các đại lượng như biến số $x \in \mathbb{R}$, vector đặc trưng $\mathbf{x} = [x_1, x_2, \dots, x_n]^T \in \mathbb{R}^n$, hay hàm mục tiêu $f(x) = \frac{1}{1 + e^{-x}}$. Đánh giá độ phức tạp tính toán của thuật toán cũng được thể hiện rõ ràng qua ký hiệu Big-$\mathcal{O}$ như $\mathcal{O}(n \log n)$ với điều kiện ràng buộc sai số $\epsilon \le 10^{-4}$.
-
-Đối với các công thức trọng tâm, ta sử dụng môi trường công thức hiển thị riêng dòng (\textit{display math}) có đánh số tự động để phục vụ việc tham chiếu chéo. Công thức \eqref{eq:sample_sigmoid} biểu diễn hàm kích hoạt chuẩn:
-
+% -------------------------------------------------
+% Công thức tính điểm và xếp hạng (ví dụ)
+% -------------------------------------------------
+\section{Công thức tính điểm và xếp hạng}
+\label{sec:scoring}
+Trong trò chơi, điểm số được tính dựa trên số câu trả lời đúng \(C\) và thời gian còn lại \(T\) (giây).  Công thức mẫu được triển khai trong \texttt{ScoreManager.cpp} (không có trong repository hiện tại, nhưng được mô tả như sau):
 \begin{equation}
-    \label{eq:sample_sigmoid}
-    \sigma(z) = \frac{1}{1 + e^{-z}} = \frac{e^z}{e^z + 1}, \quad \forall z \in \mathbb{R}
+S = 10\times C \; - \; \alpha \times \max(0, T_{\max} - T)
+\label{eq:score}
 \end{equation}
+Trong đó \(\alpha\) là hệ số phạt thời gian (ví dụ 0.5) và \(T_{\max}\) là thời gian giới hạn cho một vòng chơi (30 s).  Xếp hạng toàn hệ thống được tính theo tổng điểm \(S_{\text{total}}\) và sắp xếp giảm dần; người dùng có vị trí \(rank = \operatorname{arg\,sort}(S_{\text{total}})\).
 
-Khi cần trình bày hệ công thức hoặc bài toán tối ưu nhiều bước có căn chỉnh dấu bằng, môi trường \texttt{align} được sử dụng như minh họa trong hệ thức \eqref{eq:sample_loss} và \eqref{eq:sample_gradient}:
+% -------------------------------------------------
+% So sánh và đánh giá lựa chọn công nghệ
+% -------------------------------------------------
+\section{Đánh giá lựa chọn công nghệ}
+\label{sec:comparison}
+\begin{itemize}
+    \item \textbf{C++/Qt vs. Electron}: C++/Qt cung cấp hiệu năng gốc, tiêu thụ tài nguyên thấp hơn đáng kể so với Electron (Node.js + Chromium). Điều này phù hợp với mục tiêu phát hành một ứng dụng desktop nhẹ cho Windows.
+    \item \textbf{React + Vite vs. QtQuick UI}: React cho phép tái sử dụng mã nguồn web và tận dụng hệ sinh thái NPM phong phú, trong khi Vite giảm thời gian khởi động và hot‑module‑replacement nhanh. Kết hợp với Qt WebEngineView cho phép giữ lợi thế đa nền tảng.
+    \item \textbf{Tailwind CSS vs. truyền thống CSS}: Tailwind giúp duy trì phong cách thiết kế nhất quán và giảm thiểu việc viết CSS lặp lại, hỗ trợ nhanh chóng tạo giao diện neo‑brutalism theo yêu cầu.
+    \item \textbf{CMake vs. Meson/Bazel}: CMake đã được tích hợp sẵn trong Visual Studio và hỗ trợ trực tiếp Qt, giảm bớt cấu hình bổ sung. Đối với dự án nhỏ‑trung bình, CMake đáp ứng đủ nhu cầu.
+\end{itemize}
 
-\begin{align}
-    \label{eq:sample_loss}
-    \mathcal{L}(\mathbf{w}) &= -\frac{1}{N} \sum_{i=1}^{N} \left[ y_i \ln(\hat{y}_i) + (1 - y_i)\ln(1 - \hat{y}_i) \right] + \frac{\lambda}{2} \|\mathbf{w}\|_2^2, \\
-    \label{eq:sample_gradient}
-    \nabla_{\mathbf{w}} \mathcal{L}(\mathbf{w}) &= \frac{1}{N} \sum_{i=1}^{N} (\hat{y}_i - y_i) \mathbf{x}_i + \lambda \mathbf{w}.
-\end{align}
-
-Ngoài ra, trường hợp cần hiển thị công thức ma trận không đánh số, ta có thể sử dụng môi trường dấu ngoặc vuông \texttt{\textbackslash[ \dots \textbackslash]} kết hợp môi trường \texttt{bmatrix}:
-
-\[
-    \mathbf{A} = \begin{bmatrix}
-        a_{11} & a_{12} & \dots  & a_{1n} \\
-        a_{21} & a_{22} & \dots  & a_{2n} \\
-        \vdots & \vdots & \ddots & \vdots \\
-        a_{m1} & a_{m2} & \dots  & a_{mn}
-    \end{bmatrix} \in \mathbb{R}^{m \times n}
-\]
-
-\section{Tiêu đề mục 2.2}
-\label{sec:section_2_2}
-
-Nội dung chi tiết của mục 2.2 so sánh, đánh giá đối chiếu giữa các phương pháp tiếp cận khác nhau nhằm định hình giải pháp tối ưu cho đề tài nghiên cứu.
+% -------------------------------------------------
+% Kết luận chương
+% -------------------------------------------------
+\section{Kết luận}
+\label{sec:conclusion}
+Chương này đã tổng hợp các nền tảng công nghệ cốt lõi của WordSprint, giải thích lý do lựa chọn C++/Qt cho backend, React+Vite+Tailwind cho frontend, và mô tả cơ chế giao tiếp qua Qt WebEngine và WebChannel. Những quyết định này đồng thời đáp ứng yêu cầu về hiệu năng, khả năng mở rộng và trải nghiệm người dùng hiện đại.

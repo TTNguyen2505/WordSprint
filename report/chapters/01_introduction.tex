@@ -1,67 +1,73 @@
-%%!
+%!
 % @file 01_introduction.tex
-% @brief Template for Chapter 1 demonstrating heading hierarchy, lists, tables, figures, and code.
+% @brief Introduction chapter for WordSprint report.
 
-\chapter{Tiêu đề chương 1}
-\label{chap:chapter_1}
+\chapter{Giới thiệu}
+\label{chap:introduction}
 
-Đây là nội dung mở đầu của chương 1 trong bản mẫu báo cáo. Đoạn văn bản này minh họa định dạng chuẩn với cỡ chữ 13pt, khoảng cách giãn dòng 1.5 và thụt đầu dòng 1.25cm theo quy định kỹ thuật \cite{doe2023}. Nội dung mẫu có thể được thay thế bằng phần giới thiệu tổng quan, bối cảnh thực hiện hoặc mục tiêu nghiên cứu của đề tài.
+% -------------------------------------------------
+% Tổng quan đề tài
+% -------------------------------------------------
+\section{Tổng quan đề tài}
+\label{sec:overview}
+WordSprint là một phần mềm desktop hỗ trợ người học tiếng Anh thông qua các trò chơi đố từ vựng có thời gian giới hạn. Ứng dụng kết hợp các dạng câu đố (xáo trộn chữ, điền từ thiếu, nhận dạng âm thanh) nhằm rèn luyện khả năng nhận diện từ, tốc độ phản ứng và kỹ năng gõ bàn phím. Ý tưởng xuất phát từ nhu cầu tạo môi trường học tập tích cực, vừa thú vị, vừa có tính thử thách, phù hợp cho nhiều trình độ CEFR (A1‑C2) và cho phép người dùng luyện tập theo chủ đề.
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat \cite{newman2021}.
-
-\section{Tiêu đề mục 1.1}
-\label{sec:section_1_1}
-
-Nội dung chi tiết của mục 1.1 trình bày cơ sở lý luận, bối cảnh hoặc các vấn đề trọng tâm liên quan đến nội dung chương 1. Dưới đây là các tiểu mục được phân cấp chi tiết.
-
-\subsection{Tiêu đề mục 1.1.1}
-\label{subsec:subsection_1_1_1}
-
-Nội dung minh họa của mục 1.1.1. Đoạn này minh họa cách trình bày danh sách hoa thị đa cấp theo chuẩn định dạng kỹ thuật:
-
+% -------------------------------------------------
+% Mục tiêu nghiên cứu
+% -------------------------------------------------
+\section{Mục tiêu nghiên cứu}
+\label{sec:objectives}
+Mục tiêu chính của dự án WordSprint bao gồm:
 \begin{itemize}
-    \item Nội dung danh sách cấp 1 -- Mục thứ nhất (sử dụng dấu gạch ngang, khoảng cách lề trái chuẩn).
-    \item Nội dung danh sách cấp 1 -- Mục thứ hai với các ý chi tiết bên trong:
-          \begin{itemize}
-              \item Nội dung danh sách cấp 2 -- Chi tiết 2.1 (sử dụng ký hiệu dấu cộng, thụt đầu dòng 1.25cm).
-              \item Nội dung danh sách cấp 2 -- Chi tiết 2.2.
-          \end{itemize}
-    \item Nội dung danh sách cấp 1 -- Mục thứ ba.
+    \item \textbf{Cung cấp một công cụ học từ vựng đa dạng} với các loại câu đố được thiết kế để kích thích trí nhớ và phản xạ.
+    \item \textbf{Hỗ trợ người dùng ở mọi trình độ} bằng cách cho phép lựa chọn mức độ khó dựa trên tiêu chuẩn CEFR.
+    \item \textbf{Xây dựng kiến trúc phần mềm mở rộng được}: giao diện người dùng React + Vite, nền tảng desktop C++/Qt6, cho phép tích hợp thêm nội dung hoặc chức năng mới trong tương lai.
+    \item \textbf{Đánh giá hiệu quả học tập} thông qua thống kê thời gian hoàn thành, số câu trả lời đúng và cơ chế lưu trữ hồ sơ người dùng.
 \end{itemize}
 
-\subsubsection{Tiêu đề mục 1.1.1.1}
-\label{subsubsec:subsubsection_1_1_1_1}
+% -------------------------------------------------
+% Phạm vi và đối tượng
+% -------------------------------------------------
+\section{Phạm vi và đối tượng}
+\label{sec:scope}
+Hệ thống được thiết kế cho:
+\begin{itemize}
+    \item \textbf{Người học tiếng Anh} (tự học hoặc trong môi trường lớp học) muốn luyện tập từ vựng một cách nhanh gọn và có tính gamification.
+    \item \textbf{Giáo viên} có thể tạo ra các bộ câu hỏi tùy chỉnh và theo dõi tiến độ học của học sinh.
+    \item \textbf{Các nhà phát triển} muốn mở rộng hoặc tùy biến giao diện và chức năng nhờ kiến trúc mô-đun.
+\end{itemize}
 
-Nội dung minh họa cấp đề mục thứ 4 (Sub-subsection) với tiền tố số 4 cấp. Theo đặc tả mẫu, cấp này chỉ hiển thị trong nội dung chính và tự động không xuất hiện trong Mục lục để đảm bảo tính tinh gọn của tài liệu.
+Phạm vi chức năng chính của WordSprint được tóm tắt trong Bảng~\ref{tab:functional_scope}.
 
-\section{Tiêu đề mục 1.2}
-\label{sec:section_1_2}
+\begin{table}[h!]
+\centering
+\caption{Phạm vi chức năng của hệ thống WordSprint}
+\label{tab:functional_scope}
+\begin{tabular}{p{0.35\linewidth}p{0.55\linewidth}}
+\toprule
+Chức năng & Mô tả \\
+\midrule
+Quản lý trò chơi & Khởi động, tạm dừng, lưu trữ trạng thái và hiển thị điểm số. \\
+Câu đố đa dạng & Scramble, Fill‑in‑the‑Blank, Audio với thời gian giới hạn. \\
+Hồ sơ người dùng & Đăng ký, chuyển đổi hồ sơ, lưu tiến độ và thành tựu. \\
+Bảng xếp hạng & Xếp hạng cá nhân và toàn hệ thống dựa trên điểm số. \\
+Cấu hình âm thanh & Điều chỉnh âm lượng âm thanh và nhạc nền. \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-Mục này minh họa quy cách trình bày các đối tượng nổi (floats) bao gồm bảng biểu và hình vẽ, cùng cơ chế tham chiếu chéo tự động. Bảng \ref{tab:sample_table} minh họa bảng dữ liệu mẫu có đệm 4pt trên và dưới.
+% -------------------------------------------------
+% Bố cục báo cáo
+% -------------------------------------------------
+\section{Bố cục báo cáo}
+\label{sec:structure}
+Báo cáo này được tổ chức theo các chương sau:
+\begin{itemize}
+    \item \textbf{Chương 1 -- Giới thiệu} (nội dung hiện tại): cung cấp bối cảnh, mục tiêu, phạm vi và cấu trúc báo cáo.
+    \item \textbf{Chương 2 -- Tổng quan tài liệu}: khảo sát các công nghệ liên quan và các nghiên cứu hiện có.
+    \item \textbf{Chương 3 -- Kiến trúc hệ thống}: mô tả thiết kế phần mềm, mô‑đun và quy trình giao tiếp.
+    \item \textbf{Chương 4 -- Triển khai}: chi tiết quá trình xây dựng, biên dịch và tích hợp giao diện.
+    \item \textbf{Chương 5 -- Kết luận và hướng phát triển}: tổng kết kết quả, đánh giá và đề xuất cải tiến trong tương lai.
+\end{itemize}
 
-\input{assets/tables/ch01/example_table.tex}
-
-Bên cạnh bảng biểu, Hình \ref{fig:sample_figure} minh họa một sơ đồ khối kỹ thuật được vẽ trực tiếp bằng gói lệnh TikZ với chú thích căn giữa bên dưới hình ảnh.
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=\textwidth, height=0.7\textheight, keepaspectratio]{assets/figures/ch01/example_figure.pdf}
-    \caption{Tiêu đề hình 1.1}
-    \label{fig:sample_figure}
-\end{figure}
-
-\section{Tiêu đề mục 1.3}
-\label{sec:section_1_3}
-
-Đoạn mã sau minh họa cách trình bày khối mã nguồn hệ thống với định dạng hộp viền đơn, cỡ chữ 10pt phông Inconsolata, như được hiển thị tại Đoạn mã \ref{lst:sample_code}.
-
-\begin{lstlisting}[language=Python, caption={Tiêu đề đoạn mã 1.1}, label={lst:sample_code}]
-def example_function(param_a: int, param_b: int) -> int:
-    """Tinh tong hai so nguyen va tra ve ket qua."""
-    result = param_a + param_b
-    return result
-
-if __name__ == "__main__":
-    output = example_function(10, 20)
-    print(f"Ket qua tinh toan: {output}")
-\end{lstlisting}
+\noindent Nội dung các chương được liên kết chặt chẽ qua các nhãn (\ref{chap:introduction}, \ref{sec:overview}, \ref{sec:objectives}, \ref{sec:scope}, \ref{sec:structure}) nhằm hỗ trợ người đọc theo dõi một cách hệ thống.

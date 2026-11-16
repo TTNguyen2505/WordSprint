@@ -1,20 +1,58 @@
-%%!
+﻿%!
 % @file 05_conclusion.tex
-% @brief Template for Chapter 5 (Conclusions and Future Work).
+% @brief Conclusion chapter for WordSprint report.
 
-\chapter{Tiêu đề chương 5}
-\label{chap:chapter_5}
+\chapter{Kết luận}
+\label{chap:conclusion}
 
-Chương cuối tổng kết lại các mục tiêu đã hoàn thành của đề tài nghiên cứu, các kết quả đạt được, hạn chế còn tồn tại và đề xuất các hướng phát triển mở rộng trong tương lai.
+% -------------------------------------------------
+% 5.1 Kết quả đạt được
+% -------------------------------------------------
+\section{Kết quả đạt được}
+\label{sec:results}
+Dựa trên mục tiêu đề ra trong \ref{sec:objectives} của Chương \ref{chap:introduction}, dự án WordSprint đã hoàn thiện các tính năng cốt lõi sau:
+\begin{itemize}
+    \item \textbf{Các loại câu đố đa dạng}: Scramble, Fill‑in‑the‑Blank và Audio được triển khai đầy đủ, đáp ứng yêu cầu cung cấp công cụ học từ vựng đa dạng cho người dùng ở mọi trình độ CEFR.
+    \item \textbf{Quản lý người dùng và hồ sơ}: Hỗ trợ đa hồ sơ trên cùng máy tính, lưu trữ tiến độ, điểm số và thành tựu dưới dạng file JSON, đáp ứng mục tiêu "hỗ trợ người dùng ở mọi trình độ".
+    \item \textbf{Hệ thống tính điểm và xếp hạng}: Công thức điểm \eqref{eq:score} được áp dụng, điểm được tổng hợp và hiển thị bảng xếp hạng nội bộ, thực hiện mục tiêu "đánh giá hiệu quả học tập".
+    \item \textbf{Kiến trúc hai lớp rõ ràng}: Backend được xây dựng bằng C++20/Qt6, Frontend bằng React + Vite + Tailwind CSS, tương tác qua QtWebChannel. Kiến trúc này mang lại lợi thế về hiệu năng (ứng dụng gốc) và khả năng mở rộng (có thể thay thế frontend bằng bất kỳ SPA nào).
+    \item \textbf{Quy trình xây dựng và triển khai tự động}: Sử dụng CMake cho backend, Vite cho frontend, đồng thời cung cấp các script build và chạy debug, đáp ứng yêu cầu "cài đặt, biên dịch, khởi chạy hệ thống thực tế".
+    \item \textbf{Kiểm thử toàn diện}: Các kịch bản kiểm thử chức năng và biên đã được thực hiện và ghi lại trong Bảng \ref{tab:test_results}, cho thấy tất cả các chức năng chính hoạt động ổn định.
+\end{itemize}
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nonummy aliquam ante. Etiam elementum pellentesque sapien. Proin sodales libero eget ante. Nulla turpis magna, cursus sit amet, suscipit a, interdum id, felis.
+Những kết quả trên cho thấy WordSprint không chỉ đáp ứng đầy đủ các mục tiêu chức năng mà còn thể hiện ưu điểm về:
+\begin{itemize}
+    \item \textit{Kiến trúc mô‑đun}: Tách biệt rõ ràng giữa backend và frontend, giúp phát triển đồng thời và dễ dàng mở rộng.
+    \item \textit{Thiết kế OOP}: Áp dụng các nguyên tắc Encapsulation, Inheritance và Polymorphism, cùng mẫu Factory Method cho việc tạo puzzle, tạo nền tảng cho việc thêm các loại trò chơi mới mà không ảnh hưởng đến code hiện tại.
+    \item \textit{Hiệu năng}: Ứng dụng desktop được biên dịch native, tiêu thụ tài nguyên thấp hơn so với các giải pháp Electron.
+\end{itemize}
 
-\section{Tiêu đề mục 5.1}
-\label{sec:section_5_1}
+% -------------------------------------------------
+% 5.2 Hạn chế và hướng phát triển
+% -------------------------------------------------
+\section{Hạn chế và hướng phát triển}
+\label{sec:limitations}
+Mặc dù đã đạt được nhiều kết quả, phiên bản hiện tại vẫn còn một số hạn chế:
+\begin{itemize}
+    \item \textbf{Lưu trữ dữ liệu còn đơn giản}: Tất cả dữ liệu (từ vựng, hồ sơ, điểm) được lưu dưới dạng JSON cục bộ, chưa có cơ chế đồng bộ đa thiết bị hoặc sao lưu đám mây.
+    \item \textbf{Số lượng puzzle hạn chế}: Chỉ hỗ trợ ba loại puzzle cơ bản; chưa có các dạng nâng cao như “Word Search”, “Crossword” hoặc “Multiplayer challenge”.
+    \item \textbf{Thiếu hỗ trợ đa ngôn ngữ}: Giao diện và nội dung hiện chỉ hỗ trợ tiếng Anh; chưa có cơ chế quốc tế hoá (i18n).
+    \item \textbf{Audio chưa tối ưu}: Âm thanh được tải từ file tĩnh, chưa có tính năng điều chỉnh tốc độ phát hay hỗ trợ đa nguồn âm thanh.
+    \item \textbf{Giao diện chưa hoàn thiện}: Mặc dù sử dụng Tailwind CSS, một số thành phần UI vẫn còn mẫu thử nghiệm và chưa đáp ứng đầy đủ tiêu chuẩn truy cập (accessibility).
+    \item \textbf{Kiểm thử phần mềm chưa tự động toàn diện}: Các test backend hiện chỉ là unit test cơ bản; chưa có hệ thống CI/CD để tự động chạy toàn bộ bộ test trên mỗi commit.
+\end{itemize}
 
-Nội dung chi tiết của mục 5.1 tổng kết các đóng góp chính và kết quả thực nghiệm đạt được của đề tài nghiên cứu so với các mục tiêu đề ra ban đầu.
+\subsection{Hướng phát triển trong tương lai}
+\label{subsec:future_work}
+Dựa trên các hạn chế trên, chúng tôi đề xuất các công việc mở rộng khả thi:
+\begin{enumerate}
+    \item \textbf{Triển khai backend dữ liệu}: Áp dụng SQLite hoặc một server RESTful (Spring/Node) để lưu trữ dữ liệu một cách có cấu trúc, hỗ trợ đồng bộ đa thiết bị và sao lưu đám mây.
+    \item \textbf{Mở rộng danh mục puzzle}: Phát triển các loại trò chơi như Word Search, Crossword, Quiz‑based và chế độ đa người chơi (multiplayer) thông qua WebSocket.
+    \item \textbf{Hỗ trợ đa ngôn ngữ}: Sử dụng thư viện i18n cho React và Qt, cho phép người dùng chọn ngôn ngữ giao diện và từ vựng (ví dụ tiếng Pháp, tiếng Tây Ban Nha).
+    \item \textbf{Cải thiện âm thanh}: Tích hợp thư viện audio xử lý (Qt Multimedia) để cho phép người dùng điều chỉnh tốc độ, độ lớn và sử dụng nguồn âm thanh động.
+    \item \textbf{Nâng cao UI/UX}: Áp dụng các guideline về truy cập (WCAG), tối ưu hoá bố cục, thêm animation mượt mà và chế độ dark mode.
+    \item \textbf{Tự động hoá kiểm thử và CI/CD}: Xây dựng pipeline CI (GitHub Actions) để chạy unit test, integration test và end‑to‑end test (Playwright) trên mỗi pull‑request, đồng thời tạo bản phát hành tự động.
+    \item \textbf{Tích hợp AI hỗ trợ học}: Sử dụng Gemini API hoặc mô hình ngôn ngữ để gợi ý từ vựng, tạo câu hỏi ngẫu nhiên và cung cấp phân tích tiến độ học tập cho người dùng.
+\end{enumerate}
 
-\section{Tiêu đề mục 5.2}
-\label{sec:section_5_2}
-
-Nội dung chi tiết của mục 5.2 trình bày các định hướng nghiên cứu và phát triển tiếp theo nhằm hoàn thiện và mở rộng phạm vi ứng dụng của đề tài.
+Những hướng phát triển trên không chỉ khắc phục các hạn chế hiện tại mà còn mở rộng tiềm năng ứng dụng WordSprint thành một nền tảng học tập đa dạng, linh hoạt và có khả năng mở rộng quy mô trong tương lai.

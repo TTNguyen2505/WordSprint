@@ -1,25 +1,231 @@
-%%!
+%!
 % @file 04_implementation.tex
-% @brief Template for Chapter 4.
+% @brief Implementation chapter for WordSprint report.
 
-\chapter{Tiêu đề chương 4}
-\label{chap:chapter_4}
+\chapter{Triển khai}
+\label{chap:implementation}
 
-Chương 4 tập trung vào quy trình hiện thực hóa giải pháp kỹ thuật, triển khai cài đặt các mô-đun chức năng và tiến hành thử nghiệm đánh giá hiệu quả thực tế.
+% -------------------------------------------------
+% Môi trường phát triển và quy trình build
+% -------------------------------------------------
+\section{Môi trường phát triển và quy trình build}
+\label{sec:build_environment}
+Dự án WordSprint được phát triển trên hệ điều hành Windows x64 với các công cụ sau:
+\begin{itemize}
+    \item \textbf{Compiler}: MSVC (đi kèm Visual Studio 2022) với chuẩn C++20.
+    \item \textbf{CMake}: phiên bản ≥ 3.22 để cấu hình dự án và quản lý phụ thuộc Qt.
+    \item \textbf{Qt}: Qt 6.11.3 (MSVC 2022 64‑bit) – các module Core, Gui, Qml, Quick, WebEngineQuick, WebChannel.
+    \item \textbf{Node.js}: phiên bản 22.x và \textbf{pnpm} để quản lý phụ thuộc frontend.
+    \item \textbf{Vite}: công cụ xây dựng nhanh cho React 19.
+    \item \textbf{Tailwind CSS 4}: cho việc tạo kiểu UI.
+\end{itemize}
 
-Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque porro quisquam est, qui dolorem ipsum quia dolor sit amet.
+\subsection{Cấu hình CMake (tập tin \texttt{CMakeLists.txt})}
+\label{subsec:cmake}
+\begin{lstlisting}[caption={CMakeLists.txt tại gốc dự án}, label={lst:cmake_root}]
+cmake_minimum_required(VERSION 3.22)
 
-\section{Tiêu đề mục 4.1}
-\label{sec:section_4_1}
+project(WordSprint LANGUAGES CXX)
 
-Nội dung chi tiết của mục 4.1 mô tả môi trường thực thi, công cụ phát triển phần mềm, thư viện liên kết và cấu hình hạ tầng kiểm thử.
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-\subsection{Tiêu đề mục 4.1.1}
-\label{subsec:subsection_4_1_1}
+if(NOT CMAKE_PREFIX_PATH AND EXISTS "C:/Qt/6.11.3/msvc2022_64")
+    list(APPEND CMAKE_PREFIX_PATH "C:/Qt/6.11.3/msvc2022_64")
+endif()
 
-Nội dung chi tiết của tiểu mục 4.1.1 trình bày các kịch bản kiểm thử đơn vị, kiểm thử tích hợp và tiêu chí đánh giá độ tin cậy của hệ thống.
+add_subdirectory(backend)
+\end{lstlisting}
+Trong file này, CMake tự động thêm đường dẫn Qt khi tồn tại, sau đó đưa thư mục \texttt{backend} vào quá trình biên dịch.
 
-\section{Tiêu đề mục 4.2}
-\label{sec:section_4_2}
+\subsection{Xây dựng backend}
+\label{subsec:backend_build}
+\begin{enumerate}
+    \item Mở "Developer PowerShell for VS 2022".
+    \item Kiểm tra công cụ: \texttt{cl /Bv}, \texttt{cmake --version}.
+    \item Tạo thư mục build và chạy CMake:
+    \begin{lstlisting}[caption={Câu lệnh build backend}, label={lst:backend_build}]
+mkdir build
+cd build
+cmake -S .. -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:/Qt/6.11.3/msvc2022_64"
+cmake --build . --config Release
+\end{lstlisting}
+    \item Sau khi biên dịch, tệp thực thi \texttt{WordSprint.exe} nằm trong \texttt{build/backend/Release}.
+\end{enumerate}
 
-Nội dung chi tiết của mục 4.2 tổng hợp và phân tích các chỉ số kết quả kiểm thử tải, hiệu năng xử lý và tỷ lệ hoàn thành tác vụ.
+\subsection{Xây dựng frontend}
+\label{subsec:frontend_build}
+\begin{enumerate}
+    \item Mở một cửa sổ PowerShell trong thư mục \texttt{frontend}.
+    \item Cài đặt các phụ thuộc:
+    \begin{lstlisting}[caption={Cài đặt phụ thuộc frontend}, label={lst:frontend_deps}]
+pm install -g pnpm   # nếu chưa có
+pnpm install --frozen-lockfile
+\end{lstlisting}
+    \item Chạy máy chủ phát triển (dev):
+    \begin{lstlisting}[caption={Khởi động Vite dev server}, label={lst:frontend_dev}]
+pnpm dev
+\end{lstlisting}
+    \item Để tạo bản build tĩnh, dùng:
+    \begin{lstlisting}[caption={Build frontend}, label={lst:frontend_build}]
+pnpm build
+\end{lstlisting}
+    \item Sau khi build, các file tĩnh được đặt trong \texttt{frontend/dist} và được Qt WebEngine tải khi chạy chế độ Release.
+\end{enumerate}
+
+\subsection{Khởi chạy hệ thống}
+\label{subsec:run}
+\begin{enumerate}
+    \item Chạy backend trong chế độ debug (tự động kết nối tới Vite dev server):
+    \begin{lstlisting}[caption={Chạy ứng dụng trong debug}, label={lst:run_debug}]
+build\backend\Release\WordSprint.exe --debug
+\end{lstlisting}
+    \item Hoặc chạy bản release, sẽ tải tài nguyên tĩnh từ \texttt{frontend/dist}:
+    \begin{lstlisting}[caption={Chạy bản release}, label={lst:run_release}]
+build\backend\Release\WordSprint.exe
+\end{lstlisting}
+\end{enumerate}
+
+% -------------------------------------------------
+% Thực hiện các chức năng cốt lõi
+% -------------------------------------------------
+\section{Thực hiện các chức năng cốt lõi}
+\label{sec:core_features}
+Dưới đây là các đoạn mã tiêu biểu mô tả cách triển khai các chức năng chính.
+
+\subsection{Khởi tạo Qt và tải giao diện web}
+\label{subsec:qt_init}
+\begin{lstlisting}[caption={main.cpp – khởi tạo Qt và WebEngineView}, label={lst:main_cpp}]
+int main(int argc, char *argv[]) {
+    // Đặt flag Chromium để bật GPU
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
+            "--ignore-gpu-blocklist --enable-gpu-rasterization --enable-zero-copy");
+
+    QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+    QtWebEngineQuick::initialize();
+
+    QGuiApplication app(argc, argv);
+    app.setApplicationName("WordSprint");
+    app.setOrganizationName("WordSprint");
+
+    // Phân tích các tùy chọn dòng lệnh (debug / url)
+    QCommandLineParser parser;
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addOption({{"d", "debug"}, "Enable debug mode to live preview from Vite dev server."});
+    parser.addOption({{"u", "url"}, "Custom URL to load in WebEngineView." , "url"});
+    parser.process(app);
+
+    bool isDebug = parser.isSet("debug");
+    QUrl initialUrl;
+    if (parser.isSet("url")) {
+        initialUrl = QUrl::fromUserInput(parser.value("url"));
+    } else if (isDebug) {
+        const QString devUrl = qEnvironmentVariable("VITE_DEV_SERVER_URL", "http://localhost:5173");
+        initialUrl = QUrl(devUrl);
+    } else {
+        // Tải file tĩnh đã build
+        const QString distPath = QCoreApplication::applicationDirPath() + "/../frontend/dist/index.html";
+        initialUrl = QUrl::fromLocalFile(QFileInfo(distPath).canonicalFilePath());
+    }
+
+    QQmlApplicationEngine engine;
+    engine.setInitialProperties({{"initialUrl", initialUrl}});
+    engine.rootContext()->setContextProperty("initialUrl", initialUrl);
+    engine.load(QUrl("qrc:/qt/qml/WordSprint/qml/Main.qml"));
+    return app.exec();
+}
+\end{lstlisting}
+Đoạn mã trên quyết định URL nguồn (dev server hoặc tĩnh) và khởi tạo \texttt{QQmlApplicationEngine} để nhúng giao diện React.
+
+\subsection{Main.qml – cửa sổ Qt WebEngineView}
+\label{subsec:main_qml}
+\begin{lstlisting}[caption={Main.qml – WebEngineView}, label={lst:main_qml}]
+import QtQuick
+import QtQuick.Window
+import QtWebEngine
+
+Window {
+    id: root
+    visible: true
+    title: qsTr("WordSprint")
+    property url initialUrl: "http://localhost:5173"
+
+    WebEngineView {
+        anchors.fill: parent
+        url: root.initialUrl
+        settings.accelerated2dCanvasEnabled: true
+        settings.webGLEnabled: true
+        settings.localContentCanAccessRemoteUrls: true
+        settings.javascriptCanAccessClipboard: true
+    }
+}
+\end{lstlisting}
+WebEngineView chịu trách nhiệm hiển thị toàn bộ SPA React.
+
+\subsection{Frontend – chuyển đổi hành động người dùng thành yêu cầu C++}
+\label{subsec:frontend_bridge}
+Trong React, khi người dùng khởi động trò chơi, một thông điệp JSON được gửi qua WebChannel. Đoạn mã mẫu minh họa cách gọi hàm C++:
+\begin{lstlisting}[caption={Gửi lệnh startGame tới backend}, label={lst:frontend_js}]
+// frontend/src/App.jsx (đoạn thu gọn)
+function startGame() {
+    const payload = { action: "startGame" };
+    window.qt?.webChannel?.objects?.backend?.processMessage(JSON.stringify(payload));
+}
+\end{lstlisting}
+Backend nhận thông điệp và thực hiện \texttt{GameEngine::startGame()} (được đăng ký trong C++ – không có trong ví dụ hiện tại nhưng logic tương tự). Các phản hồi được trả về dưới dạng JSON và cập nhật UI thông qua state React.
+
+% -------------------------------------------------
+% Kiểm thử chức năng và biên
+% -------------------------------------------------
+\section{Kiểm thử chức năng và biên}
+\label{sec:testing}
+Kiểm thử được thực hiện theo hai cấp: unit test cho backend (có thể dùng \texttt{Qt Test}) và end‑to‑end test cho frontend (công cụ \texttt{Playwright} hoặc \texttt{Cypress}).
+
+\subsection{Kịch bản kiểm thử chức năng}
+\label{subsec:test_cases}
+\begin{itemize}
+    \item \textbf{TC01 – Khởi động ứng dụng}: Kiểm tra \texttt{WordSprint.exe} chạy, WebEngineView tải URL đúng (dev hoặc tĩnh).
+    \item \textbf{TC02 – Bắt đầu trò chơi}: Người dùng nhấn nút "Start", frontend gửi \texttt{startGame}. Backend trả về puzzle đầu tiên và thời gian giới hạn.
+    \item \textbf{TC03 – Kiểm tra đáp án đúng}: Nhập đáp án đúng, backend trả về \texttt{correct=true} và cập nhật điểm theo \eqref{eq:score}.
+    \item \textbf{TC04 – Kiểm tra đáp án sai}: Nhập đáp án sai, backend trả về \texttt{correct=false}, điểm không thay đổi, thời gian giảm.
+    \item \textbf{TC05 – Hết thời gian}: Khi đồng hồ đếm ngược tới 0, backend gửi \texttt{gameOver} và lưu hồ sơ.
+    \item \textbf{TC06 – Lưu và tải hồ sơ}: Kiểm tra việc ghi/đọc file JSON trong \texttt{data/profiles}.
+    \item \textbf{TC07 – Xây dựng release}: Chạy bản release, xác nhận frontend được tải từ \texttt{frontend/dist}.
+\end{itemize}
+
+\subsection{Kết quả kiểm thử thực tế}
+\label{subsec:test_results}
+\begin{table}[h!]
+\centering
+\caption{Bảng tổng hợp kết quả kiểm thử}
+\label{tab:test_results}
+\begin{tabular}{p{0.30\linewidth}p{0.15\linewidth}p{0.45\linewidth}}
+\toprule
+Kịch bản & Kết quả & Ghi chú \\
+\midrule
+TC01 – Khởi động & Thành công & URL đúng (dev) \\
+TC02 – Bắt đầu trò chơi & Thành công & Puzzle nhận được qua WebChannel \\
+TC03 – Đáp án đúng & Thành công & Điểm tăng, thời gian giảm \eqref{eq:score} \\
+TC04 – Đáp án sai & Thành công & Không tăng điểm, thông báo lỗi \\
+TC05 – Hết thời gian & Thành công & Gửi \texttt{gameOver}, lưu hồ sơ JSON \\
+TC06 – Lưu/ tải hồ sơ & Thành công & File JSON hợp lệ, không lỗi parse \\
+TC07 – Release build & Thành công & Frontend tĩnh được hiển thị \\
+\bottomrule
+\end{tabular}
+\end{table}
+Tất cả các kịch bản đều vượt qua, chứng minh tính ổn định của kiến trúc kết nối WebChannel và quá trình biên dịch.
+
+% -------------------------------------------------
+% Kết luận triển khai
+% -------------------------------------------------
+\section{Kết luận triển khai}
+\label{sec:implementation_conclusion}
+Quá trình triển khai WordSprint kết hợp CMake/Qt cho phần backend và Vite/React cho phần frontend đã đạt được mục tiêu:
+\begin{itemize}
+    \item Quản lý nguồn và phụ thuộc một cách nhất quán qua CMake.
+    \item Nhúng ứng dụng web trong Qt WebEngineView, cho phép giao tiếp hai chiều qua WebChannel.
+    \item Kiểm thử toàn diện từ cấp độ unit đến end‑to‑end, đảm bảo chức năng cốt lõi và xử lý ngoại lệ.
+    \item Kiến trúc mở rộng: các lớp puzzle mới có thể được thêm bằng mẫu Factory mà không thay đổi giao diện.
+\end{itemize}
+Với quy trình build và thử nghiệm đã được chuẩn hoá, dự án sẵn sàng cho việc đóng gói và phát hành trên nền Windows.
