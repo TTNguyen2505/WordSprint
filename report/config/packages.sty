@@ -3,40 +3,24 @@
 % @brief Core package dependencies and global font configuration.
 \ProvidesPackage{config/packages}
 
-\usepackage{iftex}
+% Math packages
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Font handling – XeLaTeX only
+\usepackage{fontspec}
+% Main text font (serif) – Times New Roman
+\setmainfont{Times New Roman}
+% Sans-serif font – Times New Roman (đảm bảo tiêu đề luôn dùng Times New Roman)
+\setsansfont{Times New Roman}
+% Monospace font – Consolas (chỉ dùng cho khối code, môi trường listings)
+\setmonofont{Consolas}
+\renewcommand{\familydefault}{\rmdefault}
+
+% Basic layout packages
 \usepackage[fontsize=13pt]{scrextend}
-
-\RequirePackage{newtxtext}
-\RequirePackage{newtxmath}
-\RequirePackage{inconsolata}
-
-%%!
-% @note Binds OpenType Inconsolata font in XeTeX when installed on the host system.
-\ifXeTeX
-  \IfFontExistsTF{Inconsolatazi4-Regular.otf}{%
-    \setmonofont{Inconsolatazi4}[
-      Extension   = .otf,
-      UprightFont = *-Regular,
-      BoldFont    = *-Bold,
-    ]%
-  }{%
-    \IfFontExistsTF{Inconsolata}{%
-      \setmonofont{Inconsolata}%
-    }{%
-    }%
-  }%
-\fi
-
-\usepackage[
-    a4paper,
-    left=30mm,
-    right=20mm,
-    top=20mm,
-    bottom=20mm
-]{geometry}
-
-\usepackage{setspace}
-\setstretch{1.5}
+\usepackage[a4paper, left=30mm, right=20mm, top=20mm, bottom=20mm]{geometry}
+\usepackage{setspace}\setstretch{1.5}
 \usepackage{indentfirst}
 \usepackage{fancyhdr}
 \usepackage{titlesec}
