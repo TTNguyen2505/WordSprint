@@ -2,20 +2,35 @@ cmake_minimum_required(VERSION 3.22)
 
 project(WordSprintBackend LANGUAGES CXX)
 
+# Core Qt components that are required for the application and tests
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
     Qml
     Quick
-    WebEngineQuick
-    WebEngineCore
-    WebChannel
+    Sql
+    Test
 )
+
+# Optional Web‑related components (may be unavailable in MinGW builds)
+find_package(Qt6 COMPONENTS WebEngineCore WebEngineQuick WebChannel QUIET)
+
+# Define compile‑time symbols if optional modules are found
+if (Qt6WebEngineCore_FOUND)
+    add_definitions(-DHAVE_WEBENGINECORE)
+endif()
+if (Qt6WebEngineQuick_FOUND)
+    add_definitions(-DHAVE_WEBENGINEQUICK)
+endif()
+if (Qt6WebChannel_FOUND)
+    add_definitions(-DHAVE_WEBCHANNEL)
+endif()
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
 
+# Front‑end build support
 find_program(PNPM_EXECUTABLE NAMES pnpm pnpm.cmd npm npm.cmd)
 set(FRONTEND_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../frontend")
 set(FRONTEND_DIST_DIR "${FRONTEND_DIR}/dist")
@@ -66,15 +81,25 @@ qt_add_qml_module(WordSprint
         qml/Main.qml
 )
 
+# Link required Qt libraries
 target_link_libraries(WordSprint PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
-    Qt6::WebEngineQuick
-    Qt6::WebEngineCore
-    Qt6::WebChannel
+    Qt6::Sql
 )
+
+# Conditionally link optional Web modules
+if (Qt6WebEngineCore_FOUND)
+    target_link_libraries(WordSprint PRIVATE Qt6::WebEngineCore)
+endif()
+if (Qt6WebEngineQuick_FOUND)
+    target_link_libraries(WordSprint PRIVATE Qt6::WebEngineQuick)
+endif()
+if (Qt6WebChannel_FOUND)
+    target_link_libraries(WordSprint PRIVATE Qt6::WebChannel)
+endif()
 
 if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
@@ -84,3 +109,35 @@ if(WIN32)
         COMMENT "Deploying Qt runtime DLLs with windeployqt..."
     )
 endif()
+
+# Copy SQLite scripts (schema.sql and seed.sql) to runtime directory of WordSprint
+add_custom_command(TARGET WordSprint POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_CURRENT_SOURCE_DIR}/database $<TARGET_FILE_DIR:WordSprint>
+    COMMENT "Copy SQLite schema and seed scripts"
+)
+
+# -----------------------------------------------------------------------------
+# Test executable for SQLite schema and seed verification
+# -----------------------------------------------------------------------------
+
+enable_testing()
+
+add_executable(test_sqlite
+    ${CMAKE_CURRENT_SOURCE_DIR}/database/test_sqlite.cpp
+)
+
+target_link_libraries(test_sqlite PRIVATE Qt6::Core Qt6::Sql Qt6::Test)
+
+# Ensure the test binary receives the .sql files next to it at runtime
+add_custom_command(TARGET test_sqlite POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/database/schema.sql
+        $<TARGET_FILE_DIR:test_sqlite>/schema.sql
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/database/seed.sql
+        $<TARGET_FILE_DIR:test_sqlite>/seed.sql
+    COMMENT "Copy SQLite schema and seed scripts for test_sqlite"
+)
+
+add_test(NAME SQLiteSchemaTest COMMAND test_sqlite)
