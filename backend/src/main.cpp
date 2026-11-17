@@ -6,16 +6,25 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
+#include "viewmodel/AppViewModel.h"
+#include "viewmodel/GameplayViewModel.h"
+#include "model/MockVocabularyRepository.h"
+#if defined(HAVE_WEBENGINEQUICK)
 #include <QtWebEngineQuick/qtwebenginequickglobal.h>
+#endif
 
 int main(int argc, char *argv[]) {
+
+
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
                                           "--enable-gpu-rasterization "
                                           "--enable-zero-copy");
 
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
+    #if defined(HAVE_WEBENGINEQUICK)
     QtWebEngineQuick::initialize();
+#endif
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
@@ -71,6 +80,12 @@ int main(int argc, char *argv[]) {
     }
 
     QQmlApplicationEngine engine;
+    // Register ViewModels with QML
+    AppViewModel appVM;
+    MockVocabularyRepository repo;
+    GameplayViewModel gameplayVM(&repo);
+    engine.rootContext()->setContextProperty("appVM", &appVM);
+    engine.rootContext()->setContextProperty("gameplayVM", &gameplayVM);
     engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl}});
     engine.rootContext()->setContextProperty(QStringLiteral("initialUrl"), initialUrl);
 

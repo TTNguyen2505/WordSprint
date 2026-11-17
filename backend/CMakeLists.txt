@@ -7,10 +7,40 @@ find_package(Qt6 REQUIRED COMPONENTS
     Gui
     Qml
     Quick
-    WebEngineQuick
-    WebEngineCore
-    WebChannel
 )
+
+# Optional Qt components (WebEngine, WebChannel, etc.)
+find_package(Qt6 QUIET COMPONENTS EntryPoint)
+find_package(Qt6 QUIET COMPONENTS WebEngineCore)
+find_package(Qt6 QUIET COMPONENTS WebEngineWidgets)
+find_package(Qt6 QUIET COMPONENTS WebChannel)
+
+# Set flags based on found components
+if (Qt6WebEngineQuick_FOUND)
+    set(HAVE_WEBENGINEQUICK ON)
+else()
+    set(HAVE_WEBENGINEQUICK OFF)
+endif()
+
+if (Qt6WebEngineCore_FOUND)
+    set(HAVE_WEBENGINECORE ON)
+else()
+    set(HAVE_WEBENGINECORE OFF)
+endif()
+
+if (Qt6WebEngineWidgets_FOUND)
+    set(HAVE_WEBENGINEWIDGETS ON)
+else()
+    set(HAVE_WEBENGINEWIDGETS OFF)
+endif()
+
+if (Qt6WebChannel_FOUND)
+    set(HAVE_WEBCHANNEL ON)
+else()
+    set(HAVE_WEBCHANNEL OFF)
+endif()
+
+
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
@@ -44,12 +74,16 @@ file(GLOB_RECURSE FRONTEND_DIST_FILES
 
 qt_add_executable(WordSprint
     src/main.cpp
+    src/viewmodel/AppViewModel.cpp
+    src/viewmodel/GameplayViewModel.cpp
+    src/model/MockVocabularyRepository.cpp
+    src/model/IVocabularyRepository.cpp
 )
 
-set_target_properties(WordSprint PROPERTIES
-    WIN32_EXECUTABLE TRUE
-    MACOSX_BUNDLE TRUE
-)
+#set_target_properties(WordSprint PROPERTIES
+#    WIN32_EXECUTABLE TRUE
+#    MACOSX_BUNDLE TRUE
+#)
 
 if(FRONTEND_DIST_FILES)
     qt_add_resources(WordSprint "frontend_resources"
@@ -67,14 +101,51 @@ qt_add_qml_module(WordSprint
 )
 
 target_link_libraries(WordSprint PRIVATE
+    mingw32
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
-    Qt6::WebEngineQuick
-    Qt6::WebEngineCore
-    Qt6::WebChannel
 )
+
+enable_testing()
+find_package(Qt6 REQUIRED COMPONENTS Test)
+
+add_executable(test_gameplay
+    tests/test_gameplay.cpp
+    src/viewmodel/GameplayViewModel.cpp
+    src/model/MockVocabularyRepository.cpp
+    src/model/IVocabularyRepository.cpp
+)
+
+target_link_libraries(test_gameplay PRIVATE
+    Qt6::Test
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Qml
+    Qt6::Quick
+)
+
+add_test(NAME GameplayTests COMMAND ${CMAKE_CURRENT_BINARY_DIR}/test_gameplay)
+
+if(HAVE_WEBCHANNEL)
+    target_link_libraries(WordSprint PRIVATE Qt6::WebChannel)
+    target_compile_definitions(WordSprint PRIVATE HAVE_WEBCHANNEL)
+endif()
+
+if(HAVE_WEBENGINECORE)
+    target_link_libraries(WordSprint PRIVATE Qt6::WebEngineCore)
+    target_compile_definitions(WordSprint PRIVATE HAVE_WEBENGINECORE)
+endif()
+
+if(HAVE_WEBENGINEQUICK)
+    target_link_libraries(WordSprint PRIVATE Qt6::WebEngineQuick)
+    target_compile_definitions(WordSprint PRIVATE HAVE_WEBENGINEQUICK)
+endif()
+
+
+
+
 
 if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
