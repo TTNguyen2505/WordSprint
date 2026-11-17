@@ -7,6 +7,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Gui
     Qml
     Quick
+    Sql
     WebEngineQuick
     WebEngineCore
     WebChannel
@@ -43,6 +44,10 @@ file(GLOB_RECURSE FRONTEND_DIST_FILES
 )
 
 qt_add_executable(WordSprint
+    src/DatabaseManager.cpp
+    src/DatabaseManager.h
+    src/DatabaseWorker.cpp
+    src/DatabaseWorker.h
     src/main.cpp
 )
 
@@ -71,6 +76,7 @@ target_link_libraries(WordSprint PRIVATE
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
+    Qt6::Sql
     Qt6::WebEngineQuick
     Qt6::WebEngineCore
     Qt6::WebChannel

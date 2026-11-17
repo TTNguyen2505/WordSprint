@@ -2,7 +2,7 @@
 
 WordSprint is a desktop English vocabulary puzzle game. It aims to help learners practice vocabulary, listening, reaction speed, and typing through short, timed challenges.
 
-> **Current status:** The frontend still displays the React/Vite starter screen. The gameplay and features described below are product goals and have not yet been fully implemented.
+> **Current status:** The desktop app shows a startup screen while it initializes SQLite, loads the frontend fonts, and verifies bundled resources, then opens the WordSprint menu. The gameplay and features described below are product goals and have not yet been fully implemented.
 
 ## Product vision
 
@@ -51,7 +51,7 @@ This project setup targets **Windows x64**.
 | Git | Current version | Clone and update the repository |
 | Visual Studio 2026 | Workload **Desktop development with C++**, including MSVC (latest version) and a Windows SDK | C++ compiler and build tools |
 | CMake | 3.22 or newer | Configure and build the desktop application |
-| Qt | Qt 6 for MSVC 2022 64-bit, with **Core**, **Gui**, **Qml**, **Quick**, **WebEngineQuick**, **WebEngineCore**, **Qt Positioning** and **WebChannel** | Desktop shell, QML, and embedded web view |
+| Qt | Qt 6 for MSVC 2022 64-bit, with **Core**, **Gui**, **Qml**, **Quick**, **Sql**, **WebEngineQuick**, **WebEngineCore**, **Qt Positioning** and **WebChannel** | Desktop shell, asynchronous SQLite startup, and embedded web view |
 | Node.js | 22.12 or newer | Run the Vite frontend and install its tools |
 | pnpm | Current version | Install frontend dependencies and run frontend scripts |
 

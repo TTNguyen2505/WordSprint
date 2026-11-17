@@ -2,7 +2,7 @@
 
 This directory contains WordSprint's React frontend. It can be installed, run, checked, and built independently of the Qt desktop application. The same frontend is also used by the root project, where Qt WebEngine displays it inside the desktop shell.
 
-> **Current status:** The frontend still shows the React/Vite starter screen. The vocabulary puzzles and gameplay described in the [product overview](../english-vocabulary-puzzle-game.md) are planned features, not completed functionality.
+> **Current status:** The frontend opens with a startup screen that loads and verifies its fonts and bundled assets before showing the WordSprint menu. In the Qt desktop app it also waits for the background SQLite initialization. The vocabulary puzzles and gameplay described in the [product overview](../english-vocabulary-puzzle-game.md) are planned features, not completed functionality.
 
 ## Requirements
 
