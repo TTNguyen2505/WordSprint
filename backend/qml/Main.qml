@@ -1,27 +1,17 @@
-import QtQuick
-import QtQuick.Window
-import QtWebEngine
+﻿import QtQuick 2.15
+import QtQuick.Controls 2.15
+import WordSprint 1.0
 
-Window {
-    id: root
-    maximumWidth: 1200
-    maximumHeight: 900
-    minimumWidth: 1200
-    minimumHeight: 900
+ApplicationWindow {
+    id: mainWindow
+    width: 900
+    height: 650
     visible: true
-    title: qsTr("WordSprint")
+    title: "WordSprint"
 
-    property url initialUrl: "http://localhost:5173"
-
-    WebEngineView {
-        id: webEngineView
+    StackView {
+        id: rootStack
         anchors.fill: parent
-        url: root.initialUrl
-
-        settings.accelerated2dCanvasEnabled: true
-        settings.webGLEnabled: true
-        settings.localContentCanAccessRemoteUrls: true
-        settings.localContentCanAccessFileUrls: true
-        settings.javascriptCanAccessClipboard: true
+        initialItem: MenuScreen {}
     }
 }

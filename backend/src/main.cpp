@@ -5,8 +5,9 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include "viewmodel/WordViewModel.h"
 #include <QUrl>
-#include <QtWebEngineQuick/qtwebenginequickglobal.h>
+// #include <QtWebEngineQuick/qtwebenginequickglobal.h>
 
 int main(int argc, char *argv[]) {
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
@@ -15,7 +16,7 @@ int main(int argc, char *argv[]) {
 
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
-    QtWebEngineQuick::initialize();
+    // QtWebEngineQuick::initialize();
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
@@ -71,6 +72,9 @@ int main(int argc, char *argv[]) {
     }
 
     QQmlApplicationEngine engine;
+    // Register WordViewModel for QML
+    qmlRegisterType<WordViewModel>("WordSprint", 1, 0, "WordViewModel");
+    engine.rootContext()->setContextProperty("wordVM", new WordViewModel(&engine));
     engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl}});
     engine.rootContext()->setContextProperty(QStringLiteral("initialUrl"), initialUrl);
 
