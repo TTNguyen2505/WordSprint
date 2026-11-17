@@ -6,6 +6,8 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
+#include <QtQml>
+
 #include "viewmodel/AppViewModel.h"
 #include "viewmodel/GameplayViewModel.h"
 #include "model/MockVocabularyRepository.h"
@@ -14,6 +16,9 @@
 #endif
 
 int main(int argc, char *argv[]) {
+    // Register C++ types for QML (uncreatable, used for enums)
+    qmlRegisterUncreatableType<GameplayViewModel>("WordSprint", 1, 0, "GameplayViewModel", "Enum type only, cannot be instantiated in QML");
+    qmlRegisterUncreatableType<AppViewModel>("WordSprint", 1, 0, "AppViewModel", "Enum type only, cannot be instantiated in QML");
 
 
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "

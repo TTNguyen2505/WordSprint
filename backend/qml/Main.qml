@@ -1,27 +1,34 @@
-import QtQuick
-import QtQuick.Window
-import QtWebEngine
+import QtQuick 2.15
+import QtQuick.Window 2.15
+import QtQuick.Controls 2.15
+import WordSprint 1.0
 
 Window {
     id: root
-    maximumWidth: 1200
-    maximumHeight: 900
-    minimumWidth: 1200
-    minimumHeight: 900
     visible: true
+    width: 1200
+    height: 900
     title: qsTr("WordSprint")
 
-    property url initialUrl: "http://localhost:5173"
+    Column {
+        anchors.centerIn: parent
+        spacing: 12
 
-    WebEngineView {
-        id: webEngineView
-        anchors.fill: parent
-        url: root.initialUrl
+        Text { text: "Screen: " + appVM.currentScreen }
+        Text { text: "Score: " + gameplayVM.score }
+        Text { text: "Time: " + gameplayVM.remainingTime }
+        Text { text: "State: " + gameplayVM.gameState }
 
-        settings.accelerated2dCanvasEnabled: true
-        settings.webGLEnabled: true
-        settings.localContentCanAccessRemoteUrls: true
-        settings.localContentCanAccessFileUrls: true
-        settings.javascriptCanAccessClipboard: true
+        Button { text: "Start"; onClicked: gameplayVM.startGame() }
+        Button { text: "Pause"; onClicked: gameplayVM.pauseGame() }
+        Button { text: "Resume"; onClicked: gameplayVM.resumeGame() }
+        Button { text: "Restart"; onClicked: gameplayVM.restartGame() }
+
+        Row {
+            spacing: 8
+            TextField { id: answerField; placeholderText: "Answer"; width: 200 }
+            Button { text: "Submit"; onClicked: gameplayVM.submitAnswer(answerField.text) }
+        }
     }
 }
+
