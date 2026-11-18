@@ -1,4 +1,4 @@
-#include <QCommandLineOption>
+﻿#include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDir>
 #include <QFileInfo>
@@ -6,7 +6,9 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
+#ifdef HAVE_WEBENGINEQUICK
 #include <QtWebEngineQuick/qtwebenginequickglobal.h>
+#endif
 
 int main(int argc, char *argv[]) {
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
@@ -15,7 +17,9 @@ int main(int argc, char *argv[]) {
 
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
+    #ifdef HAVE_WEBENGINEQUICK
     QtWebEngineQuick::initialize();
+#endif
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
@@ -86,3 +90,4 @@ int main(int argc, char *argv[]) {
 
     return app.exec();
 }
+
