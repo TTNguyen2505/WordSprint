@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <string>
+#include <optional>
 
 #include "Level.h"
 #include "Topic.h"
