@@ -119,7 +119,13 @@ std::vector<Vocabulary> VocabularyRepository::getVocabulariesByTopic(int topicId
 std::vector<Vocabulary> VocabularyRepository::getVocabulariesFilter(const std::string &filter,
                                                                    const std::vector<std::string> &params) {
     std::vector<Vocabulary> result;
-    // Build the final query string safely – filter is supplied by the caller (trusted internal code).
+        // Build the final query string safely – filter is supplied by the caller (trusted internal code).
+    QString sql;
+    if (filter.empty()) {
+        sql = QStringLiteral("SELECT * FROM vocabularies;");
+    } else {
+        sql = QString::fromStdString("SELECT * FROM vocabularies WHERE " + filter + ";");
+    }
     QString sql = QString::fromStdString("SELECT * FROM vocabularies WHERE " + filter + ";");
     QSqlQuery query = m_dbMgr->prepare(sql);
     // Bind parameters in order.
