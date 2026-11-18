@@ -63,10 +63,27 @@ set(BACKEND_MODEL_HEADERS
     src/model/StageListModel.h
 )
 
+set(BACKEND_QUIZ_SOURCES
+    src/quiz/QuizBase.cpp
+    src/quiz/ScrambleQuiz.cpp
+    src/quiz/FillInBlankQuiz.cpp
+    src/quiz/ListeningQuiz.cpp
+)
+
+set(BACKEND_QUIZ_HEADERS
+    src/quiz/QuizTypes.h
+    src/quiz/QuizBase.h
+    src/quiz/ScrambleQuiz.h
+    src/quiz/FillInBlankQuiz.h
+    src/quiz/ListeningQuiz.h
+)
+
 qt_add_executable(WordSprint
     src/main.cpp
     ${BACKEND_MODEL_SOURCES}
     ${BACKEND_MODEL_HEADERS}
+    ${BACKEND_QUIZ_SOURCES}
+    ${BACKEND_QUIZ_HEADERS}
 )
 
 set_target_properties(WordSprint PROPERTIES
@@ -113,14 +130,23 @@ qt_add_executable(test_data_models
     ${BACKEND_MODEL_SOURCES}
     ${BACKEND_MODEL_HEADERS}
 )
-
 target_link_libraries(test_data_models PRIVATE
     Qt6::Core
     Qt6::Qml
     Qt6::Test
 )
-
 add_test(NAME test_data_models COMMAND test_data_models)
+
+qt_add_executable(test_quiz_polymorphism
+    tests/test_quiz_polymorphism.cpp
+    ${BACKEND_QUIZ_SOURCES}
+    ${BACKEND_QUIZ_HEADERS}
+)
+target_link_libraries(test_quiz_polymorphism PRIVATE
+    Qt6::Core
+    Qt6::Test
+)
+add_test(NAME test_quiz_polymorphism COMMAND test_quiz_polymorphism)
 
 if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
