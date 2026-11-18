@@ -6,7 +6,10 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QUrl>
+#include <QWebChannel>
 #include <QtWebEngineQuick/qtwebenginequickglobal.h>
+
+#include "src/BridgeController.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
@@ -70,9 +73,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // -----------------------------------------------------------------------
+    // Set up QWebChannel and register BridgeController so that the React
+    // frontend can call C++ methods via qwebchannel.js.
+    // -----------------------------------------------------------------------
+    QWebChannel webChannel;
+    BridgeController bridgeController;
+    webChannel.registerObject(QStringLiteral("bridge"), &bridgeController);
+
     QQmlApplicationEngine engine;
     engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl}});
     engine.rootContext()->setContextProperty(QStringLiteral("initialUrl"), initialUrl);
+    // Expose the QWebChannel pointer to QML so Main.qml can attach it to WebEngineView
+    engine.rootContext()->setContextProperty(QStringLiteral("webChannel"), &webChannel);
 
     const QUrl url(QStringLiteral("qrc:/qt/qml/WordSprint/qml/Main.qml"));
     QObject::connect(
