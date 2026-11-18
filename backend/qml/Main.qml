@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtWebEngine
+import QtWebChannel
 
 Window {
     id: root
@@ -17,6 +18,10 @@ Window {
         id: webEngineView
         anchors.fill: parent
         url: root.initialUrl
+
+        // Attach the QWebChannel instance exposed from main.cpp so that
+        // the React frontend can access the "bridge" object via qwebchannel.js.
+        webChannel: webChannel
 
         settings.accelerated2dCanvasEnabled: true
         settings.webGLEnabled: true
