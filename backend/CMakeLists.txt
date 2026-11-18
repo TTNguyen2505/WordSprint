@@ -68,6 +68,7 @@ set(BACKEND_QUIZ_SOURCES
     src/quiz/ScrambleQuiz.cpp
     src/quiz/FillInBlankQuiz.cpp
     src/quiz/ListeningQuiz.cpp
+    src/quiz/QuizFactory.cpp
 )
 
 set(BACKEND_QUIZ_HEADERS
@@ -76,6 +77,7 @@ set(BACKEND_QUIZ_HEADERS
     src/quiz/ScrambleQuiz.h
     src/quiz/FillInBlankQuiz.h
     src/quiz/ListeningQuiz.h
+    src/quiz/QuizFactory.h
 )
 
 qt_add_executable(WordSprint
@@ -147,6 +149,17 @@ target_link_libraries(test_quiz_polymorphism PRIVATE
     Qt6::Test
 )
 add_test(NAME test_quiz_polymorphism COMMAND test_quiz_polymorphism)
+
+qt_add_executable(test_quiz_factory
+    tests/test_quiz_factory.cpp
+    ${BACKEND_QUIZ_SOURCES}
+    ${BACKEND_QUIZ_HEADERS}
+)
+target_link_libraries(test_quiz_factory PRIVATE
+    Qt6::Core
+    Qt6::Test
+)
+add_test(NAME test_quiz_factory COMMAND test_quiz_factory)
 
 if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
