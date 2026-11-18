@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QObject>
-#include <QJsonObject>
 #include <QJsonArray>
+#include <QJsonObject>
+#include <QObject>
 #include <QString>
 #include <vector>
 
@@ -23,28 +23,21 @@
  *   - currentScore       – accumulated score for the session
  *   - elapsedTime        – seconds elapsed since startStage was called
  */
-class GameSession : public QObject
-{
+class GameSession : public QObject {
     Q_OBJECT
 public:
-    explicit GameSession(QObject *parent = nullptr)
-        : QObject(parent)
-        , m_stageId(-1)
-        , m_timeLimit(60)
-        , m_questionCount(10)
-        , m_currentScore(0)
-        , m_elapsedTime(0)
-    {}
+    explicit GameSession(QObject *parent = nullptr) :
+        QObject(parent), m_stageId(-1), m_timeLimit(60), m_questionCount(10), m_currentScore(0), m_elapsedTime(0) {}
 
     // Setters & getters -----------------------------------------------------
     void setStageId(int id) { m_stageId = id; }
     int stageId() const { return m_stageId; }
 
     void setWordIds(const std::vector<int> &ids) { m_wordIds = ids; }
-    const std::vector<int>& wordIds() const { return m_wordIds; }
+    const std::vector<int> &wordIds() const { return m_wordIds; }
 
     void setWords(const QJsonArray &arr) { m_words = arr; }
-    const QJsonArray& words() const { return m_words; }
+    const QJsonArray &words() const { return m_words; }
 
     void setTimeLimit(int seconds) { m_timeLimit = seconds; }
     int timeLimit() const { return m_timeLimit; }
@@ -76,7 +69,7 @@ public:
 private:
     int m_stageId;
     std::vector<int> m_wordIds; // internal ids for lookup, not sent to UI
-    QJsonArray m_words;         // full word objects (target_word, hint, etc.)
+    QJsonArray m_words; // full word objects (target_word, hint, etc.)
     int m_timeLimit;
     int m_questionCount;
     int m_currentScore;

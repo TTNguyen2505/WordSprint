@@ -48,6 +48,8 @@ qt_add_executable(WordSprint
     src/main.cpp
     src/DatabaseManager.cpp
     src/VocabularyRepository.cpp
+    src/BridgeController.cpp
+    src/GameSession.h
 )
 
 set_target_properties(WordSprint PROPERTIES
@@ -102,3 +104,16 @@ add_executable(RepositoryTest
 target_include_directories(RepositoryTest PRIVATE src)
 target_link_libraries(RepositoryTest PRIVATE Qt6::Test Qt6::Sql)
 add_test(NAME RepositoryTest COMMAND RepositoryTest)
+
+add_executable(BridgeControllerTest
+    tests/BridgeControllerTest.cpp
+    src/BridgeController.cpp
+    src/GameSession.h
+    src/DatabaseManager.cpp
+    src/VocabularyRepository.cpp
+)
+target_include_directories(BridgeControllerTest PRIVATE src)
+target_link_libraries(BridgeControllerTest PRIVATE
+    Qt6::Test Qt6::Core Qt6::Sql Qt6::WebChannel
+)
+add_test(NAME BridgeControllerTest COMMAND BridgeControllerTest)

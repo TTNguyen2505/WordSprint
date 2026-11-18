@@ -1,14 +1,14 @@
 #pragma once
 
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QObject>
 #include <QString>
-#include <QJsonObject>
-#include <QJsonDocument>
 
 // Repository interfaces already provided in the backend
+#include "DatabaseManager.h"
 #include "IVocabularyRepository.h"
 #include "VocabularyRepository.h"
-#include "DatabaseManager.h"
 
 /**
  * @brief BridgeController
@@ -21,8 +21,7 @@
  * string as response, matching the contract described in Chapter 2 of the
  * project report (system design).
  */
-class BridgeController : public QObject
-{
+class BridgeController : public QObject {
     Q_OBJECT
 public:
     explicit BridgeController(QObject *parent = nullptr);
@@ -59,8 +58,7 @@ signals:
     void jsonMessage(const QString &payload);
 
 private:
-    // Repository handling vocabulary look‑up. The concrete implementation is
-    // provided by VocabularyRepository which uses DatabaseManager internally.
+    std::shared_ptr<DatabaseManager> m_dbMgr;
     std::unique_ptr<IVocabularyRepository> m_vocabRepo;
     // Helper to parse incoming JSON safely
     QJsonObject parseJson(const QString &jsonStr) const;
