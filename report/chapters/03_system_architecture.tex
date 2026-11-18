@@ -21,16 +21,14 @@ Kiến trúc được mô tả bằng sơ đồ sau (được thể hiện bằn
 \centering
 \caption{Sơ đồ tầng kiến trúc WordSprint}
 \label{tab:architecture_layers}
-\begin{tabular}{p{0.30\linewidth}p{0.65\linewidth}}
-\toprule
-Tầng & Mô tả \\
-\midrule
-\textit{UI (frontend)} & React components, Tailwind CSS, Vite dev server hoặc tài nguyên build tĩnh. \\
-\textit{Bridge (Qt WebChannel)} & Kết nối JavaScript <-> C++ qua đối tượng đăng ký trong \texttt{QQmlApplicationEngine}. \\
-\textit{Backend (C++/Qt)} & Quản lý vòng đời Qt, xử lý nghiệp vụ, lưu trữ dữ liệu, cung cấp API cho frontend. \\
-\textit{Data (file)} & JSON/YAML files lưu trữ từ vựng, hồ sơ người dùng, lịch sử điểm. \\
-\bottomrule
-\end{tabular}
+\begin{tabularx}{\textwidth}{|L{4.2cm}|Y|}
+\hline
+\thcell{Tầng} & \thcell{Mô tả} \\ \hline
+\textit{UI (frontend)} & React components, Tailwind CSS, Vite dev server hoặc tài nguyên build tĩnh. \\ \hline
+\textit{Bridge (Qt WebChannel)} & Kết nối JavaScript <-> C++ qua đối tượng đăng ký trong \texttt{QQmlApplicationEngine}. \\ \hline
+\textit{Backend (C++/Qt)} & Quản lý vòng đời Qt, xử lý nghiệp vụ, lưu trữ dữ liệu, cung cấp API cho frontend. \\ \hline
+\textit{Data (file)} & JSON/YAML files lưu trữ từ vựng, hồ sơ người dùng, lịch sử điểm. \\ \hline
+\end{tabularx}
 \end{table}
 
 % -------------------------------------------------
@@ -102,7 +100,7 @@ Quy trình thực thi một vòng chơi được mô tả theo các bước sau 
 \label{subsec:data_format}
 Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChannel:
 
-\begin{verbatim}
+\begin{lstlisting}
 // Example payload from frontend to backend
 {
     "action": "processAnswer",
@@ -122,7 +120,7 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
         "question": "_ppl_"
     }
 }
-\end{verbatim}
+\end{lstlisting}
 
 % -------------------------------------------------
 % Lưu trữ dữ liệu từ vựng và kết quả

@@ -200,19 +200,17 @@ Kiểm thử được thực hiện theo hai cấp: unit test cho backend (có t
 \centering
 \caption{Bảng tổng hợp kết quả kiểm thử}
 \label{tab:test_results}
-\begin{tabular}{p{0.30\linewidth}p{0.15\linewidth}p{0.45\linewidth}}
-\toprule
-Kịch bản & Kết quả & Ghi chú \\
-\midrule
-TC01 – Khởi động & Thành công & URL đúng (dev) \\
-TC02 – Bắt đầu trò chơi & Thành công & Puzzle nhận được qua WebChannel \\
-TC03 – Đáp án đúng & Thành công & Điểm tăng, thời gian giảm \eqref{eq:score} \\
-TC04 – Đáp án sai & Thành công & Không tăng điểm, thông báo lỗi \\
-TC05 – Hết thời gian & Thành công & Gửi \texttt{gameOver}, lưu hồ sơ JSON \\
-TC06 – Lưu/ tải hồ sơ & Thành công & File JSON hợp lệ, không lỗi parse \\
-TC07 – Release build & Thành công & Frontend tĩnh được hiển thị \\
-\bottomrule
-\end{tabular}
+\begin{tabularx}{\textwidth}{|L{4.5cm}|C{3.0cm}|Y|}
+\hline
+\thcell{Kịch bản} & \thcell{Kết quả} & \thcell{Ghi chú} \\ \hline
+TC01 – Khởi động & Thành công & URL đúng (dev) \\ \hline
+TC02 – Bắt đầu trò chơi & Thành công & Puzzle nhận được qua WebChannel \\ \hline
+TC03 – Đáp án đúng & Thành công & Điểm tăng, thời gian giảm \eqref{eq:score} \\ \hline
+TC04 – Đáp án sai & Thành công & Không tăng điểm, thông báo lỗi \\ \hline
+TC05 – Hết thời gian & Thành công & Gửi \texttt{gameOver}, lưu hồ sơ JSON \\ \hline
+TC06 – Lưu/ tải hồ sơ & Thành công & File JSON hợp lệ, không lỗi parse \\ \hline
+TC07 – Release build & Thành công & Frontend tĩnh được hiển thị \\ \hline
+\end{tabularx}
 \end{table}
 Tất cả các kịch bản đều vượt qua, chứng minh tính ổn định của kiến trúc kết nối WebChannel và quá trình biên dịch.
 

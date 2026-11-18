@@ -1,0 +1,136 @@
+\chapter{Khảo sát \& phân tích yêu cầu nghiệp vụ}
+\label{chap:survey_and_business_requirements}
+\label{chap:introduction}
+
+\section{Khảo sát thực trạng và bài toán đặt ra}
+\label{sec:survey_problem}
+\label{sec:overview}
+
+\subsection{Thực trạng học từ vựng tiếng Anh}
+\label{subsec:current_situation}
+Từ vựng là nền tảng cốt lõi quyết định khả năng nghe, nói, đọc và viết trong quá trình học ngoại ngữ. Tuy nhiên, cách học truyền thống như chép tay lặp lại hoặc học thuộc danh sách từ đơn lẻ thường mang tính thụ động, dễ gây nhàm chán và khiến người học gặp ba hạn chế phổ biến:
+\begin{itemize}
+    \item Khó tái hiện chính xác mặt chữ: Người học có thể nhận ra nghĩa của từ khi đọc nhưng lúng túng khi phải tự viết lại đúng chính tả trong thời gian ngắn.
+    \item Tách rời giữa mặt chữ và âm thanh: Việc ít kết hợp luyện nghe phát âm chuẩn làm giảm khả năng nhận diện từ vựng khi giao tiếp thực tế.
+    \item Thiếu động lực luyện tập liên tục: Quá trình ôn tập thiếu các cột mốc đánh giá tiến độ hoặc yếu tố thử thách khiến người học khó duy trì thói quen hàng ngày.
+\end{itemize}
+
+Bên cạnh đó, các ứng dụng học từ vựng hiện nay thường thiên về dạng thẻ ghi nhớ hoặc trắc nghiệm đơn thuần, chưa tạo được áp lực thời gian và phản xạ kết hợp đồng thời cả tư duy gợi ý, kỹ năng nghe lẫn tốc độ gõ phím trên máy tính.
+
+\subsection{Bài toán đặt ra và định hướng giải quyết}
+\label{subsec:problem_solution}
+Từ những hạn chế trên kết hợp với mục tiêu vận dụng kiến thức môn Lập trình hướng đối tượng vào một sản phẩm phần mềm hoàn chỉnh, đề tài hướng tới việc xây dựng một trò chơi giải đố từ vựng tiếng Anh trên máy tính. Trò chơi lồng ghép quá trình ôn luyện từ vựng theo khung tham chiếu trình độ châu Âu (CEFR từ bậc A1 đến C2) vào các màn chơi giải đố tính giờ, giúp người học chủ động ghi nhớ mặt chữ, luyện nghe phát âm và rèn luyện phản xạ gõ phím thông qua trải nghiệm tương tác trực quan.
+
+\section{Mục tiêu và phạm vi đề tài}
+\label{sec:objectives_and_scope}
+
+\subsection{Mục tiêu đề tài}
+\label{sec:objectives}
+\label{subsec:objectives}
+Đề tài hướng tới hai nhóm mục tiêu chính về trải nghiệm học tập và kỹ thuật lập trình:
+\begin{itemize}
+    \item Về trải nghiệm học tập: Giúp người chơi ghi nhớ chủ động cấu trúc chính tả của từ vựng theo từng chủ đề quen thuộc; rèn luyện tư duy suy luận thông qua hình ảnh và ngữ cảnh gợi ý dưới áp lực đồng hồ đếm ngược; nâng cao khả năng nghe phát âm kết hợp tốc độ gõ phím chính xác; tạo động lực luyện tập thông qua cơ chế mở khóa màn chơi tuần tự và bảng xếp hạng thành tích.
+    \item Về kỹ thuật phần mềm: Vận dụng bài bản quy trình phân tích và thiết kế hướng đối tượng bằng hệ thống sơ đồ UML; hiện thực hóa đầy đủ các kỹ thuật cốt lõi của lập trình hướng đối tượng gồm tính đóng gói, tính kế thừa, tính đa hình, tính trừu tượng và các mẫu thiết kế vào việc xây dựng tầng xử lý nghiệp vụ trò chơi, kết hợp với giao diện hiện đại trên nền tảng máy tính.
+\end{itemize}
+
+\subsection{Đối tượng sử dụng và phạm vi triển khai}
+\label{sec:scope}
+\label{subsec:scope}
+\begin{itemize}
+    \item Đối tượng sử dụng: Học sinh, sinh viên và những người tự học tiếng Anh trên máy tính cá nhân muốn ôn luyện từ vựng từ cơ bản đến nâng cao, bao gồm cả trường hợp nhiều người dùng chung một máy tính.
+    \item Phạm vi triển khai: Ứng dụng hoạt động độc lập trên máy tính cá nhân mà không cần kết nối mạng; toàn bộ thông tin hồ sơ người chơi, kho từ vựng, tệp âm thanh, hình ảnh gợi ý và lịch sử thành tích được lưu trữ cục bộ ngay trên thiết bị.
+\end{itemize}
+
+\section{Phân tích yêu cầu nghiệp vụ}
+\label{sec:business_requirements}
+
+\subsection{Nghiệp vụ quản lý nhiều hồ sơ người chơi}
+\label{subsec:profile_management}
+Hệ thống cho phép nhiều người cùng sử dụng phần mềm trên một máy tính mà không làm ảnh hưởng đến dữ liệu của nhau:
+\begin{itemize}
+    \item Tạo hồ sơ mới: Người chơi nhập tên định danh riêng để khởi tạo hồ sơ cá nhân; hệ thống kiểm tra tính duy nhất của tên hồ sơ trước khi tạo.
+    \item Chuyển đổi hồ sơ nhanh: Người chơi có thể xem danh sách các hồ sơ hiện có và chuyển đổi qua lại chỉ bằng một thao tác nhấp chuột.
+    \item Lưu trữ độc lập: Tiến độ mở khóa màn chơi, cấu hình âm thanh, điểm số và kỷ lục thời gian của mỗi hồ sơ được quản lý tách biệt hoàn toàn.
+\end{itemize}
+
+\subsection{Nghiệp vụ phân cấp màn chơi và sinh bộ câu hỏi ngẫu nhiên}
+\label{subsec:level_and_question_generation}
+\begin{itemize}
+    \item Phân loại theo chủ đề và trình độ: Kho từ vựng được tổ chức theo các chủ đề gần gũi như Công nghệ, Đời sống, Thiên nhiên,... và phân cấp theo 6 trình độ chuẩn CEFR gồm mức cơ bản (A1, A2), mức trung cấp (B1, B2) và mức nâng cao (C1, C2).
+    \item Mở khóa tuần tự: Các màn chơi được sắp xếp theo lộ trình tăng dần; người chơi phải hoàn thành màn chơi hiện tại mới có thể mở khóa màn chơi tiếp theo.
+    \item Không trùng lặp khi chơi lại: Mỗi khi người chơi bắt đầu hoặc chơi lại một màn, hệ thống tự động chọn ngẫu nhiên một tập từ vựng mới phù hợp với chủ đề và trình độ của màn đó để duy trì tính thử thách.
+\end{itemize}
+
+\subsection{Nghiệp vụ ba chế độ câu đố}
+\label{subsec:puzzle_modes}
+Trong mỗi màn chơi, hệ thống cung cấp ba dạng thử thách từ vựng đa dạng:
+\begin{itemize}
+    \item Sắp xếp chữ cái (Scramble): Các chữ cái trong từ bị đảo lộn ngẫu nhiên kèm theo hình ảnh gợi ý để người chơi sắp xếp lại thành từ tiếng Anh có nghĩa.
+    \item Điền chữ cái còn thiếu (Fill in the Blank): Một số vị trí chữ cái trong từ bị ẩn đi ngẫu nhiên; người chơi dựa vào phần chữ hiển thị và gợi ý ngữ cảnh để nhập lại từ hoàn chỉnh.
+    \item Nghe phát âm và đoán từ (Audio): Người chơi bấm nút nghe phát âm chuẩn của từ với số lượt nghe bị giới hạn 3 lần, kết hợp gợi ý về số lượng chữ cái để nhập chính xác từ đã nghe.
+\end{itemize}
+
+\subsection{Nghiệp vụ điều hướng câu hỏi, xác nhận đáp án và bảng nhiệm vụ}
+\label{subsec:navigation_and_hud}
+\begin{itemize}
+    \item Xác nhận đáp án bằng nút Submit: Người chơi nhập từ vựng vào ô nhập liệu và nhấn nút Submit để gửi câu trả lời.
+    \item Xử lý khi trả lời đúng: Ô nhập liệu chuyển sang màu xanh lá, phát hiệu ứng âm thanh chúc mừng, cộng điểm vào tổng điểm hiện tại, đánh dấu câu hỏi đã hoàn thành và tự động chuyển sang câu hỏi chưa giải tiếp theo.
+    \item Xử lý khi trả lời sai: Ô nhập liệu chuyển sang màu đỏ, phát hiệu ứng rung lắc nhẹ để báo lỗi và tự động chọn sẵn toàn bộ nội dung vừa nhập, cho phép người chơi gõ đè câu trả lời mới và nhấn Submit lại mà không cần xóa từng ký tự.
+    \item Bảng nhiệm vụ trong trận đấu: Hiển thị đồng hồ đếm ngược, điểm số hiện tại, số câu hỏi còn lại, nút tạm dừng và danh sách toàn bộ câu hỏi của màn với ba trạng thái trực quan:
+    \begin{itemize}
+        \item \textit{Queued}: Câu hỏi chưa được giải, hiển thị mặc định và cho phép người chơi chọn để làm trước.
+        \item \textit{Current}: Câu hỏi đang được chọn để thực hiện, làm nổi bật bằng màu vàng.
+        \item \textit{Solved}: Câu hỏi đã giải đúng, hiển thị dấu tích màu xanh lá và bị khóa lại để không thể chọn hay nộp lại.
+    \end{itemize}
+    \item Điều hướng tự do giữa các câu hỏi: Trong lúc đồng hồ đang chạy, người chơi có thể chuyển đổi qua lại giữa các câu hỏi chưa hoàn thành bằng nút Next, nút Previous hoặc nhấp trực tiếp vào các thẻ ở trạng thái Queued trên bảng nhiệm vụ; thao tác điều hướng tự động bỏ qua các câu đã ở trạng thái Solved.
+    \item Tạm dừng và kết thúc màn chơi: Người chơi có thể nhấn nút PAUSE bất cứ lúc nào để tạm dừng đồng hồ đếm ngược và tiếp tục khi sẵn sàng. Màn chơi kết thúc thắng lợi khi toàn bộ câu hỏi chuyển sang trạng thái Solved, hoặc thất bại khi đồng hồ đếm ngược về không trước lúc giải xong tất cả câu hỏi.
+\end{itemize}
+
+\subsection{Nghiệp vụ tùy chỉnh âm thanh và bảng xếp hạng}
+\label{subsec:audio_and_leaderboard}
+\begin{itemize}
+    \item Tùy chỉnh âm thanh: Cho phép bật hoặc tắt nhanh và điều chỉnh mức âm lượng độc lập cho nhạc nền và hiệu ứng âm thanh. Khi người chơi kéo thanh điều chỉnh âm lượng, hệ thống phát ngay âm thanh nghe thử để dễ dàng chọn mức phù hợp.
+    \item Bảng xếp hạng: Cung cấp hai chế độ theo dõi thành tích gồm bảng xếp hạng theo từng màn chơi hiển thị những hồ sơ có điểm cao nhất ở mỗi màn và bảng xếp hạng tổng thể dựa trên tổng số màn chơi đã vượt qua và tổng thời gian hoàn thành.
+\end{itemize}
+
+\section{Yêu cầu phi chức năng và công nghệ triển khai}
+\label{sec:non_functional_and_tech}
+
+\subsection{Yêu cầu phi chức năng}
+\label{subsec:non_functional_requirements}
+\begin{itemize}
+    \item Tốc độ phản hồi: Các thao tác gõ phím, hiệu ứng đổi màu khung nhập liệu, âm thanh thông báo đúng sai và đồng hồ đếm ngược phải phản hồi tức thì, mượt mà.
+    \item Tính toàn vẹn dữ liệu: Dữ liệu tiến độ, cấu hình và kỷ lục của từng hồ sơ người chơi được lưu trữ an toàn cục bộ, đảm bảo không bị mất mát hay ghi đè chéo giữa các tài khoản.
+    \item Giao diện trực quan: Giao diện áp dụng phong cách thiết kế Neo-brutalism với đường viền đen đậm, góc cạnh vuông vức và bảng màu tương phản cao giúp người chơi nhận biết nhanh trạng thái câu đố dưới áp lực thời gian.
+    \item Tính mở rộng của kiến trúc: Hệ thống xử lý nghiệp vụ được thiết kế hướng đối tượng chặt chẽ, dễ dàng bổ sung thêm chủ đề, kho từ vựng hoặc dạng câu đố mới mà không ảnh hưởng đến cấu trúc hiện có.
+\end{itemize}
+
+\subsection{Công nghệ và công cụ triển khai}
+\label{subsec:tech_stack}
+Công nghệ và công cụ sử dụng trong quá trình phát triển hệ thống WordSprint được tổng hợp trong Bảng~\ref{tab:tech_stack}.
+
+\begin{table}[h!]
+\centering
+\caption{Công nghệ và công cụ triển khai hệ thống}
+\label{tab:tech_stack}
+\begin{tabularx}{\textwidth}{|L{3.2cm}|L{4.2cm}|Y|}
+\hline
+\thcell{Thành phần} & \thcell{Công nghệ / Công cụ} & \thcell{Vai trò trong hệ thống} \\ \hline
+Tầng giao diện người dùng & Vite, React, JavaScript & Xây dựng giao diện tương tác theo phong cách Neo-brutalism, hiển thị bảng nhiệm vụ và bộ đếm thời gian trên màn hình chơi. \\ \hline
+Tầng ứng dụng nền và xử lý nghiệp vụ & C++, Qt 6 (Qt Quick, Qt WebEngine) & Đóng gói ứng dụng máy tính, nhúng giao diện Web và cài đặt toàn bộ logic hướng đối tượng của trò chơi. \\ \hline
+Cầu nối giao tiếp nội bộ & Qt WebChannel & Thiết lập kênh truyền thông điệp hai chiều giữa giao diện JavaScript và tầng xử lý nghiệp vụ C++. \\ \hline
+Hệ quản trị cơ sở dữ liệu & SQLite & Lưu trữ dữ liệu quan hệ cục bộ gọn nhẹ trên máy tính mà không cần cài đặt máy chủ cơ sở dữ liệu ngoài. \\ \hline
+Công cụ thiết kế giao diện & Figma & Thiết kế sơ đồ luồng trải nghiệm người dùng và giao diện các màn hình chức năng. \\ \hline
+Công cụ vẽ sơ đồ phân tích thiết kế & Draw.io & Xây dựng hệ thống sơ đồ UML và sơ đồ cơ sở dữ liệu quan hệ. \\ \hline
+\end{tabularx}
+\end{table}
+
+\section{Bố cục của báo cáo}
+\label{sec:structure}
+Ngoài phần mở đầu, phần kết luận và phụ lục phân công công việc, nội dung chính của báo cáo được tổ chức thành 4 chương:
+\begin{itemize}
+    \item Chương 1 -- Khảo sát \& Phân tích yêu cầu nghiệp vụ: Trình bày khái quát thực trạng học từ vựng tiếng Anh, bài toán đặt ra, mục tiêu và phạm vi đề tài, phân tích chi tiết các yêu cầu nghiệp vụ của trò chơi cùng các yêu cầu phi chức năng và công nghệ triển khai.
+    \item Chương 2 -- Thiết kế hệ thống \& Biểu đồ UML: Trình bày mô hình hóa chức năng thông qua sơ đồ Use Case kèm bảng đặc tả kịch bản, sơ đồ tuần tự Sequence Diagram cho các luồng nghiệp vụ chính, sơ đồ lớp Class Diagram phân tầng, mô hình cơ sở dữ liệu quan hệ ERD, đặc tả giao tiếp giữa giao diện và tầng xử lý C++ cùng thiết kế luồng trải nghiệm người dùng.
+    \item Chương 3 -- Cài đặt chi tiết \& Kỹ thuật OOP C++: Trình bày kiến trúc tổ chức mã nguồn và minh họa chi tiết việc áp dụng các tính chất của lập trình hướng đối tượng, kỹ thuật nạp chồng toán tử và các mẫu thiết kế vào từng thành phần của trò chơi.
+    \item Chương 4 -- Thử nghiệm kiểm thử \& Đánh giá kết quả: Xây dựng bộ kịch bản kiểm thử chức năng bao phủ các tình huống nghiệp vụ và trường hợp biên, đánh giá mức độ hoàn thiện của ứng dụng so với yêu cầu đặt ra và nêu hướng phát triển mở rộng.
+\end{itemize}
