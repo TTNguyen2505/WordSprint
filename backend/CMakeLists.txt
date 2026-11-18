@@ -80,12 +80,30 @@ set(BACKEND_QUIZ_HEADERS
     src/quiz/QuizFactory.h
 )
 
+set(BACKEND_HINT_SOURCES
+    src/hint/RevealLetterHintStrategy.cpp
+    src/hint/FreezeTimeHintStrategy.cpp
+    src/hint/ShowImageHintStrategy.cpp
+    src/hint/HintManager.cpp
+)
+
+set(BACKEND_HINT_HEADERS
+    src/hint/HintTypes.h
+    src/hint/IHintStrategy.h
+    src/hint/RevealLetterHintStrategy.h
+    src/hint/FreezeTimeHintStrategy.h
+    src/hint/ShowImageHintStrategy.h
+    src/hint/HintManager.h
+)
+
 qt_add_executable(WordSprint
     src/main.cpp
     ${BACKEND_MODEL_SOURCES}
     ${BACKEND_MODEL_HEADERS}
     ${BACKEND_QUIZ_SOURCES}
     ${BACKEND_QUIZ_HEADERS}
+    ${BACKEND_HINT_SOURCES}
+    ${BACKEND_HINT_HEADERS}
 )
 
 set_target_properties(WordSprint PROPERTIES
@@ -160,6 +178,19 @@ target_link_libraries(test_quiz_factory PRIVATE
     Qt6::Test
 )
 add_test(NAME test_quiz_factory COMMAND test_quiz_factory)
+
+qt_add_executable(test_hint_strategy
+    tests/test_hint_strategy.cpp
+    ${BACKEND_QUIZ_SOURCES}
+    ${BACKEND_QUIZ_HEADERS}
+    ${BACKEND_HINT_SOURCES}
+    ${BACKEND_HINT_HEADERS}
+)
+target_link_libraries(test_hint_strategy PRIVATE
+    Qt6::Core
+    Qt6::Test
+)
+add_test(NAME test_hint_strategy COMMAND test_hint_strategy)
 
 if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
