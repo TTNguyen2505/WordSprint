@@ -7,10 +7,14 @@ find_package(Qt6 REQUIRED COMPONENTS
     Gui
     Qml
     Quick
+    Sql
+    Test
+)
+
+find_package(Qt6 QUIET COMPONENTS
     WebEngineQuick
     WebEngineCore
     WebChannel
-    Sql
 )
 
 qt_standard_project_setup()
@@ -43,8 +47,26 @@ file(GLOB_RECURSE FRONTEND_DIST_FILES
     "${FRONTEND_DIST_DIR}/*"
 )
 
+set(BACKEND_MODEL_SOURCES
+    src/model/WordListModel.cpp
+    src/model/TopicListModel.cpp
+    src/model/StageListModel.cpp
+)
+
+set(BACKEND_MODEL_HEADERS
+    src/model/WordItem.h
+    src/model/Topic.h
+    src/model/Stage.h
+    src/model/UserProfile.h
+    src/model/WordListModel.h
+    src/model/TopicListModel.h
+    src/model/StageListModel.h
+)
+
 qt_add_executable(WordSprint
     src/main.cpp
+    ${BACKEND_MODEL_SOURCES}
+    ${BACKEND_MODEL_HEADERS}
 )
 
 set_target_properties(WordSprint PROPERTIES
@@ -72,11 +94,33 @@ target_link_libraries(WordSprint PRIVATE
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
-    Qt6::WebEngineQuick
-    Qt6::WebEngineCore
-    Qt6::WebChannel
     Qt6::Sql
 )
+
+if(TARGET Qt6::WebEngineQuick)
+    target_link_libraries(WordSprint PRIVATE
+        Qt6::WebEngineQuick
+        Qt6::WebEngineCore
+        Qt6::WebChannel
+    )
+endif()
+
+# Unit Tests
+enable_testing()
+
+qt_add_executable(test_data_models
+    tests/test_data_models.cpp
+    ${BACKEND_MODEL_SOURCES}
+    ${BACKEND_MODEL_HEADERS}
+)
+
+target_link_libraries(test_data_models PRIVATE
+    Qt6::Core
+    Qt6::Qml
+    Qt6::Test
+)
+
+add_test(NAME test_data_models COMMAND test_data_models)
 
 if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
