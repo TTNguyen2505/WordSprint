@@ -31,12 +31,26 @@ if(PNPM_EXECUTABLE)
         )
     endif()
 
+# Copy database schema and seed files to output directory
+add_custom_command(TARGET WordSprint POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/database" $<TARGET_FILE_DIR:WordSprint>
+    COMMENT "Copy SQLite schema and seed files to runtime directory"
+)
+
+
     add_custom_target(build_frontend
         COMMAND ${PNPM_EXECUTABLE} run build
         WORKING_DIRECTORY "${FRONTEND_DIR}"
         COMMENT "Building React frontend with Vite..."
     )
 endif()
+
+# Copy database schema and seed files to output directory
+add_custom_command(TARGET WordSprint POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/database" $<TARGET_FILE_DIR:WordSprint>
+    COMMENT "Copy SQLite schema and seed files to runtime directory"
+)
+
 
 file(GLOB_RECURSE FRONTEND_DIST_FILES
     CONFIGURE_DEPENDS
@@ -59,6 +73,13 @@ if(FRONTEND_DIST_FILES)
         FILES ${FRONTEND_DIST_FILES}
     )
 endif()
+
+# Copy database schema and seed files to output directory
+add_custom_command(TARGET WordSprint POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/database" $<TARGET_FILE_DIR:WordSprint>
+    COMMENT "Copy SQLite schema and seed files to runtime directory"
+)
+
 
 qt_add_qml_module(WordSprint
     URI WordSprint
@@ -87,3 +108,10 @@ if(WIN32)
         COMMENT "Deploying Qt runtime DLLs with windeployqt..."
     )
 endif()
+
+# Copy database schema and seed files to output directory
+add_custom_command(TARGET WordSprint POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/database" $<TARGET_FILE_DIR:WordSprint>
+    COMMENT "Copy SQLite schema and seed files to runtime directory"
+)
+
