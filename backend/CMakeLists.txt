@@ -10,6 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineQuick
     WebEngineCore
     WebChannel
+    Sql
 )
 
 qt_standard_project_setup()
@@ -74,12 +75,14 @@ target_link_libraries(WordSprint PRIVATE
     Qt6::WebEngineQuick
     Qt6::WebEngineCore
     Qt6::WebChannel
+    Qt6::Sql
 )
 
 if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
         COMMAND "${QT6_INSTALL_PREFIX}/bin/windeployqt.exe"
                 --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+                --include-plugins qsqlite
                 "$<TARGET_FILE:WordSprint>"
         COMMENT "Deploying Qt runtime DLLs with windeployqt..."
     )
