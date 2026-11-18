@@ -82,7 +82,58 @@ int main(int argc, char *argv[]) {
                     QCoreApplication::exit(-1);
             },
             Qt::QueuedConnection);
+        // Initialize SQLite database and ViewModel
+    // Determine database file path (in application directory)
+    const QString dbPath = QCoreApplication::applicationDirPath() + "/wordsprint.db";
+    auto dbMgr = std::make_shared<DatabaseManager>(dbPath);
+    // Load schema if external .sql files exist, otherwise create tables programmatically
+    const QString schemaFile = QCoreApplication::applicationDirPath() + "/schema.sql";
+    const QString seedFile = QCoreApplication::applicationDirPath() + "/seed.sql";
+    if (QFileInfo::exists(schemaFile)) {
+        QFile f(schemaFile);
+        if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            const QString sql = QTextStream(&f).readAll();
+            QSqlQuery q(dbMgr->db());
+            for (const QString &stmt : sql.split(';', Qt::SkipEmptyParts)) {
+                if (!stmt.trimmed().isEmpty()) {
+                    if (!q.exec(stmt)) {
+                        qWarning() << "Failed to exec schema stmt:" << stmt << q.lastError();
+                    }
+                }
+            }
+            f.close();
+        }
+    } else {
+        // Fallback: create minimal tables
+        QSqlQuery q(dbMgr->db());
+        q.exec("CREATE TABLE IF NOT EXISTS levels (id INTEGER PRIMARY KEY, code TEXT, name TEXT, description TEXT);");
+        q.exec("CREATE TABLE IF NOT EXISTS topics (id INTEGER PRIMARY KEY, name TEXT, description TEXT);");
+        q.exec("CREATE TABLE IF NOT EXISTS vocabularies (id INTEGER PRIMARY KEY, word TEXT, phonetic TEXT, part_of_speech TEXT, meaning_vi TEXT, definition_en TEXT, example_sentence TEXT, example_translation TEXT, level_id INTEGER, topic_id INTEGER, created_at INTEGER, FOREIGN KEY(level_id) REFERENCES levels(id), FOREIGN KEY(topic_id) REFERENCES topics(id));");
+    }
+    if (QFileInfo::exists(seedFile)) {
+        QFile f(seedFile);
+        if (f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            const QString sql = QTextStream(&f).readAll();
+            QSqlQuery q(dbMgr->db());
+            for (const QString &stmt : sql.split(';', Qt::SkipEmptyParts)) {
+                if (!stmt.trimmed().isEmpty()) {
+                    if (!q.exec(stmt)) {
+                        qWarning() << "Failed to exec seed stmt:" << stmt << q.lastError();
+                    }
+                }
+            }
+            f.close();
+        }
+    }
+    // Create repository and view model
+    auto vocabRepo = std::make_unique<VocabularyRepository>(dbMgr);
+    auto *viewModel = new VocabularyViewModel(dbMgr, nullptr);
+    // inject repository (viewModel owns repo internally)
+    // expose to QML
+    engine.rootContext()->setContextProperty(QStringLiteral("vocabModel"), viewModel);
+    // Continue loading QML
     engine.load(url);
+    return app.exec();
 
     return app.exec();
 }
