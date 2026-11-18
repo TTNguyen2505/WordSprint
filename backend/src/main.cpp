@@ -1,13 +1,13 @@
-#include <QCommandLineOption>
+﻿#include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDir>
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
-#include "viewmodel/WordViewModel.h"
 #include <QUrl>
-// #include <QtWebEngineQuick/qtwebenginequickglobal.h>
+#include "repository/WordRepository.h"
+#include "viewmodel/WordViewModel.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
@@ -15,8 +15,6 @@ int main(int argc, char *argv[]) {
                                           "--enable-zero-copy");
 
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
-
-    // QtWebEngineQuick::initialize();
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
@@ -72,9 +70,13 @@ int main(int argc, char *argv[]) {
     }
 
     QQmlApplicationEngine engine;
-    // Register WordViewModel for QML
+
+    // Initialize SQLite Repository and inject into WordViewModel
+    auto *wordRepository = new WordRepository(&engine);
+    wordRepository->initialize();
+
     qmlRegisterType<WordViewModel>("WordSprint", 1, 0, "WordViewModel");
-    engine.rootContext()->setContextProperty("wordVM", new WordViewModel(&engine));
+    engine.rootContext()->setContextProperty("wordVM", new WordViewModel(wordRepository, &engine));
     engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl}});
     engine.rootContext()->setContextProperty(QStringLiteral("initialUrl"), initialUrl);
 
