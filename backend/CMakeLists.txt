@@ -11,6 +11,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     WebEngineCore
     WebChannel
     Sql
+    Test
 )
 
 qt_standard_project_setup()
@@ -89,3 +90,15 @@ if(WIN32)
         COMMENT "Deploying Qt runtime DLLs with windeployqt..."
     )
 endif()
+
+# -------------------------------------------------
+# Unit tests
+enable_testing()
+add_executable(RepositoryTest
+    tests/RepositoryTest.cpp
+    src/DatabaseManager.cpp
+    src/VocabularyRepository.cpp
+)
+target_include_directories(RepositoryTest PRIVATE src)
+target_link_libraries(RepositoryTest PRIVATE Qt6::Test Qt6::Sql)
+add_test(NAME RepositoryTest COMMAND RepositoryTest)
