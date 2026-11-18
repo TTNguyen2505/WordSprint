@@ -313,6 +313,10 @@
 \setlength{\intextsep}{12pt}
 
 %%!
+% @brief Automatically restricts all included images to fit printable width or 75% printable height with locked aspect ratio.
+\setkeys{Gin}{max width=\linewidth, max height=0.75\textheight, keepaspectratio}
+
+%%!
 % @brief Configures 4pt symmetric cell padding and vertical centering for tables.
 % @details Overrides array strut mechanics to enforce top and bottom cell padding
 %          across single-line and multi-line paragraph cells.
@@ -343,10 +347,12 @@
 }
 
 \setlength{\tabcolsep}{5pt}
+\setlength{\arrayrulewidth}{1pt}
 
 \newcolumntype{L}[1]{>{\fontsize{13pt}{16pt}\selectfont\raggedright\arraybackslash}m{#1}}
 \newcolumntype{C}[1]{>{\fontsize{13pt}{16pt}\selectfont\centering\arraybackslash}m{#1}}
 \newcolumntype{R}[1]{>{\fontsize{13pt}{16pt}\selectfont\raggedleft\arraybackslash}m{#1}}
+\newcolumntype{N}{>{\fontsize{13pt}{16pt}\selectfont\centering\arraybackslash}c}
 \newcolumntype{Y}{>{\fontsize{13pt}{16pt}\selectfont\raggedright\arraybackslash}X}
 
 %%!
@@ -365,6 +371,7 @@
     frame=single,
     rulecolor=\color{black},
     basicstyle=\fontsize{10pt}{12pt}\ttfamily,
+    columns=fullflexible,
     lineskip=0pt,
     breaklines=true,
     breakatwhitespace=false,
