@@ -48,6 +48,7 @@ qt_add_executable(WordSprint
     src/main.cpp
     src/DatabaseManager.cpp
     src/VocabularyRepository.cpp
+    src/VocabularyViewModel.cpp
 )
 
 set_target_properties(WordSprint PROPERTIES
