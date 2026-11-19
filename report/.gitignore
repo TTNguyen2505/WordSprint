@@ -38,10 +38,13 @@
 *.lol
 *.loa
 *.lod
+*.log
 *.nav
 *.out
 *.pre
 *.snm
+*.toc
+*.txt
 *.vrb
 *.tdo
 *.sta
