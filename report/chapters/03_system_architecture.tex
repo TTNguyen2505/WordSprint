@@ -2,11 +2,81 @@
 % @file 03_system_architecture.tex
 % @brief System architecture chapter for WordSprint report.
 
-\chapter{Kiến trúc hệ thống}
+\chapter{Cài đặt chi tiết và Kỹ thuật lập trình hướng đối tượng C++}
 \label{chap:system_architecture}
 
 % -------------------------------------------------
-% Tổng quan kiến trúc
+% 3.1 Môi trường phát triển và tổ chức cấu trúc dự án
+% -------------------------------------------------
+\section{Môi trường phát triển và tổ chức cấu trúc dự án}
+\label{sec:environment_and_structure}
+
+\subsection{Công cụ và môi trường phát triển}
+\label{subsec:tools_and_environment}
+Ứng dụng WordSprint được xây dựng theo mô hình ứng dụng máy tính để bàn lai, kết hợp lớp vỏ điều khiển viết bằng ngôn ngữ C++ trên nền tảng Qt 6 với giao diện web hiện đại phát triển bằng React và Vite. Toàn bộ các công cụ, trình biên dịch và thư viện được sử dụng trong quá trình phát triển và đóng gói dự án được tổng hợp trong Bảng~\ref{tab:tools_and_libraries}.
+
+\begin{table}[h!]
+\centering
+\caption{Danh mục công cụ và thư viện sử dụng trong dự án WordSprint}
+\label{tab:tools_and_libraries}
+\begin{tabularx}{\textwidth}{|L{3.5cm}|L{3.5cm}|Y|}
+\hline
+\thcell{Thành phần} & \thcell{Công nghệ / Phiên bản} & \thcell{Vai trò trong dự án WordSprint} \\ \hline
+Ngôn ngữ lập trình lõi & C++17 & Khởi tạo ứng dụng máy tính, quản lý tùy chọn vận hành và xây dựng tầng ánh xạ dữ liệu hướng đối tượng \\ \hline
+Khung phát triển ứng dụng & Qt 6 (Core, Quick, WebEngine, WebChannel, Sql) & Thiết lập cửa sổ Qt Quick bằng QML, nhúng trình duyệt Qt WebEngine, mở kênh giao tiếp và kết nối cơ sở dữ liệu \\ \hline
+Hệ quản trị cơ sở dữ liệu & SQLite 3 & Lưu trữ cục bộ hồ sơ người chơi, cấu hình âm thanh, kho từ vựng CEFR, tiến độ vượt màn và bảng xếp hạng \\ \hline
+Công cụ quản lý biên dịch & CMake & Cấu hình quá trình biên dịch mã nguồn C++, liên kết các mô-đun Qt và điều phối đóng gói tài nguyên giao diện \\ \hline
+Công nghệ giao diện & Vite, React, JavaScript & Xây dựng giao diện Neo-brutalism, vận hành vòng lặp giải đố, đồng hồ đếm ngược và phát tài nguyên âm thanh, hình ảnh \\ \hline
+Hệ thống soạn thảo báo cáo & XeLaTeX & Biên dịch độc lập mã nguồn tài liệu báo cáo học thuật sang tệp PDF hoàn chỉnh \\ \hline
+\end{tabularx}
+\end{table}
+
+\subsection{Tổ chức cấu trúc thư mục mã nguồn WordSprint}
+\label{subsec:project_structure}
+Để đảm bảo tính mô-đun hóa và phân tách rạch ròi giữa phần vỏ ứng dụng máy tính, giao diện người dùng và tài liệu báo cáo học thuật, cây thư mục của dự án WordSprint được tổ chức thành các khu vực chức năng độc lập. Sơ đồ phân cấp các thư mục chính của dự án được bố trí như sau:
+
+\begin{lstlisting}[caption={Cấu trúc thư mục tổ chức mã nguồn dự án WordSprint}, label={lst:project_structure}]
+WordSprint/
+├── .github/                # Thiết lập cộng tác và quy trình kiểm tra trên GitHub
+├── backend/
+│   ├── qml/                 # Cửa sổ Qt Quick và vùng hiển thị giao diện web
+│   └── src/                 # Mã nguồn C++ khởi tạo ứng dụng và xử lý dữ liệu
+├── frontend/
+│   ├── public/              # Tài nguyên tĩnh phục vụ ứng dụng web
+│   ├── src/
+│   │   ├── assets/          # Hình ảnh, phông chữ và biểu tượng giao diện
+│   │   └── components/      # Các thành phần giao diện React tái sử dụng
+│   └── dist/                # Kết quả đóng gói giao diện web sinh tự động
+├── report/
+│   ├── assets/              # Hình ảnh, bảng biểu và nhận diện đồ họa của báo cáo
+│   ├── backmatter/          # Tài liệu tham khảo và phụ lục
+│   ├── chapters/            # Nội dung chi tiết các chương
+│   ├── config/              # Thiết lập định dạng LaTeX và thông tin báo cáo
+│   └── frontmatter/         # Trang bìa, lời nói đầu và mục lục
+└── build/                   # Sản phẩm biên dịch CMake và Qt sinh tự động
+\end{lstlisting}
+
+Vai trò của từng khu vực thư mục trong dự án được phân định cụ thể như sau:
+
+\begin{itemize}
+    \item \textbf{Thư mục backend}: Đóng vai trò lớp vỏ ứng dụng máy tính sử dụng C++ và Qt. Trong đó, thư mục con \code{qml} định nghĩa cửa sổ Qt Quick chứa thành phần Qt WebEngine để hiển thị giao diện web; thư mục con \code{src} chứa mã nguồn C++ khởi tạo ứng dụng, đọc tùy chọn chạy và tổ chức các lớp thực thể, kho lưu trữ cùng cầu nối giao tiếp.
+    \item \textbf{Thư mục frontend}: Chứa toàn bộ mã nguồn giao diện người dùng phát triển bằng React và Vite. Thư mục \code{public} lưu trữ các tài nguyên tĩnh phục vụ ứng dụng web như tệp âm thanh phát âm, nhạc nền; thư mục \code{src} lưu giữ tài nguyên đi cùng mã nguồn (hình ảnh gợi ý, phông chữ, biểu tượng) cùng các thành phần giao diện tái sử dụng; thư mục \code{dist} là kết quả đóng gói giao diện được sinh tự động khi biên dịch.
+    \item \textbf{Thư mục report}: Lưu trữ mã nguồn tài liệu báo cáo học thuật biên soạn bằng LaTeX, tách biệt hoàn toàn với luồng chạy của ứng dụng và phân chia rõ ràng thành phần đầu, nội dung các chương, phần cuối, cấu hình trình bày cùng tài nguyên đồ họa minh họa.
+    \item \textbf{Thư mục \code{.github} và thư mục \code{build}}: Thư mục \code{.github} lưu giữ thiết lập phục vụ cộng tác trên kho mã nguồn, trong khi thư mục \code{build} chỉ chứa các tệp trung gian và sản phẩm biên dịch được CMake và Qt sinh ra tự động.
+\end{itemize}
+
+\subsection{Cơ chế tích hợp và luồng biên dịch ứng dụng}
+\label{subsec:integration_and_build_flow}
+Quá trình phối hợp giữa mô-đun giao diện Vite React, ứng dụng nền C++ Qt 6 và tài liệu báo cáo trong dự án WordSprint được vận hành theo ba luồng làm việc độc lập:
+
+\begin{itemize}
+    \item \textbf{Chế độ phát triển}: Mô-đun giao diện React trên máy chủ phát triển Vite có thể vận hành, kiểm thử và xây dựng độc lập với ứng dụng Qt. Khi chạy tích hợp trên máy tính, ứng dụng Qt Quick khởi tạo cửa sổ Qt WebEngine và nạp trực tiếp giao diện từ máy chủ Vite để phản hồi nhanh các thay đổi trong quá trình lập trình.
+    \item \textbf{Chế độ đóng gói phát hành}: Công cụ Vite biên dịch toàn bộ mã nguồn React, JavaScript cùng tài nguyên đa phương tiện trong thư mục \code{frontend} thành bộ tệp tĩnh tại thư mục \code{dist}. Sau đó, hệ thống cấu hình CMake tiến hành đóng gói thư mục đầu ra này thành tài nguyên nội bộ đi kèm ứng dụng Qt, cho phép thành phần Qt WebEngine nạp giao diện cục bộ mà không phụ thuộc vào máy chủ web bên ngoài.
+    \item \textbf{Biên dịch tài liệu báo cáo}: Toàn bộ mã nguồn báo cáo trong thư mục \code{report} được biên dịch độc lập thông qua hệ thống XeLaTeX để xuất ra tệp tài liệu PDF hoàn chỉnh, hoàn toàn tách biệt khỏi đường chạy và gói cài đặt của phần mềm WordSprint.
+\end{itemize}
+
+% -------------------------------------------------
+% 3.2 Kiến trúc tổng thể
 % -------------------------------------------------
 \section{Kiến trúc tổng thể}
 \label{sec:overall_architecture}
@@ -32,7 +102,7 @@ Kiến trúc được mô tả bằng sơ đồ sau (được thể hiện bằn
 \end{table}
 
 % -------------------------------------------------
-% Thiết kế hướng đối tượng
+% 3.3 Thiết kế hướng đối tượng
 % -------------------------------------------------
 \section{Thiết kế hướng đối tượng}
 \label{sec:oop_design}
@@ -79,7 +149,7 @@ Kiến trúc OOP được áp dụng chủ yếu ở phía backend. Các lớp c
 \end{itemize}
 
 % -------------------------------------------------
-% Luồng xử lý nghiệp vụ
+% 3.4 Luồng xử lý nghiệp vụ và giao thức giao tiếp
 % -------------------------------------------------
 \section{Luồng xử lý nghiệp vụ và giao thức giao tiếp}
 \label{sec:workflow}
@@ -123,7 +193,7 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
 \end{lstlisting}
 
 % -------------------------------------------------
-% Lưu trữ dữ liệu từ vựng và kết quả
+% 3.5 Lưu trữ dữ liệu
 % -------------------------------------------------
 \section{Lưu trữ dữ liệu}
 \label{sec:data_storage}
@@ -134,10 +204,8 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
 \end{itemize}
 
 % -------------------------------------------------
-% Kết luận kiến trúc
+% 3.6 Kết luận
 % -------------------------------------------------
 \section{Kết luận}
 \label{sec:architecture_conclusion}
 Kiến trúc WordSprint tách rời rõ ràng giữa backend C++/Qt và frontend React, cho phép tận dụng ưu điểm hiệu năng gốc và hệ sinh thái web. Thiết kế OOP và các mẫu thiết kế (Factory Method, Singleton cho \code{ScoreManager}) giúp mở rộng dễ dàng, trong khi giao thức JSON/QtWebChannel đảm bảo truyền thông tin nhanh chóng và bảo trì tốt.
-
-
