@@ -6,13 +6,13 @@
 \textit{Lập trình hướng đối tượng} là phương pháp thiết kế phần mềm dựa trên các ``đối tượng'' mô tả dữ liệu và hành vi. Ở dự án WordSprint, mô‑đun backend được triển khai bằng C++20 và tuân thủ nguyên tắc OOP:
 \begin{itemize}
     \item Encapsulation: các thành phần giao diện người dùng và logic trò chơi được đóng gói trong các lớp riêng biệt.
-    \item Inheritance: các lớp câu đố như \texttt{ScramblePuzzle}, \texttt{FillInPuzzle} kế thừa từ lớp trừu tượng \texttt{BasePuzzle} để chia sẻ giao diện và các phương thức chung.
-    \item Polymorphism: hàm \texttt{processAnswer()} được khai báo ảo trong \texttt{BasePuzzle} và được ghi đè trong các lớp con, cho phép thực thi đa hình tại thời gian chạy.
+    \item Inheritance: các lớp câu đố như \code{ScramblePuzzle}, \code{FillInPuzzle} kế thừa từ lớp trừu tượng \code{BasePuzzle} để chia sẻ giao diện và các phương thức chung.
+    \item Polymorphism: hàm \code{process\allowbreak{}Answer()} được khai báo ảo trong \code{Base\allowbreak{}Puzzle} và được ghi đè trong các lớp con, cho phép thực thi đa hình tại thời gian chạy.
 \end{itemize}
 
 \section{Ngôn ngữ C++ và CMake}
 \label{sec:cpp_cmake}
-Backend sử dụng C++20 để khai thác các tính năng hiện đại như \texttt{concepts}, \texttt{coroutines} (khi mở rộng), và \texttt{constexpr} để tối ưu hoá thời gian biên dịch.  Các tùy chọn biên dịch được định nghĩa trong \texttt{CMakeLists.txt}:
+Backend sử dụng C++20 để khai thác các tính năng hiện đại như \code{concepts}, \code{coroutines} (khi mở rộng), và \code{constexpr} để tối ưu hoá thời gian biên dịch.  Các tùy chọn biên dịch được định nghĩa trong \code{CMakeLists.txt}:
 \begin{lstlisting}
 cmake_minimum_required(VERSION 3.22)
 project(WordSprint LANGUAGES CXX)
@@ -20,16 +20,16 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 add_subdirectory(backend)
 \end{lstlisting}
-CMake cung cấp khả năng phát hiện tự động vị trí Qt SDK (đường dẫn \texttt{C:/Qt/6.11.3/msvc2022\_64}) và tạo ra target \texttt{WordSprint} liên kết với \texttt{Qt6::Core}, \texttt{Qt6::Gui}, \texttt{Qt6::Qml}, \texttt{Qt6::WebEngineQuick}.
+CMake cung cấp khả năng phát hiện tự động vị trí Qt SDK (đường dẫn \code{C:/\allowbreak{}Qt/\allowbreak{}6.11.\allowbreak{}3/\allowbreak{}msvc2022\_\allowbreak{}64}) và tạo ra target \code{WordSprint} liên kết với \code{Qt6::Core}, \code{Qt6::Gui}, \code{Qt6::Qml}, \code{Qt6::WebEngineQuick}.
 
 \section{Giao diện người dùng}
 \label{sec:frontend}
-Phần giao diện được xây dựng bằng React 19 và công cụ xây dựng nhanh Vite.  Kiến trúc dự án frontend tuân thủ mô hình component‑based, mỗi màn hình trò chơi được biểu diễn bằng một component React độc lập (\texttt{Game.jsx}, \texttt{ScoreBoard.jsx}).  Tailwind CSS 4 được tích hợp để tạo kiểu nhanh chóng, hỗ trợ thiết kế \textit{neo‑brutalism} với màu sắc và đường viền mạnh mẽ.
+Phần giao diện được xây dựng bằng React 19 và công cụ xây dựng nhanh Vite.  Kiến trúc dự án frontend tuân thủ mô hình component‑based, mỗi màn hình trò chơi được biểu diễn bằng một component React độc lập (\code{Game.jsx}, \code{ScoreBoard.jsx}).  Tailwind CSS 4 được tích hợp để tạo kiểu nhanh chóng, hỗ trợ thiết kế \textit{neo‑brutalism} với màu sắc và đường viền mạnh mẽ.
 
 \section{Cơ chế giao tiếp giữa backend và frontend}
 \label{sec:communication}
-Qt WebEngineView được sử dụng để nhúng ứng dụng web React vào ứng dụng desktop Qt. Ứng dụng khởi tạo một \texttt{QUrl} tới URL Vite dev server (\texttt{http://localhost:5173}) hoặc tới file tĩnh \texttt{index.html} đã được build. Trong \texttt{main.cpp}:
-Frontend và backend trao đổi dữ liệu thông qua WebChannel (\texttt{QtWebChannel}) – các đối tượng C++ được đăng ký vào context, cho phép JavaScript gọi các phương thức C++.
+Qt WebEngineView được sử dụng để nhúng ứng dụng web React vào ứng dụng desktop Qt. Ứng dụng khởi tạo một \code{QUrl} tới URL Vite dev server (\code{http:\allowbreak{}//\allowbreak{}localhost:\allowbreak{}5173}) hoặc tới file tĩnh \code{index.html} đã được build. Trong \code{main.cpp}:
+Frontend và backend trao đổi dữ liệu thông qua WebChannel (\code{QtWebChannel}) – các đối tượng C++ được đăng ký vào context, cho phép JavaScript gọi các phương thức C++.
 
 \section{Thiết kế tương tác với biểu đồ tuần tự}
 \label{sec:interaction_design}
@@ -42,12 +42,12 @@ Frontend và backend trao đổi dữ liệu thông qua WebChannel (\texttt{QtWe
 Luồng tương tác đầu tiên mô tả quá trình hệ thống chuẩn bị dữ liệu đầu vào khi người chơi chọn một màn chơi hợp lệ từ bản đồ chủ đề và cấp độ CEFR để bắt đầu giải đố. Toàn bộ quá trình truy xuất và đóng gói dữ liệu diễn ra theo trình tự sau:
 
 \begin{enumerate}
-    \item Người chơi chọn một màn chơi ở trạng thái đã mở khóa trên giao diện React; tầng giao diện gửi yêu cầu bất đồng bộ \texttt{startStage} kèm mã định danh màn chơi thông qua cầu nối QWebChannel tới đối tượng điều phối \texttt{BridgeController} ở tầng C++.
-    \item Đối tượng \texttt{BridgeController} gọi phương thức \texttt{findStageById} của lớp \texttt{StageRepository} để truy vấn cấu hình chi tiết của màn chơi từ cơ sở dữ liệu SQLite, bao gồm mã chủ đề, cấp độ CEFR, giới hạn thời gian và số lượng câu hỏi quy định.
-    \item Sau khi nhận về đối tượng thực thể \texttt{Stage} chứa đầy đủ thông số màn chơi, \texttt{BridgeController} tiếp tục gọi phương thức \texttt{fetchRandomWords} của lớp \texttt{WordRepository} với các tham số về chủ đề, cấp độ và số lượng câu hỏi cần lấy.
-    \item Lớp \texttt{WordRepository} thực thi câu truy vấn lấy ngẫu nhiên tập bản ghi từ bảng kho từ vựng, ánh xạ từng bản ghi thành các đối tượng thực thể \texttt{WordItem} (chứa từ gốc, văn bản gợi ý, đường dẫn hình ảnh và đường dẫn tệp âm thanh) rồi trả danh sách này về cho \texttt{BridgeController}.
-    \item Đối tượng \texttt{BridgeController} duyệt qua danh sách thực thể \texttt{WordItem}, gọi phương thức \texttt{toJson} trên từng đối tượng để tuần tự hóa thành mảng dữ liệu JSON và gửi phản hồi ngược lại tầng giao diện React qua QWebChannel.
-    \item Giao diện React tiếp nhận mảng dữ liệu từ vựng, tự động sinh hình thức câu đố tương ứng cho từng từ (xáo trộn chữ cái, ẩn ký tự hoặc thiết lập khung nghe phát âm), khởi tạo bảng điều khiển HUD với câu đầu tiên ở trạng thái \texttt{Current} cùng các câu còn lại ở trạng thái \texttt{Queued} và kích hoạt đồng hồ đếm ngược.
+    \item Người chơi chọn một màn chơi ở trạng thái đã mở khóa trên giao diện React; tầng giao diện gửi yêu cầu bất đồng bộ \code{startStage} kèm mã định danh màn chơi thông qua cầu nối QWebChannel tới đối tượng điều phối \code{BridgeController} ở tầng C++.
+    \item Đối tượng \code{Bridge\allowbreak{}Controller} gọi phương thức \code{findStageById} của lớp \code{Stage\allowbreak{}Repository} để truy vấn cấu hình chi tiết của màn chơi từ cơ sở dữ liệu SQLite, bao gồm mã chủ đề, cấp độ CEFR, giới hạn thời gian và số lượng câu hỏi quy định.
+    \item Sau khi nhận về đối tượng thực thể \code{Stage} chứa đầy đủ thông số màn chơi, \code{BridgeController} tiếp tục gọi phương thức \code{fetchRandomWords} của \code{WordRepository} với các tham số về chủ đề, cấp độ và số lượng câu hỏi cần lấy.
+    \item Lớp \code{WordRepository} thực thi câu truy vấn lấy ngẫu nhiên tập bản ghi từ bảng kho từ vựng, ánh xạ từng bản ghi thành các đối tượng thực thể \code{WordItem} (chứa từ gốc, văn bản gợi ý, đường dẫn hình ảnh và đường dẫn tệp âm thanh) rồi trả danh sách này về cho \code{BridgeController}.
+    \item Đối tượng \code{BridgeController} duyệt qua danh sách thực thể \code{WordItem}, gọi phương thức \code{toJson} trên từng đối tượng để tuần tự hóa thành mảng dữ liệu JSON và gửi phản hồi ngược lại tầng giao diện React qua QWebChannel.
+    \item Giao diện React tiếp nhận mảng dữ liệu từ vựng, tự động sinh hình thức câu đố tương ứng cho từng từ (xáo trộn chữ cái, ẩn ký tự hoặc thiết lập khung nghe phát âm), khởi tạo bảng điều khiển HUD với câu đầu tiên ở trạng thái \code{Current} cùng các câu còn lại ở trạng thái \code{Queued} và kích hoạt đồng hồ đếm ngược.
 \end{enumerate}
 
 \begin{figure}[!ht]
@@ -63,12 +63,12 @@ Luồng tương tác đầu tiên mô tả quá trình hệ thống chuẩn bị
 Luồng tương tác thứ hai mô tả quá trình lưu trữ kết quả và cập nhật lộ trình mở khóa sau khi người chơi xác nhận đúng toàn bộ các câu hỏi thông qua nút Submit trước khi đồng hồ đếm ngược kết thúc. Các bước truyền thông điệp diễn ra như sau:
 
 \begin{enumerate}
-    \item Khi câu hỏi cuối cùng trên giao diện React chuyển sang trạng thái \texttt{Solved}, tầng giao diện dừng đồng hồ đếm ngược, tổng hợp điểm số đạt được cùng thời gian hoàn thành thực tế và gọi phương thức \texttt{completeStage} trên \texttt{BridgeController} kèm thông tin mã người chơi và mã màn chơi.
-    \item Đối tượng \texttt{BridgeController} khởi tạo một đối tượng thực thể \texttt{StageRecord} mang thông tin điểm số và thời gian hoàn thành của lượt chơi vừa kết thúc, sau đó chuyển cho lớp \texttt{RecordRepository} thông qua phương thức \texttt{insertRecord} để ghi nhận vào bảng lịch sử lượt chơi trong cơ sở dữ liệu SQLite.
-    \item Tiếp theo, \texttt{BridgeController} truy xuất đối tượng tiến độ hiện tại của người chơi ở màn chơi này thông qua lớp \texttt{ProgressRepository}.
-    \item Tại đây, \texttt{BridgeController} sử dụng toán tử nạp chồng cộng gán trên đối tượng \texttt{UserProgress} với tham số là đối tượng \texttt{StageRecord} mới; phép toán này tự động đánh dấu trạng thái hoàn thành màn chơi, đồng thời đối chiếu để cập nhật lại điểm cao nhất hoặc thời gian hoàn thành ngắn nhất nếu người chơi vừa phá kỷ lục cá nhân.
-    \item Đối tượng \texttt{BridgeController} gọi phương thức \texttt{saveProgress} của \texttt{ProgressRepository} để lưu trạng thái tiến độ mới xuống cơ sở dữ liệu, đồng thời gọi tiếp phương thức \texttt{unlockNextStage} nhằm mở khóa màn chơi có thứ tự kế tiếp cho hồ sơ người chơi hiện tại.
-    \item Cuối cùng, \texttt{BridgeController} đóng gói kết quả cập nhật thành đối tượng JSON gửi về cho giao diện React để hiển thị hộp thoại tổng kết chiến thắng. Trong trường hợp người chơi hết thời gian hoặc thoát ngang khi chưa giải xong toàn bộ câu hỏi, giao diện React không kích hoạt lời gọi \texttt{completeStage} nhằm giữ cho dữ liệu tiến độ và lịch sử kỷ lục luôn toàn vẹn.
+    \item Khi câu hỏi cuối cùng trên giao diện React chuyển sang trạng thái \code{Solved}, tầng giao diện dừng đồng hồ đếm ngược, tổng hợp điểm số đạt được cùng thời gian hoàn thành thực tế và gọi phương thức \code{completeStage} trên \code{BridgeController} kèm thông tin mã người chơi và mã màn chơi.
+    \item Đối tượng \code{BridgeController} khởi tạo một đối tượng thực thể \code{StageRecord} mang thông tin điểm số và thời gian hoàn thành của lượt chơi vừa kết thúc, sau đó chuyển cho lớp \code{RecordRepository} thông qua phương thức \code{insertRecord} để ghi nhận vào bảng lịch sử lượt chơi trong cơ sở dữ liệu SQLite.
+    \item Tiếp theo, \code{BridgeController} truy xuất đối tượng tiến độ hiện tại của người chơi ở màn chơi này thông qua lớp \code{ProgressRepository}.
+    \item Tại đây, \code{BridgeController} sử dụng toán tử nạp chồng cộng gán trên đối tượng \code{UserProgress} với tham số là đối tượng \code{StageRecord} mới; phép toán này tự động đánh dấu trạng thái hoàn thành màn chơi, đồng thời đối chiếu để cập nhật lại điểm cao nhất hoặc thời gian hoàn thành ngắn nhất nếu người chơi vừa phá kỷ lục cá nhân.
+    \item Đối tượng \code{BridgeController} gọi phương thức \code{saveProgress} của \code{ProgressRepository} để lưu trạng thái tiến độ mới xuống cơ sở dữ liệu, đồng thời gọi tiếp phương thức \code{unlockNextStage} nhằm mở khóa màn chơi có thứ tự kế tiếp cho hồ sơ người chơi hiện tại.
+    \item Cuối cùng, \code{BridgeController} đóng gói kết quả cập nhật thành đối tượng JSON gửi về cho giao diện React để hiển thị hộp thoại tổng kết chiến thắng. Trong trường hợp người chơi hết thời gian hoặc thoát ngang khi chưa giải xong toàn bộ câu hỏi, giao diện React không kích hoạt lời gọi \code{completeStage} nhằm giữ cho dữ liệu tiến độ và lịch sử kỷ lục luôn toàn vẹn.
 \end{enumerate}
 
 \begin{figure}[!ht]
@@ -77,6 +77,7 @@ Luồng tương tác thứ hai mô tả quá trình lưu trữ kết quả và c
     \caption{Biểu đồ tuần tự luồng hoàn thành màn chơi và cập nhật tiến độ}
     \label{fig:seq_complete_stage}
 \end{figure}
+\FloatBarrier
 
 \section{Thiết kế cơ sở dữ liệu}
 \label{sec:database_design}
@@ -89,16 +90,16 @@ Hệ thống sử dụng hệ quản trị cơ sở dữ liệu quan hệ nhúng
 Các thực thể trong cơ sở dữ liệu được tổ chức liên kết chặt chẽ nhằm phục vụ đồng thời hai nhóm nghiệp vụ chính là lưu trữ kho học liệu từ vựng và quản lý dữ liệu cá nhân hóa của từng người chơi:
 
 \begin{itemize}
-    \item Quan hệ một‑một giữa bảng \texttt{users} và bảng \texttt{user\_settings}: Mỗi hồ sơ người chơi sở hữu duy nhất một bản ghi thiết lập âm thanh riêng biệt thông qua khóa chính đồng thời là khóa ngoại \texttt{user\_id}. Khi một hồ sơ người chơi bị xóa khỏi hệ thống, bản ghi thiết lập tương ứng cũng tự động được xóa theo.
-    \item Quan hệ một‑nhiều giữa bảng \texttt{topics} với hai bảng \texttt{stages} và \texttt{word\_pool}: Mỗi chủ đề từ vựng phân loại nhiều màn chơi theo các cấp độ CEFR khác nhau và quản lý một kho từ vựng dùng chung cho toàn bộ các màn thuộc chủ đề đó.
-    \item Quan hệ nhiều‑nhiều giữa bảng \texttt{users} và bảng \texttt{stages} thông qua hai bảng trung gian: Bảng \texttt{user\_progress} sử dụng khóa chính phức hợp gồm cặp mã người chơi và mã màn chơi để theo dõi trạng thái mở khóa, trạng thái hoàn thành cùng kỷ lục tốt nhất của từng người chơi trên mỗi màn. Trong khi đó, bảng \texttt{stage\_records} lưu lại lịch sử chi tiết của mọi lượt chơi hoàn thành thành công để phục vụ thống kê và xếp hạng.
+    \item Quan hệ một‑một giữa bảng \code{users} và bảng \code{user\_settings}: Mỗi hồ sơ người chơi sở hữu duy nhất một bản ghi thiết lập âm thanh riêng biệt thông qua khóa chính đồng thời là khóa ngoại \code{user\_id}. Khi một hồ sơ người chơi bị xóa khỏi hệ thống, bản ghi thiết lập tương ứng cũng tự động được xóa theo.
+    \item Quan hệ một‑nhiều giữa bảng \code{topics} với hai bảng \code{stages} và \code{word\_pool}: Mỗi chủ đề từ vựng phân loại nhiều màn chơi theo các cấp độ CEFR khác nhau và quản lý một kho từ vựng dùng chung cho toàn bộ các màn thuộc chủ đề đó.
+    \item Quan hệ nhiều‑nhiều giữa bảng \code{users} và bảng \code{stages} thông qua hai bảng trung gian: Bảng \code{user\_progress} sử dụng khóa chính phức hợp gồm cặp mã người chơi và mã màn chơi để theo dõi trạng thái mở khóa, trạng thái hoàn thành cùng kỷ lục tốt nhất của từng người chơi trên mỗi màn. Trong khi đó, bảng \code{stage\_records} lưu lại lịch sử chi tiết của mọi lượt chơi hoàn thành thành công để phục vụ thống kê và xếp hạng.
 \end{itemize}
 
 Để tối ưu tốc độ truy xuất khi kho từ vựng mở rộng hoặc khi người chơi mở bảng xếp hạng, cơ sở dữ liệu thiết lập hai chỉ mục tìm kiếm quan trọng:
 
 \begin{itemize}
-    \item Chỉ mục phức hợp trên bảng \texttt{word\_pool} gồm hai cột \texttt{topic\_id} và \texttt{cefr\_level} giúp lọc nhanh danh sách từ vựng ứng viên trước khi chọn ngẫu nhiên bộ câu hỏi lúc bắt đầu màn chơi.
-    \item Chỉ mục phức hợp trên bảng \texttt{stage\_records} gồm các cột \texttt{stage\_id}, \texttt{score} (sắp xếp giảm dần) và \texttt{completion\_time} (sắp xếp tăng dần) giúp truy vấn tức thì danh sách người chơi đứng đầu từng màn mà không cần sắp xếp lại toàn bộ bảng.
+    \item Chỉ mục phức hợp trên bảng \code{word\_pool} gồm hai cột \code{topic\_id} và \code{cefr\_level} giúp lọc nhanh danh sách từ vựng ứng viên trước khi chọn ngẫu nhiên bộ câu hỏi lúc bắt đầu màn chơi.
+    \item Chỉ mục phức hợp trên bảng \code{stage\_records} gồm các cột \code{stage\_id}, \code{score} (sắp xếp giảm dần) và \code{completion\_time} (sắp xếp tăng dần) giúp truy vấn tức thì danh sách người chơi đứng đầu từng màn mà không cần sắp xếp lại toàn bộ bảng.
 \end{itemize}
 
 \begin{figure}[!ht]
@@ -142,7 +143,7 @@ created\_at & TEXT & Không rỗng, mặc định thời gian hiện tại & Th�
 \thcell{Tên cột} & \thcell{Kiểu dữ liệu} & \thcell{Khóa và ràng buộc} & \thcell{Mô tả} \\
 \hline
 \endhead
-user\_id & INTEGER & Khóa chính, khóa ngoại \texttt{users(user\_id)} & Mã hồ sơ người chơi sở hữu thiết lập âm thanh \\
+user\_id & INTEGER & Khóa chính, khóa ngoại \code{users(user\_id)} & Mã hồ sơ người chơi sở hữu thiết lập âm thanh \\
 \hline
 bgm\_enabled & INTEGER & Không rỗng, mặc định 1 & Trạng thái bật nhạc nền (1 là bật, 0 là tắt) \\
 \hline
@@ -188,7 +189,7 @@ description & TEXT & Cho phép rỗng & Mô tả ngắn gọn nội dung từ v�
 \endhead
 stage\_id & INTEGER & Khóa chính, tự động tăng & Mã định danh duy nhất của màn chơi \\
 \hline
-topic\_id & INTEGER & Không rỗng, khóa ngoại \texttt{topics(topic\_id)} & Mã chủ đề mà màn chơi trực thuộc \\
+topic\_id & INTEGER & Không rỗng, khóa ngoại \code{topics(topic\_id)} & Mã chủ đề mà màn chơi trực thuộc \\
 \hline
 cefr\_level & TEXT & Không rỗng, A1--C2 & Cấp độ từ vựng chuẩn CEFR áp dụng cho màn chơi \\
 \hline
@@ -214,7 +215,7 @@ question\_count & INTEGER & Không rỗng, mặc định 10 & Số lượng câu
 \endhead
 word\_id & INTEGER & Khóa chính, tự động tăng & Mã định danh duy nhất của mục từ vựng & \\
 \hline
-topic\_id & INTEGER & Không rỗng, khóa ngoại \texttt{topics(\allowbreak topic\_id)} & Mã chủ đề phân loại từ vựng & \\
+topic\_id & INTEGER & Không rỗng, khóa ngoại \code{topics(\allowbreak topic\_id)} & Mã chủ đề phân loại từ vựng & \\
 \hline
 cefr\_level & TEXT & Không rỗng, A1--C2 & Cấp độ khó của từ vựng & \\
 \hline
@@ -240,9 +241,9 @@ audio\_path & TEXT & Không rỗng & Đường dẫn tới tệp âm thanh phát
 \thcell{Tên cột} & \thcell{Kiểu dữ liệu} & \thcell{Khóa và ràng buộc} & \thcell{Mặc định} & \thcell{Mô tả} \\
 \hline
 \endhead
-user\_id & INTEGER & Khóa chính phức hợp, khóa ngoại \texttt{users(\allowbreak user\_id)} & & Mã hồ sơ người chơi được theo dõi tiến độ \\
+user\_id & INTEGER & Khóa chính phức hợp, khóa ngoại \code{users(\allowbreak user\_id)} & & Mã hồ sơ người chơi được theo dõi tiến độ \\
 \hline
-stage\_id & INTEGER & Khóa chính phức hợp, khóa ngoại \texttt{stages(\allowbreak stage\_id)} & & Mã màn chơi tương ứng với tiến độ \\
+stage\_id & INTEGER & Khóa chính phức hợp, khóa ngoại \code{stages(\allowbreak stage\_id)} & & Mã màn chơi tương ứng với tiến độ \\
 \hline
 is\_unlocked & INTEGER & Không rỗng, mặc định 0 & 0 & Trạng thái mở khóa (1 = mở, 0 = khóa) \\
 \hline
@@ -268,9 +269,9 @@ best\_time & INTEGER & Cho phép rỗng & & Thời gian ngắn nhất (giây) ho
 \endhead
 record\_id & INTEGER & Khóa chính, tự động tăng & & Mã định danh duy nhất của bản ghi lịch sử lượt chơi \\
 \hline
-user\_id & INTEGER & Không rỗng, khóa ngoại \texttt{users(\allowbreak user\_id)} & & Mã hồ sơ người chơi thực hiện lượt chơi \\
+user\_id & INTEGER & Không rỗng, khóa ngoại \code{users(\allowbreak user\_id)} & & Mã hồ sơ người chơi thực hiện lượt chơi \\
 \hline
-stage\_id & INTEGER & Không rỗng, khóa ngoại \texttt{stages(\allowbreak stage\_id)} & & Mã màn chơi được hoàn thành \\
+stage\_id & INTEGER & Không rỗng, khóa ngoại \code{stages(\allowbreak stage\_id)} & & Mã màn chơi được hoàn thành \\
 \hline
 score & INTEGER & Không rỗng & & Tổng điểm số đạt được trong lượt chơi \\
 \hline
@@ -279,3 +280,5 @@ completion\_time & INTEGER & Không rỗng & & Tổng thời gian thực tế (g
 played\_at & TEXT & Không rỗng, mặc định thời gian hiện tại & & Thời điểm người chơi hoàn thành lượt chơi \\
 \hline
 \end{xltabular}
+
+

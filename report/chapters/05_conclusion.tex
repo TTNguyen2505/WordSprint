@@ -1,58 +1,60 @@
-﻿%!
+%!
 % @file 05_conclusion.tex
 % @brief Conclusion chapter for WordSprint report.
 
-\chapter{Kết luận}
+\chapter{K?t lu?n}
 \label{chap:conclusion}
 
 % -------------------------------------------------
-% 5.1 Kết quả đạt được
+% 5.1 K?t qu? d?t du?c
 % -------------------------------------------------
-\section{Kết quả đạt được}
+\section{K?t qu? d?t du?c}
 \label{sec:results}
-Dựa trên mục tiêu đề ra trong \ref{sec:objectives} của Chương \ref{chap:introduction}, dự án WordSprint đã hoàn thiện các tính năng cốt lõi sau:
+D?a tr�n m?c ti�u d? ra trong \ref{sec:objectives} c?a Chuong \ref{chap:introduction}, d? �n WordSprint d� ho�n thi?n c�c t�nh nang c?t l�i sau:
 \begin{itemize}
-    \item \textbf{Các loại câu đố đa dạng}: Scramble, Fill‑in‑the‑Blank và Audio được triển khai đầy đủ, đáp ứng yêu cầu cung cấp công cụ học từ vựng đa dạng cho người dùng ở mọi trình độ CEFR.
-    \item \textbf{Quản lý người dùng và hồ sơ}: Hỗ trợ đa hồ sơ trên cùng máy tính, lưu trữ tiến độ, điểm số và thành tựu dưới dạng file JSON, đáp ứng mục tiêu "hỗ trợ người dùng ở mọi trình độ".
-    \item \textbf{Hệ thống tính điểm và xếp hạng}: Công thức điểm \eqref{eq:score} được áp dụng, điểm được tổng hợp và hiển thị bảng xếp hạng nội bộ, thực hiện mục tiêu "đánh giá hiệu quả học tập".
-    \item \textbf{Kiến trúc hai lớp rõ ràng}: Backend được xây dựng bằng C++20/Qt6, Frontend bằng React + Vite + Tailwind CSS, tương tác qua QtWebChannel. Kiến trúc này mang lại lợi thế về hiệu năng (ứng dụng gốc) và khả năng mở rộng (có thể thay thế frontend bằng bất kỳ SPA nào).
-    \item \textbf{Quy trình xây dựng và triển khai tự động}: Sử dụng CMake cho backend, Vite cho frontend, đồng thời cung cấp các script build và chạy debug, đáp ứng yêu cầu "cài đặt, biên dịch, khởi chạy hệ thống thực tế".
-    \item \textbf{Kiểm thử toàn diện}: Các kịch bản kiểm thử chức năng và biên đã được thực hiện và ghi lại trong Bảng \ref{tab:test_results}, cho thấy tất cả các chức năng chính hoạt động ổn định.
+    \item \textbf{C�c lo?i c�u d? da d?ng}: Scramble, Fill-in-the-Blank v� Audio du?c tri?n khai d?y d?, d�p ?ng y�u c?u cung c?p c�ng c? h?c t? v?ng da d?ng cho ngu?i d�ng ? m?i tr�nh d? CEFR.
+    \item \textbf{Qu?n l� ngu?i d�ng v� h? so}: H? tr? da h? so tr�n c�ng m�y t�nh, luu tr? ti?n d?, di?m s? v� th�nh t?u du?i d?ng file JSON, d�p ?ng m?c ti�u "h? tr? ngu?i d�ng ? m?i tr�nh d?".
+    \item \textbf{H? th?ng t�nh di?m v� x?p h?ng}: C�ng th?c di?m \eqref{eq:score} du?c �p d?ng, di?m du?c t?ng h?p v� hi?n th? b?ng x?p h?ng n?i b?, th?c hi?n m?c ti�u "d�nh gi� hi?u qu? h?c t?p".
+    \item \textbf{Ki?n tr�c hai l?p r� r�ng}: Backend du?c x�y d?ng b?ng C++20/Qt6, Frontend b?ng React?+?Vite?+?Tailwind CSS, tuong t�c qua QtWebChannel. Ki?n tr�c n�y mang l?i l?i th? v? hi?u nang (?ng d?ng g?c) v� kh? nang m? r?ng (c� th? thay th? frontend b?ng b?t k? SPA n�o).
+    \item \textbf{Quy tr�nh x�y d?ng v� tri?n khai t? d?ng}: S? d?ng CMake cho backend, Vite cho frontend, d?ng th?i cung c?p c�c script build v� ch?y debug, d�p ?ng y�u c?u "c�i d?t, bi�n d?ch, kh?i ch?y h? th?ng th?c t?".
+    \item \textbf{Ki?m th? to�n di?n}: C�c k?ch b?n ki?m th? ch?c nang v� bi�n d� du?c th?c hi?n v� ghi l?i trong B?ng \ref{tab:test_results}, cho th?y t?t c? c�c ch?c nang ch�nh ho?t d?ng ?n d?nh.
 \end{itemize}
 
-Những kết quả trên cho thấy WordSprint không chỉ đáp ứng đầy đủ các mục tiêu chức năng mà còn thể hiện ưu điểm về:
+Nh?ng k?t qu? tr�n cho th?y WordSprint kh�ng ch? d�p ?ng d?y d? c�c m?c ti�u ch?c nang m� c�n th? hi?n uu di?m v?:
 \begin{itemize}
-    \item \textit{Kiến trúc mô‑đun}: Tách biệt rõ ràng giữa backend và frontend, giúp phát triển đồng thời và dễ dàng mở rộng.
-    \item \textit{Thiết kế OOP}: Áp dụng các nguyên tắc Encapsulation, Inheritance và Polymorphism, cùng mẫu Factory Method cho việc tạo puzzle, tạo nền tảng cho việc thêm các loại trò chơi mới mà không ảnh hưởng đến code hiện tại.
-    \item \textit{Hiệu năng}: Ứng dụng desktop được biên dịch native, tiêu thụ tài nguyên thấp hơn so với các giải pháp Electron.
+    \item \textit{Ki?n tr�c m�-dun}: T�ch bi?t r� r�ng gi?a backend v� frontend, gi�p ph�t tri?n d?ng th?i v� d? d�ng m? r?ng.
+    \item \textit{Thi?t k? OOP}: �p d?ng c�c nguy�n t?c Encapsulation, Inheritance v� Polymorphism, c�ng m?u Factory Method cho vi?c t?o puzzle, t?o n?n t?ng cho vi?c th�m c�c lo?i tr� choi m?i m� kh�ng ?nh hu?ng d?n code hi?n t?i.
+    \item \textit{Hi?u nang}: ?ng d?ng desktop du?c bi�n d?ch native, ti�u th? t�i nguy�n th?p hon so v?i c�c gi?i ph�p Electron.
 \end{itemize}
 
 % -------------------------------------------------
-% 5.2 Hạn chế và hướng phát triển
+% 5.2 H?n ch? v� hu?ng ph�t tri?n
 % -------------------------------------------------
-\section{Hạn chế và hướng phát triển}
+\section{H?n ch? v� hu?ng ph�t tri?n}
 \label{sec:limitations}
-Mặc dù đã đạt được nhiều kết quả, phiên bản hiện tại vẫn còn một số hạn chế:
+M?c d� d� d?t du?c nhi?u k?t qu?, phi�n b?n hi?n t?i v?n c�n m?t s? h?n ch?:
 \begin{itemize}
-    \item \textbf{Lưu trữ dữ liệu còn đơn giản}: Tất cả dữ liệu (từ vựng, hồ sơ, điểm) được lưu dưới dạng JSON cục bộ, chưa có cơ chế đồng bộ đa thiết bị hoặc sao lưu đám mây.
-    \item \textbf{Số lượng puzzle hạn chế}: Chỉ hỗ trợ ba loại puzzle cơ bản; chưa có các dạng nâng cao như “Word Search”, “Crossword” hoặc “Multiplayer challenge”.
-    \item \textbf{Thiếu hỗ trợ đa ngôn ngữ}: Giao diện và nội dung hiện chỉ hỗ trợ tiếng Anh; chưa có cơ chế quốc tế hoá (i18n).
-    \item \textbf{Audio chưa tối ưu}: Âm thanh được tải từ file tĩnh, chưa có tính năng điều chỉnh tốc độ phát hay hỗ trợ đa nguồn âm thanh.
-    \item \textbf{Giao diện chưa hoàn thiện}: Mặc dù sử dụng Tailwind CSS, một số thành phần UI vẫn còn mẫu thử nghiệm và chưa đáp ứng đầy đủ tiêu chuẩn truy cập (accessibility).
-    \item \textbf{Kiểm thử phần mềm chưa tự động toàn diện}: Các test backend hiện chỉ là unit test cơ bản; chưa có hệ thống CI/CD để tự động chạy toàn bộ bộ test trên mỗi commit.
+    \item \textbf{Luu tr? d? li?u c�n don gi?n}: T?t c? d? li?u (t? v?ng, h? so, di?m) du?c luu du?i d?ng JSON c?c b?, chua c� co ch? d?ng b? da thi?t b? ho?c sao luu d�m m�y.
+    \item \textbf{S? lu?ng puzzle h?n ch?}: Ch? h? tr? ba lo?i puzzle co b?n; chua c� c�c d?ng n�ng cao nhu �Word Search�, �Crossword� ho?c �Multiplayer challenge�.
+    \item \textbf{Thi?u h? tr? da ng�n ng?}: Giao di?n v� n?i dung hi?n ch? h? tr? ti?ng Anh; chua c� co ch? qu?c t? ho� (i18n).
+    \item \textbf{Audio chua t?i uu}: �m thanh du?c t?i t? file tinh, chua c� t�nh nang di?u ch?nh t?c d? ph�t hay h? tr? da ngu?n �m thanh.
+    \item \textbf{Giao di?n chua ho�n thi?n}: M?c d� s? d?ng Tailwind CSS, m?t s? th�nh ph?n UI v?n c�n m?u th? nghi?m v� chua d�p ?ng d?y d? ti�u chu?n truy c?p (accessibility).
+    \item \textbf{Ki?m th? ph?n m?m chua t? d?ng to�n di?n}: C�c test backend hi?n ch? l� unit test co b?n; chua c� h? th?ng CI/CD d? t? d?ng ch?y to�n b? b? test tr�n m?i commit.
 \end{itemize}
 
-\subsection{Hướng phát triển trong tương lai}
+\subsection{Hu?ng ph�t tri?n trong tuong lai}
 \label{subsec:future_work}
-Dựa trên các hạn chế trên, chúng tôi đề xuất các công việc mở rộng khả thi:
+D?a tr�n c�c h?n ch? tr�n, ch�ng t�i d? xu?t c�c c�ng vi?c m? r?ng kh? thi:
 \begin{enumerate}
-    \item \textbf{Triển khai backend dữ liệu}: Áp dụng SQLite hoặc một server RESTful (Spring/Node) để lưu trữ dữ liệu một cách có cấu trúc, hỗ trợ đồng bộ đa thiết bị và sao lưu đám mây.
-    \item \textbf{Mở rộng danh mục puzzle}: Phát triển các loại trò chơi như Word Search, Crossword, Quiz‑based và chế độ đa người chơi (multiplayer) thông qua WebSocket.
-    \item \textbf{Hỗ trợ đa ngôn ngữ}: Sử dụng thư viện i18n cho React và Qt, cho phép người dùng chọn ngôn ngữ giao diện và từ vựng (ví dụ tiếng Pháp, tiếng Tây Ban Nha).
-    \item \textbf{Cải thiện âm thanh}: Tích hợp thư viện audio xử lý (Qt Multimedia) để cho phép người dùng điều chỉnh tốc độ, độ lớn và sử dụng nguồn âm thanh động.
-    \item \textbf{Nâng cao UI/UX}: Áp dụng các guideline về truy cập (WCAG), tối ưu hoá bố cục, thêm animation mượt mà và chế độ dark mode.
-    \item \textbf{Tự động hoá kiểm thử và CI/CD}: Xây dựng pipeline CI (GitHub Actions) để chạy unit test, integration test và end‑to‑end test (Playwright) trên mỗi pull‑request, đồng thời tạo bản phát hành tự động.
-    \item \textbf{Tích hợp AI hỗ trợ học}: Sử dụng Gemini API hoặc mô hình ngôn ngữ để gợi ý từ vựng, tạo câu hỏi ngẫu nhiên và cung cấp phân tích tiến độ học tập cho người dùng.
+    \item \textbf{Tri?n khai backend d? li?u}: �p d?ng SQLite ho?c m?t server RESTful (Spring/Node) d? luu tr? d? li?u m?t c�ch c� c?u tr�c, h? tr? d?ng b? da thi?t b? v� sao luu d�m m�y.
+    \item \textbf{M? r?ng danh m?c puzzle}: Ph�t tri?n c�c lo?i tr� choi nhu Word Search, Crossword, Quiz-based v� ch? d? da ngu?i choi (multiplayer) th�ng qua WebSocket.
+    \item \textbf{H? tr? da ng�n ng?}: S? d?ng thu vi?n i18n cho React v� Qt, cho ph�p ngu?i d�ng ch?n ng�n ng? giao di?n v� t? v?ng (v� d? ti?ng Ph�p, ti?ng T�y Ban Nha).
+    \item \textbf{C?i thi?n �m thanh}: T�ch h?p thu vi?n audio x? l� (Qt Multimedia) d? cho ph�p ngu?i d�ng di?u ch?nh t?c d?, d? l?n v� s? d?ng ngu?n �m thanh d?ng.
+    \item \textbf{N�ng cao UI/UX}: �p d?ng c�c guideline v? truy c?p (WCAG), t?i uu ho� b? c?c, th�m animation mu?t m� v� ch? d? dark mode.
+    \item \textbf{T? d?ng ho� ki?m th? v� CI/CD}: X�y d?ng pipeline CI (GitHub Actions) d? ch?y unit test, integration test v� end-to-end test (Playwright) tr�n m?i pull-request, d?ng th?i t?o b?n ph�t h�nh t? d?ng.
+    \item \textbf{T�ch h?p AI h? tr? h?c}: S? d?ng Gemini API ho?c m� h�nh ng�n ng? d? g?i � t? v?ng, t?o c�u h?i ng?u nhi�n v� cung c?p ph�n t�ch ti?n d? h?c t?p cho ngu?i d�ng.
 \end{enumerate}
 
-Những hướng phát triển trên không chỉ khắc phục các hạn chế hiện tại mà còn mở rộng tiềm năng ứng dụng WordSprint thành một nền tảng học tập đa dạng, linh hoạt và có khả năng mở rộng quy mô trong tương lai.
+Nh?ng hu?ng ph�t tri?n tr�n kh�ng ch? kh?c ph?c c�c h?n ch? hi?n t?i m� c�n m? r?ng ti?m nang ?ng d?ng WordSprint th�nh m?t n?n t?ng h?c t?p da d?ng, linh ho?t v� c� kh? nang m? r?ng quy m� trong tuong lai.
+
+

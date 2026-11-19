@@ -133,6 +133,7 @@
 \raggedbottom
 \setlength{\parindent}{1.25cm}
 \setlength{\parskip}{0pt}
+\setlength{\emergencystretch}{2em}
 
 \pagestyle{fancy}
 \fancyhf{}
@@ -366,6 +367,12 @@
 % @brief Code listing appearance and Vietnamese caption names.
 \renewcommand{\lstlistingname}{Đoạn mã}
 \renewcommand{\lstlistlistingname}{DANH MỤC ĐOẠN MÃ}
+
+%%!
+% @brief Breakable monospace text command using seqsplit to prevent overflow.
+%        Uses texorpdfstring to provide plain texttt for PDF bookmarks/TOC.
+% @param #1 Text to render in monospace with automatic line breaking.
+\newcommand{\code}[1]{\texorpdfstring{\texttt{\seqsplit{#1}}}{\texttt{#1}}}
 
 \lstset{
     frame=single,

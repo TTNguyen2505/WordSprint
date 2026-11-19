@@ -25,7 +25,7 @@ Kiến trúc được mô tả bằng sơ đồ sau (được thể hiện bằn
 \hline
 \thcell{Tầng} & \thcell{Mô tả} \\ \hline
 \textit{UI (frontend)} & React components, Tailwind CSS, Vite dev server hoặc tài nguyên build tĩnh. \\ \hline
-\textit{Bridge (Qt WebChannel)} & Kết nối JavaScript <-> C++ qua đối tượng đăng ký trong \texttt{QQmlApplicationEngine}. \\ \hline
+\textit{Bridge (Qt WebChannel)} & Kết nối JavaScript <-> C++ qua đối tượng đăng ký trong \code{QQmlApplicationEngine}. \\ \hline
 \textit{Backend (C++/Qt)} & Quản lý vòng đời Qt, xử lý nghiệp vụ, lưu trữ dữ liệu, cung cấp API cho frontend. \\ \hline
 \textit{Data (file)} & JSON/YAML files lưu trữ từ vựng, hồ sơ người dùng, lịch sử điểm. \\ \hline
 \end{tabularx}
@@ -41,41 +41,41 @@ Kiến trúc OOP được áp dụng chủ yếu ở phía backend. Các lớp c
 \subsection{Lớp \texttt{GameEngine}}
 \label{subsec:gameengine}
 \begin{itemize}
-    \item \textbf{Thuộc tính}: \texttt{scoreManager}, \texttt{puzzleFactory}, \texttt{profileManager}.
-    \item \textbf{Phương thức}: \texttt{startGame()}, \texttt{processAnswer(const QString\& answer)}, \texttt{endGame()}.
-    \item \textbf{Mối quan hệ}: Kết hợp (composition) với \texttt{ScoreManager}, \texttt{PuzzleFactory} và \texttt{UserProfile}.
+    \item \textbf{Thuộc tính}: \code{scoreManager}, \code{puzzleFactory}, \code{profileManager}.
+    \item \textbf{Phương thức}: \code{startGame()}, \code{processAnswer(const QString\& answer)}, \code{endGame()}.
+    \item \textbf{Mối quan hệ}: Kết hợp (composition) với \code{ScoreManager}, \code{PuzzleFactory} và \code{UserProfile}.
 \end{itemize}
 
 \subsection{Lớp \texttt{ScoreManager}}
 \label{subsec:scoremanager}
 \begin{itemize}
-    \item \textbf{Thuộc tính}: \texttt{int totalScore}, \texttt{int correctCount}, \texttt{double remainingTime}.
-    \item \textbf{Phương thức}: \texttt{updateScore(int correct, double timeRemaining)}, \texttt{getScore()}, \texttt{reset()}.
+    \item \textbf{Thuộc tính}: \code{int totalScore}, \code{int correctCount}, \code{double remainingTime}.
+    \item \textbf{Phương thức}: \code{updateScore(int correct, double timeRemaining)}, \code{getScore()}, \code{reset()}.
     \item \textbf{Công thức tính điểm}: được mô tả trong \eqref{eq:score} (xem phần \ref{subsec:scoremanager}).
-    \item \textbf{Mối quan hệ}: Được sử dụng bởi \texttt{GameEngine} (dependency).
+    \item \textbf{Mối quan hệ}: Được sử dụng bởi \code{GameEngine} (dependency).
 \end{itemize}
 
 \subsection{Lớp \texttt{BasePuzzle} (abstract)}
 \label{subsec:basepuzzle}
 \begin{itemize}
-    \item \textbf{Thuộc tính}: \texttt{QString question}, \texttt{QString answer}.
-    \item \textbf{Phương thức ảo}: \texttt{bool checkAnswer(const QString\&)}.
-    \item \textbf{Kế thừa}: Các lớp \texttt{ScramblePuzzle}, \texttt{FillInPuzzle}, \texttt{AudioPuzzle} kế thừa từ đây và ghi đè \texttt{checkAnswer}.
+    \item \textbf{Thuộc tính}: \code{QString question}, \code{QString answer}.
+    \item \textbf{Phương thức ảo}: \code{bool checkAnswer(const QString\&)}.
+    \item \textbf{Kế thừa}: Các lớp \code{ScramblePuzzle}, \code{FillInPuzzle}, \code{AudioPuzzle} kế thừa từ đây và ghi đè \code{checkAnswer}.
 \end{itemize}
 
 \subsection{Lớp \texttt{PuzzleFactory}}
 \label{subsec:puzzlefactory}
 \begin{itemize}
-    \item \textbf{Phương thức}: \texttt{std::unique\_ptr<BasePuzzle> createPuzzle(PuzzleType type)}.
+    \item \textbf{Phương thức}: \code{std::unique\_ptr<BasePuzzle> createPuzzle(PuzzleType type)}.
     \item \textbf{Mô hình thiết kế}: Factory Method – tạo các đối tượng puzzle mà không phụ thuộc vào lớp cụ thể.
 \end{itemize}
 
 \subsection{Lớp \texttt{UserProfile}}
 \label{subsec:userprofile}
 \begin{itemize}
-    \item \textbf{Thuộc tính}: \texttt{QString userName}, \texttt{QVector<PuzzleResult> history}.
-    \item \textbf{Phương thức}: \texttt{load()}, \texttt{save()}, \texttt{addResult(const PuzzleResult\&)}.
-    \item \textbf{Lưu trữ}: Dữ liệu được ghi/đọc dưới dạng JSON trong thư mục \texttt{data/profiles}.
+    \item \textbf{Thuộc tính}: \code{QString userName}, \code{QVector<PuzzleResult> history}.
+    \item \textbf{Phương thức}: \code{load()}, \code{save()}, \code{addResult(const PuzzleResult\&)}.
+    \item \textbf{Lưu trữ}: Dữ liệu được ghi/đọc dưới dạng JSON trong thư mục \code{data/profiles}.
 \end{itemize}
 
 % -------------------------------------------------
@@ -86,14 +86,14 @@ Kiến trúc OOP được áp dụng chủ yếu ở phía backend. Các lớp c
 Quy trình thực thi một vòng chơi được mô tả theo các bước sau (sơ đồ tuần tự):
 
 \begin{enumerate}
-    \item Ứng dụng khởi động, lớp \texttt{QQmlApplicationEngine} tải \texttt{Main.qml} và đặt \texttt{initialUrl} tới URL Vite dev server (hoặc file tĩnh).
-    \item Frontend (React) nhận URL và khởi tạo giao diện trò chơi. Khi người dùng nhấn nút "Bắt đầu", JavaScript gọi phương thức C++ \texttt{GameEngine.startGame()} qua WebChannel.
-    \item \texttt{GameEngine} sử dụng \texttt{PuzzleFactory} tạo một \texttt{BasePuzzle} ngẫu nhiên và truyền câu hỏi tới frontend qua một đối tượng WebChannel (phương thức \texttt{emitQuestion}).
-    \item Người dùng nhập đáp án, React gửi đáp án lại cho C++ qua \texttt{GameEngine.processAnswer(answer)}.
-    \item \texttt{BasePuzzle.checkAnswer()} trả về kết quả đúng/sai; \texttt{ScoreManager.updateScore()} tính điểm dựa trên công thức \eqref{eq:score} và cập nhật thời gian còn lại.
+    \item Ứng dụng khởi động, lớp \code{QQmlApplicationEngine} tải \code{Main.qml} và đặt \code{initialUrl} tới URL Vite dev server (hoặc file tĩnh).
+    \item Frontend (React) nhận URL và khởi tạo giao diện trò chơi. Khi người dùng nhấn nút "Bắt đầu", JavaScript gọi phương thức C++ \code{GameEngine.startGame()} qua WebChannel.
+    \item \code{GameEngine} sử dụng \code{PuzzleFactory} tạo một \code{BasePuzzle} ngẫu nhiên và truyền câu hỏi tới frontend qua một đối tượng WebChannel (phương thức \code{emitQuestion}).
+    \item Người dùng nhập đáp án, React gửi đáp án lại cho C++ qua \code{GameEngine.processAnswer(answer)}.
+    \item \code{BasePuzzle.checkAnswer()} trả về kết quả đúng/sai; \code{ScoreManager.updateScore()} tính điểm dựa trên công thức \eqref{eq:score} và cập nhật thời gian còn lại.
     \item Kết quả (điểm hiện tại, thời gian) được trả về cho frontend để cập nhật UI.
-    \item Khi hết thời gian hoặc người dùng kết thúc, \texttt{GameEngine.endGame()} lưu kết quả vào \texttt{UserProfile.save()} (JSON) và gửi thông báo "GameOver" tới frontend.
-    \item Frontend hiển thị bảng xếp hạng nội bộ bằng cách đọc tập tin \texttt{data/scores.json} (cũng được cập nhật bởi backend).
+    \item Khi hết thời gian hoặc người dùng kết thúc, \code{GameEngine.endGame()} lưu kết quả vào \code{UserProfile.save()} (JSON) và gửi thông báo "GameOver" tới frontend.
+    \item Frontend hiển thị bảng xếp hạng nội bộ bằng cách đọc tập tin \code{data/scores.json} (cũng được cập nhật bởi backend).
 \end{enumerate}
 
 \subsection{Định dạng dữ liệu trao đổi}
@@ -128,9 +128,9 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
 \section{Lưu trữ dữ liệu}
 \label{sec:data_storage}
 \begin{itemize}
-    \item \textbf{Từ vựng}: Được lưu trong tệp JSON \texttt{data/vocabulary.json}. Mỗi mục bao gồm \texttt{id}, \texttt{word}, \texttt{definition}, \texttt{hintImage} và \texttt{audioFile}.
-    \item \textbf{Kết quả chơi}: Được ghi trong \texttt{data/scores.json} (mảng các đối tượng \texttt{ScoreRecord} chứa \texttt{userId}, \texttt{score}, \texttt{timestamp}).
-    \item \textbf{Hồ sơ người dùng}: Tệp JSON riêng trong \texttt{data/profiles/<userName>.json} lưu lịch sử puzzle, mức độ hoàn thành và thành tích.
+    \item \textbf{Từ vựng}: Được lưu trong tệp JSON \code{data/vocabulary.json}. Mỗi mục bao gồm \code{id}, \code{word}, \code{definition}, \code{hintImage} và \code{audioFile}.
+    \item \textbf{Kết quả chơi}: Được ghi trong \code{data/scores.json} (mảng các đối tượng \code{ScoreRecord} chứa \code{userId}, \code{score}, \code{timestamp}).
+    \item \textbf{Hồ sơ người dùng}: Tệp JSON riêng trong \code{data/profiles/<userName>.json} lưu lịch sử puzzle, mức độ hoàn thành và thành tích.
 \end{itemize}
 
 % -------------------------------------------------
@@ -138,4 +138,6 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
 % -------------------------------------------------
 \section{Kết luận}
 \label{sec:architecture_conclusion}
-Kiến trúc WordSprint tách rời rõ ràng giữa backend C++/Qt và frontend React, cho phép tận dụng ưu điểm hiệu năng gốc và hệ sinh thái web. Thiết kế OOP và các mẫu thiết kế (Factory Method, Singleton cho \texttt{ScoreManager}) giúp mở rộng dễ dàng, trong khi giao thức JSON/QtWebChannel đảm bảo truyền thông tin nhanh chóng và bảo trì tốt.
+Kiến trúc WordSprint tách rời rõ ràng giữa backend C++/Qt và frontend React, cho phép tận dụng ưu điểm hiệu năng gốc và hệ sinh thái web. Thiết kế OOP và các mẫu thiết kế (Factory Method, Singleton cho \code{ScoreManager}) giúp mở rộng dễ dàng, trong khi giao thức JSON/QtWebChannel đảm bảo truyền thông tin nhanh chóng và bảo trì tốt.
+
+

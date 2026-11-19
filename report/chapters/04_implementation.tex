@@ -36,13 +36,13 @@ endif()
 
 add_subdirectory(backend)
 \end{lstlisting}
-Trong file này, CMake tự động thêm đường dẫn Qt khi tồn tại, sau đó đưa thư mục \texttt{backend} vào quá trình biên dịch.
+Trong file này, CMake tự động thêm đường dẫn Qt khi tồn tại, sau đó đưa thư mục \code{backend} vào quá trình biên dịch.
 
 \subsection{Xây dựng backend}
 \label{subsec:backend_build}
 \begin{enumerate}
     \item Mở "Developer PowerShell for VS 2022".
-    \item Kiểm tra công cụ: \texttt{cl /Bv}, \texttt{cmake --version}.
+    \item Kiểm tra công cụ: \code{cl /Bv}, \code{cmake --version}.
     \item Tạo thư mục build và chạy CMake:
     \begin{lstlisting}[caption={Câu lệnh build backend}, label={lst:backend_build}]
 mkdir build
@@ -50,13 +50,13 @@ cd build
 cmake -S .. -B . -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:/Qt/6.11.3/msvc2022_64"
 cmake --build . --config Release
 \end{lstlisting}
-    \item Sau khi biên dịch, tệp thực thi \texttt{WordSprint.exe} nằm trong \texttt{build/backend/Release}.
+    \item Sau khi biên dịch, tệp thực thi \code{WordSprint.exe} nằm trong \code{build/backend/Release}.
 \end{enumerate}
 
 \subsection{Xây dựng frontend}
 \label{subsec:frontend_build}
 \begin{enumerate}
-    \item Mở một cửa sổ PowerShell trong thư mục \texttt{frontend}.
+    \item Mở một cửa sổ PowerShell trong thư mục \code{frontend}.
     \item Cài đặt các phụ thuộc:
     \begin{lstlisting}[caption={Cài đặt phụ thuộc frontend}, label={lst:frontend_deps}]
 pm install -g pnpm   # nếu chưa có
@@ -70,7 +70,7 @@ pnpm dev
     \begin{lstlisting}[caption={Build frontend}, label={lst:frontend_build}]
 pnpm build
 \end{lstlisting}
-    \item Sau khi build, các file tĩnh được đặt trong \texttt{frontend/dist} và được Qt WebEngine tải khi chạy chế độ Release.
+    \item Sau khi build, các file tĩnh được đặt trong \code{frontend/dist} và được Qt WebEngine tải khi chạy chế độ Release.
 \end{enumerate}
 
 \subsection{Khởi chạy hệ thống}
@@ -80,7 +80,7 @@ pnpm build
     \begin{lstlisting}[caption={Chạy ứng dụng trong debug}, label={lst:run_debug}]
 build\backend\Release\WordSprint.exe --debug
 \end{lstlisting}
-    \item Hoặc chạy bản release, sẽ tải tài nguyên tĩnh từ \texttt{frontend/dist}:
+    \item Hoặc chạy bản release, sẽ tải tài nguyên tĩnh từ \code{frontend/dist}:
     \begin{lstlisting}[caption={Chạy bản release}, label={lst:run_release}]
 build\backend\Release\WordSprint.exe
 \end{lstlisting}
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
     return app.exec();
 }
 \end{lstlisting}
-Đoạn mã trên quyết định URL nguồn (dev server hoặc tĩnh) và khởi tạo \texttt{QQmlApplicationEngine} để nhúng giao diện React.
+Đoạn mã trên quyết định URL nguồn (dev server hoặc tĩnh) và khởi tạo \code{QQmlApplicationEngine} để nhúng giao diện React.
 
 \subsection{Main.qml – cửa sổ Qt WebEngineView}
 \label{subsec:main_qml}
@@ -173,25 +173,26 @@ function startGame() {
     window.qt?.webChannel?.objects?.backend?.processMessage(JSON.stringify(payload));
 }
 \end{lstlisting}
-Backend nhận thông điệp và thực hiện \texttt{GameEngine::startGame()} (được đăng ký trong C++ – không có trong ví dụ hiện tại nhưng logic tương tự). Các phản hồi được trả về dưới dạng JSON và cập nhật UI thông qua state React.
+Backend nhận thông điệp và thực hiện \code{GameEngine::startGame()} (được đăng ký trong C++ – không có trong ví dụ hiện tại nhưng logic tương tự). Các phản hồi được trả về dưới dạng JSON và cập nhật UI thông qua state React.
 
 % -------------------------------------------------
 % Kiểm thử chức năng và biên
 % -------------------------------------------------
 \section{Kiểm thử chức năng và biên}
 \label{sec:testing}
-Kiểm thử được thực hiện theo hai cấp: unit test cho backend (có thể dùng \texttt{Qt Test}) và end‑to‑end test cho frontend (công cụ \texttt{Playwright} hoặc \texttt{Cypress}).
+Kiểm thử được thực hiện theo hai cấp: unit test cho backend (có thể dùng \code{Qt Test}) và end‑to‑end test cho frontend (công cụ \code{Playwright} hoặc \code{Cypress}).
 
 \subsection{Kịch bản kiểm thử chức năng}
 \label{subsec:test_cases}
 \begin{itemize}
-    \item \textbf{TC01 – Khởi động ứng dụng}: Kiểm tra \texttt{WordSprint.exe} chạy, WebEngineView tải URL đúng (dev hoặc tĩnh).
-    \item \textbf{TC02 – Bắt đầu trò chơi}: Người dùng nhấn nút "Start", frontend gửi \texttt{startGame}. Backend trả về puzzle đầu tiên và thời gian giới hạn.
-    \item \textbf{TC03 – Kiểm tra đáp án đúng}: Nhập đáp án đúng, backend trả về \texttt{correct=true} và cập nhật điểm theo \eqref{eq:score}.
-    \item \textbf{TC04 – Kiểm tra đáp án sai}: Nhập đáp án sai, backend trả về \texttt{correct=false}, điểm không thay đổi, thời gian giảm.
-    \item \textbf{TC05 – Hết thời gian}: Khi đồng hồ đếm ngược tới 0, backend gửi \texttt{gameOver} và lưu hồ sơ.
-    \item \textbf{TC06 – Lưu và tải hồ sơ}: Kiểm tra việc ghi/đọc file JSON trong \texttt{data/profiles}.
-    \item \textbf{TC07 – Xây dựng release}: Chạy bản release, xác nhận frontend được tải từ \texttt{frontend/dist}.
+    \item \textbf{TC01 – Khởi động ứng dụng}:\\
+    Kiểm tra \code{WordSprint.exe} chạy, WebEngineView tải URL đúng (dev hoặc tĩnh).
+    \item \textbf{TC02 – Bắt đầu trò chơi}: Người dùng nhấn nút "Start", frontend gửi \code{startGame}. Backend trả về puzzle đầu tiên và thời gian giới hạn.
+    \item \textbf{TC03 – Kiểm tra đáp án đúng}: Nhập đáp án đúng, backend trả về \code{correct=true} và cập nhật điểm theo \eqref{eq:score}.
+    \item \textbf{TC04 – Kiểm tra đáp án sai}: Nhập đáp án sai, backend trả về \code{correct=false}, điểm không thay đổi, thời gian giảm.
+    \item \textbf{TC05 – Hết thời gian}: Khi đồng hồ đếm ngược tới 0, backend gửi \code{gameOver} và lưu hồ sơ.
+    \item \textbf{TC06 – Lưu và tải hồ sơ}: Kiểm tra việc ghi/đọc file JSON trong \code{data/profiles}.
+    \item \textbf{TC07 – Xây dựng release}: Chạy bản release, xác nhận frontend được tải từ \code{frontend/dist}.
 \end{itemize}
 
 \subsection{Kết quả kiểm thử thực tế}
@@ -207,7 +208,7 @@ TC01 – Khởi động & Thành công & URL đúng (dev) \\ \hline
 TC02 – Bắt đầu trò chơi & Thành công & Puzzle nhận được qua WebChannel \\ \hline
 TC03 – Đáp án đúng & Thành công & Điểm tăng, thời gian giảm \eqref{eq:score} \\ \hline
 TC04 – Đáp án sai & Thành công & Không tăng điểm, thông báo lỗi \\ \hline
-TC05 – Hết thời gian & Thành công & Gửi \texttt{gameOver}, lưu hồ sơ JSON \\ \hline
+TC05 – Hết thời gian & Thành công & Gửi \code{gameOver}, lưu hồ sơ JSON \\ \hline
 TC06 – Lưu/ tải hồ sơ & Thành công & File JSON hợp lệ, không lỗi parse \\ \hline
 TC07 – Release build & Thành công & Frontend tĩnh được hiển thị \\ \hline
 \end{tabularx}
@@ -227,3 +228,5 @@ Quá trình triển khai WordSprint kết hợp CMake/Qt cho phần backend và 
     \item Kiến trúc mở rộng: các lớp puzzle mới có thể được thêm bằng mẫu Factory mà không thay đổi giao diện.
 \end{itemize}
 Với quy trình build và thử nghiệm đã được chuẩn hoá, dự án sẵn sàng cho việc đóng gói và phát hành trên nền Windows.
+
+
