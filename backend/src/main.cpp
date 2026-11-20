@@ -23,8 +23,6 @@ int main(int argc, char *argv[]) {
     app.setApplicationName(QStringLiteral("WordSprint"));
     app.setOrganizationName(QStringLiteral("WordSprint"));
 
-    DatabaseManager databaseManager;
-
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("WordSprint Desktop Client"));
     parser.addHelpOption();
@@ -77,7 +75,8 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine;
     engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl}});
     engine.rootContext()->setContextProperty(QStringLiteral("initialUrl"), initialUrl);
-    engine.rootContext()->setContextProperty(QStringLiteral("databaseManager"), &databaseManager);
+    engine.rootContext()->setContextProperty(QStringLiteral("databaseManager"),
+                                             &DatabaseManager::instance());
 
     const QUrl url(QStringLiteral("qrc:/qt/qml/WordSprint/qml/Main.qml"));
     QObject::connect(
