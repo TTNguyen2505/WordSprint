@@ -2,7 +2,7 @@
 
 WordSprint is a desktop English vocabulary puzzle game. It aims to help learners practice vocabulary, listening, reaction speed, and typing through short, timed challenges.
 
-> **Current status:** The frontend still displays the React/Vite starter screen. The gameplay and features described below are product goals and have not yet been fully implemented.
+> **Current status:** The Qt desktop app contains static QML layouts for the menu, profile, stage selection, gameplay, results, and leaderboard. These screens use placeholder data and do not yet implement gameplay or persistence. The React frontend remains a separate UI prototype.
 
 ## Product vision
 
@@ -28,12 +28,12 @@ The planned **Neo-brutalism** visual style uses bold borders, sharp corners, har
 
 ## Technology
 
-- **Desktop application:** C++20, Qt 6, QML, and Qt WebEngine.
+- **Desktop application:** C++20, Qt 6, and QML.
 - **Frontend:** React 19, Vite, and Tailwind CSS 4.
 - **Frontend state and data tools:** Zustand and TanStack Query.
-- **Build:** CMake builds the desktop application; Vite builds the frontend, which Qt can embed as application resources.
+- **Build:** CMake builds the desktop application; Vite builds the separate frontend prototype.
 
-Qt/QML currently provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service or complete profile/progress persistence system yet.
+Qt/QML provide the desktop screens. The React frontend can still be run separately in a browser. There is no separate backend service or complete profile/progress persistence system yet.
 
 ## Clone the repository
 
@@ -51,7 +51,7 @@ This project setup targets **Windows x64**.
 | Git | Current version | Clone and update the repository |
 | Visual Studio 2026 | Workload **Desktop development with C++**, including MSVC (latest version) and a Windows SDK | C++ compiler and build tools |
 | CMake | 3.22 or newer | Configure and build the desktop application |
-| Qt | Qt 6 for MSVC 2022 64-bit, with **Core**, **Gui**, **Qml**, **Quick**, **WebEngineQuick**, **WebEngineCore**, **Qt Positioning** and **WebChannel** | Desktop shell, QML, and embedded web view |
+| Qt | Qt 6 for MSVC 2022 64-bit, with **Core**, **Gui**, **Qml**, **Quick**, and **Sql** | Desktop application and QML screens |
 | Node.js | 22.12 or newer | Run the Vite frontend and install its tools |
 | pnpm | Current version | Install frontend dependencies and run frontend scripts |
 
@@ -84,7 +84,7 @@ If Qt is installed elsewhere, change the path to match your installation. CMake 
 ### Install the development tools
 
 1. **Visual Studio:** Install Visual Studio 2022 and select **Desktop development with C++** in Visual Studio Installer. Make sure the MSVC v143 x64 tools and a Windows SDK are included.
-2. **Qt:** Use the Qt Online Installer to install a Qt 6 kit built for **MSVC 2022 64-bit**. Select the required Qt modules listed above, especially Qt WebEngine and Qt WebChannel. The Qt kit must use the same compiler and architecture as the project.
+2. **Qt:** Use the Qt Online Installer to install a Qt 6 kit built for **MSVC 2022 64-bit**. Select the required Qt modules listed above. The Qt kit must use the same compiler and architecture as the project.
 3. **CMake and Git:** Install them if they are not already available in your terminal. CMake is also available through Visual Studio Installer, but use version 3.22 or newer.
 4. **Node.js and pnpm:** Install pnpm or newer, then install Node.js:
 
@@ -99,8 +99,6 @@ If Qt is installed elsewhere, change the path to match your installation. CMake 
    Restart PowerShell after installation if `node`, or `pnpm` is not recognized.
 
 The CMake project has a convenience fallback for Qt at `C:\Qt\6.11.3\msvc2022_64`. If your Qt kit is installed in another location or uses another version, set `CMAKE_PREFIX_PATH` to that kit's root when configuring the project.
-
-Install the JavaScript dependencies before configuring CMake. If `frontend/dist/index.html` does not exist, CMake may try to build the frontend during configuration; that build requires the frontend dependencies to have already been installed.
 
 ## Install and run
 
@@ -124,45 +122,26 @@ pnpm format:check
 
 ### Build the Qt desktop application
 
-First install the frontend dependencies and build the frontend. Then configure and build the desktop application from the repository root:
+Configure and build the desktop application from the repository root:
 
 ```powershell
-cd frontend
-pnpm install --frozen-lockfile
-pnpm build
-cd ..
 cmake -S . -B build -G "Visual Studio 17 2022" -A x64 -DCMAKE_PREFIX_PATH="C:\Qt\6.11.3\msvc2022_64"
 cmake --build build --config Release
 ```
 
 Replace `C:\Qt\6.11.3\msvc2022_64` with the root directory of your Qt MSVC 2022 64-bit kit. On Windows, the build runs `windeployqt` after building the application to deploy the required Qt runtime files. The executable is created under `build\backend\Release`; the exact location may vary with the CMake generator and configuration.
 
-### Develop the frontend with the desktop application
-
-Start the Vite development server in one PowerShell window:
+### Run the QML desktop app
 
 ```powershell
-cd frontend
-pnpm dev
-```
-
-In another window, run the Qt application with `--debug`:
-
-```powershell
-<path-to-WordSprint.exe> --debug
-```
-
-The application connects to `http://localhost:5173` by default in debug mode. To load a different URL, use `--url`:
-
-```powershell
-<path-to-WordSprint.exe> --url "http://localhost:5173"
+<path-to-WordSprint.exe>
 ```
 
 ## Project structure
 
 ```text
 .
-├── backend/   # C++/Qt application and QML window hosting Qt WebEngine
+├── backend/   # C++/Qt application and QML desktop screens
 ├── frontend/  # React UI, Vite configuration, and dependencies
 ├── report/    # LaTeX report
 └── english-vocabulary-puzzle-game.md  # Gameplay and product-vision document
