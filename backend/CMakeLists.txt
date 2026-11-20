@@ -28,12 +28,11 @@ qt_add_qml_module(WordSprint
     VERSION 1.0
     QML_FILES
         qml/BrutalButton.qml
-        qml/ScreenHeader.qml
         qml/MenuScreen.qml
         qml/ProfileScreen.qml
-        qml/StageSelectionScreen.qml
+        qml/CreateProfileScreen.qml
+        qml/CountdownScreen.qml
         qml/GameScreen.qml
-        qml/ResultScreen.qml
         qml/LeaderboardScreen.qml
         qml/Main.qml
 )

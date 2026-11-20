@@ -2,7 +2,7 @@
 
 WordSprint is a desktop English vocabulary puzzle game. It aims to help learners practice vocabulary, listening, reaction speed, and typing through short, timed challenges.
 
-> **Current status:** The Qt desktop app contains static QML layouts for the menu, profile, stage selection, gameplay, results, and leaderboard. These screens use placeholder data and do not yet implement gameplay or persistence. The React frontend remains a separate UI prototype.
+> **Current status:** The Qt desktop app contains QML layouts for the scramble menu, profile selection and creation, countdown, gameplay, and leaderboard. They follow the current Figma screen designs and use placeholder data; gameplay and persistence are not yet implemented. The React frontend remains a separate UI prototype.
 
 ## Product vision
 

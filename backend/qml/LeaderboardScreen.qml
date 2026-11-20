@@ -1,121 +1,178 @@
 import QtQuick
+import QtQuick.Controls
 
 Rectangle {
     id: root
 
-    color: "#F4F4F0"
+    color: "#858585"
 
     function goBack() {
+        // qmllint disable unqualified
         StackView.view.pop();
+        // qmllint enable unqualified
     }
 
-    ScreenHeader {
-        id: header
-        anchors.top: parent.top
-        anchors.left: parent.left
-        anchors.right: parent.right
-        anchors.margins: 28
-        title: "LEADERBOARD"
-        subtitle: "TOP SPRINTERS THIS WEEK"
-        onBackRequested: root.goBack()
-    }
-
-    Column {
+    Rectangle {
         anchors.centerIn: parent
-        width: Math.min(parent.width - 64, 720)
-        spacing: 10
+        width: Math.min(parent.width - 48, 620)
+        height: 580
+        color: "#FFFFFF"
+        border.color: "#000000"
+        border.width: 2
 
-        Row {
-            width: parent.width
-            height: 42
+        Column {
+            anchors.fill: parent
+            anchors.margins: 28
+            spacing: 14
+
             Text {
-                anchors.left: parent.left
-                anchors.verticalCenter: parent.verticalCenter
-                text: "PLAYER"
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "HALL OF FAME"
+                color: "#000000"
+                font.pixelSize: 24
+                font.bold: true
+            }
+
+            Text {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "TOP SPRINTERS"
                 color: "#737373"
-                font.pixelSize: 11
+                font.pixelSize: 10
                 font.bold: true
                 font.letterSpacing: 1
             }
-            Text {
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                text: "TOTAL SCORE"
-                color: "#737373"
-                font.pixelSize: 11
-                font.bold: true
-                font.letterSpacing: 1
-            }
-        }
 
-        Repeater {
-            model: [
-                {
-                    rank: "01",
-                    player: "WordWizard",
-                    score: "12,450",
-                    fill: "#FFEA2A"
-                },
-                {
-                    rank: "02",
-                    player: "LexiRunner",
-                    score: "10,820",
-                    fill: "#FFFFFF"
-                },
-                {
-                    rank: "03",
-                    player: "WordSprinter",
-                    score: "1,250",
-                    fill: "#D1FAE5"
-                },
-                {
-                    rank: "04",
-                    player: "QuickThinker",
-                    score: "980",
-                    fill: "#FFFFFF"
-                }
-            ]
-
-            delegate: Rectangle {
-                required property var modelData
+            Rectangle {
                 width: parent.width
-                height: 68
-                color: modelData.fill
-                border.color: "#000000"
-                border.width: 2
+                height: 2
+                color: "#000000"
+            }
 
-                Row {
-                    anchors.fill: parent
-                    anchors.leftMargin: 18
-                    anchors.rightMargin: 18
+            Row {
+                width: parent.width
+                height: 30
 
-                    Text {
-                        width: 60
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: modelData.rank
-                        color: "#000000"
-                        font.pixelSize: 15
-                        font.bold: true
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: modelData.player
-                        color: "#000000"
-                        font.pixelSize: 16
-                        font.bold: true
-                    }
-                    Item {
-                        width: parent.width - 270
-                        height: 1
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: modelData.score + " PTS"
-                        color: "#000000"
-                        font.pixelSize: 14
-                        font.bold: true
+                Text {
+                    width: 52
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "RANK"
+                    color: "#404040"
+                    font.pixelSize: 10
+                    font.bold: true
+                }
+
+                Text {
+                    width: parent.width - 220
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "PLAYER"
+                    color: "#404040"
+                    font.pixelSize: 10
+                    font.bold: true
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "SCORE"
+                    color: "#404040"
+                    font.pixelSize: 10
+                    font.bold: true
+                }
+            }
+
+            Column {
+                width: parent.width
+                spacing: 0
+
+                Repeater {
+                    model: [
+                        {
+                            rank: "01",
+                            name: "WordWizard",
+                            score: "12,450"
+                        },
+                        {
+                            rank: "02",
+                            name: "LexiRunner",
+                            score: "10,820"
+                        },
+                        {
+                            rank: "03",
+                            name: "WordSprinter",
+                            score: "1,250"
+                        },
+                        {
+                            rank: "04",
+                            name: "QuickThinker",
+                            score: "980"
+                        },
+                        {
+                            rank: "05",
+                            name: "Bookworm",
+                            score: "760"
+                        },
+                        {
+                            rank: "06",
+                            name: "WordSeeker",
+                            score: "540"
+                        },
+                        {
+                            rank: "07",
+                            name: "Guest",
+                            score: "120"
+                        }
+                    ]
+
+                    delegate: Rectangle {
+                        id: leaderboardDelegate
+
+                        required property var modelData
+                        width: parent.width
+                        height: 43
+                        color: leaderboardDelegate.modelData.rank === "03" ? "#FFEA2A" : "#FFFFFF"
+                        border.color: "#000000"
+                        border.width: 1
+
+                        Row {
+                            anchors.fill: parent
+                            anchors.leftMargin: 12
+                            anchors.rightMargin: 12
+
+                            Text {
+                                width: 52
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: leaderboardDelegate.modelData.rank
+                                color: "#000000"
+                                font.pixelSize: 11
+                                font.bold: true
+                            }
+
+                            Text {
+                                width: parent.width - 112
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: leaderboardDelegate.modelData.name
+                                color: "#000000"
+                                font.pixelSize: 12
+                                font.bold: leaderboardDelegate.modelData.rank === "03"
+                            }
+
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: leaderboardDelegate.modelData.score
+                                color: "#000000"
+                                font.pixelSize: 11
+                            }
+                        }
                     }
                 }
+            }
+
+            BrutalButton {
+                anchors.horizontalCenter: parent.horizontalCenter
+                text: "CLOSE"
+                buttonColor: "#FFEA2A"
+                implicitWidth: 120
+                implicitHeight: 42
+                onClicked: root.goBack()
             }
         }
     }
