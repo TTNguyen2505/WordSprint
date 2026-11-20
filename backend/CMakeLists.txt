@@ -44,6 +44,8 @@ file(GLOB_RECURSE FRONTEND_DIST_FILES
 )
 
 qt_add_executable(WordSprint
+    src/DatabaseManager.cpp
+    src/DatabaseManager.h
     src/main.cpp
 )
 

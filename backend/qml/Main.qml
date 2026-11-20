@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Window
+import QtWebChannel
 import QtWebEngine
 
 Window {
@@ -13,10 +14,16 @@ Window {
 
     property url initialUrl: "http://localhost:5173"
 
+    WebChannel {
+        id: webChannel
+        registeredObjects: [databaseManager]
+    }
+
     WebEngineView {
         id: webEngineView
         anchors.fill: parent
         url: root.initialUrl
+        webChannel: webChannel
 
         settings.accelerated2dCanvasEnabled: true
         settings.webGLEnabled: true
