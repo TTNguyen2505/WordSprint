@@ -1,3 +1,5 @@
+#include "DatabaseManager.h"
+
 #include <QCommandLineOption>
 #include <QCommandLineParser>
 #include <QDir>
@@ -20,6 +22,8 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
     app.setOrganizationName(QStringLiteral("WordSprint"));
+
+    DatabaseManager databaseManager;
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("WordSprint Desktop Client"));
@@ -73,6 +77,7 @@ int main(int argc, char *argv[]) {
     QQmlApplicationEngine engine;
     engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl}});
     engine.rootContext()->setContextProperty(QStringLiteral("initialUrl"), initialUrl);
+    engine.rootContext()->setContextProperty(QStringLiteral("databaseManager"), &databaseManager);
 
     const QUrl url(QStringLiteral("qrc:/qt/qml/WordSprint/qml/Main.qml"));
     QObject::connect(
