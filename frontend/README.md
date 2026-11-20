@@ -63,7 +63,7 @@ The root project builds the C++/Qt application in `backend/`. Its QML window hos
 
 The root CMake configuration can invoke the frontend build when `dist/index.html` is missing, but dependencies must already be installed in this directory. Building `dist/` explicitly first makes the integration step predictable.
 
-At startup, the frontend shows a splash screen while it loads the bundled fonts, verifies the frontend assets, and asks the Qt desktop backend to open and check its SQLite database. Running the frontend directly in a browser skips SQLite and displays a notice on the menu because a browser preview cannot access the desktop database.
+At startup, the frontend shows a splash screen while it loads the bundled fonts, verifies the frontend assets, and asks the Qt desktop backend to open and check its SQLite database. The singleton `DatabaseManager` copies the bundled empty SQLite seed into the application data directory on first launch and reuses its connection. Running the frontend directly in a browser skips SQLite and displays a notice on the menu because a browser preview cannot access the desktop database.
 
 The frontend can also be built without Qt:
 

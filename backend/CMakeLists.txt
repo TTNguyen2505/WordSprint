@@ -62,6 +62,13 @@ if(FRONTEND_DIST_FILES)
     )
 endif()
 
+qt_add_resources(WordSprint "database_resources"
+    PREFIX "/database"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/resources"
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/resources/wordsprint.sqlite3"
+)
+
 qt_add_qml_module(WordSprint
     URI WordSprint
     VERSION 1.0
