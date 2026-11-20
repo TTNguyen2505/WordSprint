@@ -5,16 +5,16 @@
 
 % Math packages
 \usepackage{amsmath}
-\usepackage{amssymb}
 
 % Font handling – XeLaTeX only
 \usepackage{fontspec}
-% Main text font (serif) – Times New Roman
-\setmainfont{Times New Roman}
-% Sans-serif font – Times New Roman (đảm bảo tiêu đề luôn dùng Times New Roman)
-\setsansfont{Times New Roman}
-% Monospace font – Consolas (chỉ dùng cho khối code, môi trường listings)
-\setmonofont{Consolas}
+\usepackage{unicode-math}
+% Text fonts
+\setmainfont{TeX Gyre Termes}
+\setsansfont{TeX Gyre Heros}
+\setmonofont{TeX Gyre Cursor}
+% Math font
+\setmathfont{TeX Gyre Termes Math}
 \renewcommand{\familydefault}{\rmdefault}
 
 % Basic layout packages

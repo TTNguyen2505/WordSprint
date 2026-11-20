@@ -5,9 +5,6 @@
 \chapter{Cài đặt chi tiết và Kỹ thuật lập trình hướng đối tượng C++}
 \label{chap:system_architecture}
 
-% -------------------------------------------------
-% 3.1 Môi trường phát triển và tổ chức cấu trúc dự án
-% -------------------------------------------------
 \section{Môi trường phát triển và tổ chức cấu trúc dự án}
 \label{sec:environment_and_structure}
 
@@ -37,23 +34,23 @@ Hệ thống soạn thảo báo cáo & XeLaTeX & Biên dịch độc lập mã n
 
 \begin{lstlisting}[caption={Cấu trúc thư mục tổ chức mã nguồn dự án WordSprint}, label={lst:project_structure}]
 WordSprint/
-├── .github/                # Thiết lập cộng tác và quy trình kiểm tra trên GitHub
-├── backend/
-│   ├── qml/                 # Cửa sổ Qt Quick và vùng hiển thị giao diện web
-│   └── src/                 # Mã nguồn C++ khởi tạo ứng dụng và xử lý dữ liệu
-├── frontend/
-│   ├── public/              # Tài nguyên tĩnh phục vụ ứng dụng web
-│   ├── src/
-│   │   ├── assets/          # Hình ảnh, phông chữ và biểu tượng giao diện
-│   │   └── components/      # Các thành phần giao diện React tái sử dụng
-│   └── dist/                # Kết quả đóng gói giao diện web sinh tự động
-├── report/
-│   ├── assets/              # Hình ảnh, bảng biểu và nhận diện đồ họa của báo cáo
-│   ├── backmatter/          # Tài liệu tham khảo và phụ lục
-│   ├── chapters/            # Nội dung chi tiết các chương
-│   ├── config/              # Thiết lập định dạng LaTeX và thông tin báo cáo
-│   └── frontmatter/         # Trang bìa, lời nói đầu và mục lục
-└── build/                   # Sản phẩm biên dịch CMake và Qt sinh tự động
+|-- .github/                # Thiết lập cộng tác và quy trình kiểm tra trên GitHub
+|-- backend/
+|   |-- qml/                 # Cửa sổ Qt Quick và vùng hiển thị giao diện web
+|   \-- src/                 # Mã nguồn C++ khởi tạo ứng dụng và xử lý dữ liệu
+|-- frontend/
+|   |-- public/              # Tài nguyên tĩnh phục vụ ứng dụng web
+|   |-- src/
+|   |   |-- assets/          # Hình ảnh, phông chữ và biểu tượng giao diện
+|   |   \-- components/      # Các thành phần giao diện React tái sử dụng
+|   \-- dist/                # Kết quả đóng gói giao diện web sinh tự động
+|-- report/
+|   |-- assets/              # Hình ảnh, bảng biểu và nhận diện đồ họa của báo cáo
+|   |-- backmatter/          # Tài liệu tham khảo và phụ lục
+|   |-- chapters/            # Nội dung chi tiết các chương
+|   |-- config/              # Thiết lập định dạng LaTeX và thông tin báo cáo
+|   \-- frontmatter/         # Trang bìa, lời nói đầu và mục lục
+\-- build/                   # Sản phẩm biên dịch CMake và Qt sinh tự động
 \end{lstlisting}
 
 Vai trò của từng khu vực thư mục trong dự án được phân định cụ thể như sau:
@@ -75,9 +72,6 @@ Quá trình phối hợp giữa mô-đun giao diện Vite React, ứng dụng n�
     \item \textbf{Biên dịch tài liệu báo cáo}: Toàn bộ mã nguồn báo cáo trong thư mục \code{report} được biên dịch độc lập thông qua hệ thống XeLaTeX để xuất ra tệp tài liệu PDF hoàn chỉnh, hoàn toàn tách biệt khỏi đường chạy và gói cài đặt của phần mềm WordSprint.
 \end{itemize}
 
-% -------------------------------------------------
-% 3.2 Kiến trúc tổng thể
-% -------------------------------------------------
 \section{Kiến trúc tổng thể}
 \label{sec:overall_architecture}
 WordSprint là một ứng dụng desktop được chia thành hai phân hệ chính:
@@ -101,9 +95,6 @@ Kiến trúc được mô tả bằng sơ đồ sau (được thể hiện bằn
 \end{tabularx}
 \end{table}
 
-% -------------------------------------------------
-% 3.3 Thiết kế hướng đối tượng
-% -------------------------------------------------
 \section{Thiết kế hướng đối tượng}
 \label{sec:oop_design}
 Kiến trúc OOP được áp dụng chủ yếu ở phía backend. Các lớp chính được liệt kê dưới đây:
@@ -148,9 +139,6 @@ Kiến trúc OOP được áp dụng chủ yếu ở phía backend. Các lớp c
     \item \textbf{Lưu trữ}: Dữ liệu được ghi/đọc dưới dạng JSON trong thư mục \code{data/profiles}.
 \end{itemize}
 
-% -------------------------------------------------
-% 3.4 Luồng xử lý nghiệp vụ và giao thức giao tiếp
-% -------------------------------------------------
 \section{Luồng xử lý nghiệp vụ và giao thức giao tiếp}
 \label{sec:workflow}
 Quy trình thực thi một vòng chơi được mô tả theo các bước sau (sơ đồ tuần tự):
@@ -192,9 +180,6 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
 }
 \end{lstlisting}
 
-% -------------------------------------------------
-% 3.5 Lưu trữ dữ liệu
-% -------------------------------------------------
 \section{Lưu trữ dữ liệu}
 \label{sec:data_storage}
 \begin{itemize}
@@ -203,9 +188,6 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
     \item \textbf{Hồ sơ người dùng}: Tệp JSON riêng trong \code{data/profiles/<userName>.json} lưu lịch sử puzzle, mức độ hoàn thành và thành tích.
 \end{itemize}
 
-% -------------------------------------------------
-% 3.6 Kết luận
-% -------------------------------------------------
 \section{Kết luận}
 \label{sec:architecture_conclusion}
 Kiến trúc WordSprint tách rời rõ ràng giữa backend C++/Qt và frontend React, cho phép tận dụng ưu điểm hiệu năng gốc và hệ sinh thái web. Thiết kế OOP và các mẫu thiết kế (Factory Method, Singleton cho \code{ScoreManager}) giúp mở rộng dễ dàng, trong khi giao thức JSON/QtWebChannel đảm bảo truyền thông tin nhanh chóng và bảo trì tốt.

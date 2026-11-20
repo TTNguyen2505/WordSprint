@@ -18,6 +18,7 @@ If you already cloned the repository, run `cd report` from its root.
 ## Requirements
 
 - Windows with a TeX distribution that provides **XeLaTeX** and **BibTeX**. [MiKTeX](https://miktex.org/download) is one option.
+- The CTAN `tex-gyre` and `tex-gyre-math` packages for report fonts, plus `unicode-math` for the math font configuration.
 - The LaTeX packages used by the document. With MiKTeX, enable automatic installation of missing packages in MiKTeX Console, or install missing packages when prompted.
 - A PDF viewer. If a viewer locks `main.pdf` and prevents it from being rewritten, close the viewer during compilation or use a viewer that supports file reload, such as a browser or SumatraPDF.
 
