@@ -7,7 +7,7 @@ import Toggle from "./Toggle";
  *
  * Props:
  *   - title (string) – header text, defaults to "Title".
- *   - enabled (boolean) – enables/disables the slider and its Toggle, defaults to true.
+ *   - enabled (boolean) – enables/disables the slider, defaults to true.
  *   - onToggle (function) – called with the new enabled state when the Toggle is clicked.
  *   - value (number) – current numeric value, defaults to 50.
  *   - min (number) – minimum value, defaults to 0.
@@ -15,6 +15,7 @@ import Toggle from "./Toggle";
  *   - step (number) – step interval, defaults to 1.
  *   - onChange (function) – called with the updated value when the range changes.
  *   - className (string) – optional extra Tailwind classes for the outer card.
+ *   - id (string) – optional id / test id.
  */
 function Slider({
   title = "Title",
@@ -26,6 +27,7 @@ function Slider({
   step = 1,
   onChange,
   className,
+  id,
 }) {
   const isDisabled = !enabled;
 
@@ -33,9 +35,9 @@ function Slider({
   const clampedValue = Math.min(Math.max(value, min), max);
   const percent = ((clampedValue - min) / (max - min)) * 100;
 
-  const handleToggle = () => {
+  const handleToggle = (nextState) => {
     if (typeof onToggle === "function") {
-      onToggle(!enabled);
+      onToggle(nextState);
     }
   };
 
@@ -46,42 +48,49 @@ function Slider({
     }
   };
 
-  // Styling based on enabled/disabled state.
-  const cardBorder = isDisabled ? "border-gray-400" : "border-black";
-  const cardShadow = isDisabled ? "" : "shadow-elevation-200";
+  // Styling based on enabled/disabled state using semantic tokens from index.css
+  const cardBorder = isDisabled ? "border-stroke-disabled" : "border-stroke-default";
+  const cardShadow = isDisabled ? "shadow-elevation-0" : "shadow-elevation-200";
   const titleColor = isDisabled ? "text-content-muted" : "text-content-primary";
-  const trackBorder = isDisabled ? "border-gray-400" : "border-black";
-  const fillColor = isDisabled ? "bg-surface-disabled" : "bg-black";
-  const thumbBorder = isDisabled ? "border-gray-400" : "border-black";
-  const gripColor = isDisabled ? "text-content-muted" : "text-content-primary";
+  const trackBorder = isDisabled ? "border-stroke-disabled" : "border-stroke-default";
+  const fillColor = isDisabled ? "bg-surface-disabled" : "bg-surface-inverse";
+  const thumbBorder = isDisabled ? "border-stroke-disabled" : "border-stroke-default";
+  const gripColor = isDisabled ? "bg-stroke-disabled" : "bg-surface-inverse";
 
   return (
     <div
+      id={id}
+      data-testid={id}
       className={twMerge(
         clsx(
-          "flex flex-col gap-y-4 rounded-none border-2",
+          "flex flex-col justify-between rounded-none border-2 bg-surface-panel p-[20px] transition-all duration-150 box-border",
           cardBorder,
           cardShadow,
-          "bg-white p-4",
+          "w-[640px] max-w-full h-[126px]",
           className
-        ),
-        "max-w-[426px] w-full"
+        )
       )}
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className={twMerge("font-bold text-base", titleColor)}>{title}</h2>
+        <h2
+          className={twMerge(
+            "font-sans font-bold text-heading-lg tracking-tight",
+            titleColor
+          )}
+        >
+          {title}
+        </h2>
         <Toggle
           enabled={enabled}
           onChange={handleToggle}
-          disabled={isDisabled}
           ariaLabel={title + " toggle"}
         />
       </div>
 
       {/* Slider track */}
-      <div className="relative flex items-center">
-        {/* Hidden range input for accessibility */}
+      <div className="relative flex items-center h-[32px] w-full">
+        {/* Hidden range input for accessibility and drag interaction */}
         <input
           type="range"
           min={min}
@@ -90,15 +99,18 @@ function Slider({
           value={clampedValue}
           onChange={handleRangeChange}
           disabled={isDisabled}
-          className="absolute inset-0 w-full h-full opacity-0 appearance-none cursor-pointer"
+          aria-label={title}
+          className={twMerge(
+            "absolute inset-0 z-20 h-full w-full opacity-0 appearance-none",
+            isDisabled ? "cursor-not-allowed" : "cursor-pointer"
+          )}
         />
         {/* Track background */}
         <div
           className={twMerge(
             clsx(
-              "w-full h-[28px] rounded-none border-2",
-              trackBorder,
-              "bg-white p-[2px]"
+              "w-full h-[32px] rounded-none border-2 bg-surface-panel relative overflow-hidden box-border",
+              trackBorder
             )
           )}
         >
@@ -106,31 +118,31 @@ function Slider({
           <div
             className={twMerge(
               clsx(
-                "h-full",
-                fillColor,
-                "transition-width duration-150 ease-snap"
+                "h-full transition-[width] duration-100 ease-snap",
+                fillColor
               )
             )}
             style={{ width: `${percent}%` }}
           />
         </div>
-        {/* Thumb handle */
+        {/* Thumb handle */}
         <div
           className={twMerge(
             clsx(
-              "size-[24px] bg-white border-2",
-              thumbBorder,
-              "absolute top-1/2 left-0 transform -translate-y-1/2 transition-transform duration-150 ease-snap",
-              isDisabled && "opacity-60"
+              "size-[24px] bg-surface-panel border-2 absolute top-1/2 pointer-events-none z-10 transition-[left,transform] duration-100 ease-snap box-border flex items-center justify-center",
+              thumbBorder
             )
           )}
-          style={{ left: `calc(${percent}% - 12px)` }} // 12px = half thumb size
+          style={{
+            left: `${percent}%`,
+            transform: `translate(-${percent}%, -50%)`,
+          }}
         >
           {/* Grip lines */}
-          <div className="flex h-full items-center justify-center gap-[2px]" aria-hidden="true">
-            <span className={twMerge("w-[2px] h-[12px]", gripColor)}></span>
-            <span className={twMerge("w-[2px] h-[12px]", gripColor)}></span>
-            <span className={twMerge("w-[2px] h-[12px]", gripColor)}></span>
+          <div className="flex h-[12px] items-center justify-center gap-[2px]" aria-hidden="true">
+            <span className={twMerge("w-[2px] h-[12px] block", gripColor)} />
+            <span className={twMerge("w-[2px] h-[12px] block", gripColor)} />
+            <span className={twMerge("w-[2px] h-[12px] block", gripColor)} />
           </div>
         </div>
       </div>
