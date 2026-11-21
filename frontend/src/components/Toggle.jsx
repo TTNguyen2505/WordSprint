@@ -21,11 +21,12 @@ function Toggle({
   const isDisabled = disabled;
   const isChecked = enabled;
 
-  // Background based on state – use existing surface colour tokens.
+  // Background, borders and shadows based on state using semantic tokens from index.css
   const trackBg = isChecked ? "bg-surface-primary-cta" : "bg-surface-disabled";
-
-  // Thumb offset – 0px when off, 28px when on (track width 60px, padding 4px, thumb 24px).
-  const thumbTranslate = isChecked ? "translate-x-[28px]" : "translate-x-0";
+  const trackBorder = isChecked ? "border-stroke-default" : "border-stroke-disabled";
+  const trackShadow = isChecked ? "shadow-elevation-100" : "shadow-elevation-0";
+  const thumbBorder = isChecked ? "border-stroke-default" : "border-stroke-disabled";
+  const thumbTranslate = isChecked ? "translate-x-[26px]" : "translate-x-0";
 
   const handleClick = () => {
     if (!isDisabled && typeof onChange === "function") {
@@ -43,23 +44,23 @@ function Toggle({
       onClick={handleClick}
       className={twMerge(
         clsx(
-          "inline-flex items-center border-2 border-black",
-          "shadow-elevation-200",
-          "rounded-none",
+          "inline-flex items-center border-2 rounded-none transition-all duration-150 box-border",
+          trackBorder,
           trackBg,
-          !isDisabled && "hover:shadow-elevation-300 cursor-pointer",
+          trackShadow,
+          !isDisabled && "cursor-pointer hover:brightness-105 active:translate-x-[1px] active:translate-y-[1px]",
           isDisabled && "cursor-not-allowed opacity-60",
           className
         ),
-        "w-[60px] h-[34px] p-[4px]"
+        "w-[60px] h-[34px] p-[3px]"
       )}
       data-enabled={isChecked}
     >
       <span
         className={twMerge(
           clsx(
-            "size-[24px] bg-white border-2 border-black",
-            "transition-transform duration-200 ease-snap",
+            "size-[24px] bg-surface-panel border-2 transition-transform duration-200 ease-snap block",
+            thumbBorder,
             thumbTranslate
           )
         )}
