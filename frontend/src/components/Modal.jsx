@@ -82,8 +82,8 @@ function Modal({
             "w-full",
             maxWidth,
             "min-h-[360px] max-h-[90vh] overflow-y-auto",
-            "bg-white border border-black rounded-none",
-            "shadow-[4px_4px_0px_#000]",
+            "bg-surface-panel border-2 border-stroke-default rounded-none",
+            "shadow-elevation-200",
             "p-6",
             className
           )
