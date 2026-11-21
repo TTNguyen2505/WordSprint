@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Window
 import QtWebEngine
+import QtWebChannel
 
 Window {
     id: root
@@ -12,11 +13,13 @@ Window {
     title: qsTr("WordSprint")
 
     property url initialUrl: "http://localhost:5173"
+    property QtObject webChannel: null
 
     WebEngineView {
         id: webEngineView
         anchors.fill: parent
         url: root.initialUrl
+        webChannel: root.webChannel
 
         settings.accelerated2dCanvasEnabled: true
         settings.webGLEnabled: true

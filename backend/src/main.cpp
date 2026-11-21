@@ -4,9 +4,15 @@
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QQmlContext>
 #include <QUrl>
+#include <QWebChannel>
+
+#if __has_include(<QtWebEngineQuick/qtwebenginequickglobal.h>)
 #include <QtWebEngineQuick/qtwebenginequickglobal.h>
+#define HAS_WEBENGINE 1
+#endif
+
+#include "BridgeController.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
@@ -15,7 +21,9 @@ int main(int argc, char *argv[]) {
 
     QCoreApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
 
+#if HAS_WEBENGINE
     QtWebEngineQuick::initialize();
+#endif
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
@@ -70,9 +78,19 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    // Set up BridgeController and QWebChannel
+    BridgeController bridgeController;
+    QWebChannel webChannel;
+    webChannel.registerObject(QStringLiteral("bridgeController"), &bridgeController);
+    webChannel.registerObject(QStringLiteral("bridge"), &bridgeController);
+    webChannel.registerObject(QStringLiteral("backend"), &bridgeController);
+
+    // Initialise QQmlApplicationEngine with initialProperties (modern Qt, replacing setContextProperty)
     QQmlApplicationEngine engine;
-    engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl}});
-    engine.rootContext()->setContextProperty(QStringLiteral("initialUrl"), initialUrl);
+    engine.setInitialProperties({
+        {QStringLiteral("initialUrl"), initialUrl},
+        {QStringLiteral("webChannel"), QVariant::fromValue(&webChannel)}
+    });
 
     const QUrl url(QStringLiteral("qrc:/qt/qml/WordSprint/qml/Main.qml"));
     QObject::connect(
