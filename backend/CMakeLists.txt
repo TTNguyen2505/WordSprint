@@ -7,10 +7,13 @@ find_package(Qt6 REQUIRED COMPONENTS
     Gui
     Qml
     Quick
-    WebEngineQuick
-    WebEngineCore
     WebChannel
     Sql
+)
+
+find_package(Qt6 OPTIONAL_COMPONENTS
+    WebEngineQuick
+    WebEngineCore
 )
 
 qt_standard_project_setup()
@@ -45,6 +48,8 @@ file(GLOB_RECURSE FRONTEND_DIST_FILES
 
 qt_add_executable(WordSprint
     src/main.cpp
+    src/BridgeController.h
+    src/BridgeController.cpp
 )
 
 set_target_properties(WordSprint PROPERTIES
@@ -67,15 +72,22 @@ qt_add_qml_module(WordSprint
         qml/Main.qml
 )
 
+set(OPTIONAL_WEBENGINE_LIBS "")
+if(TARGET Qt6::WebEngineQuick)
+    list(APPEND OPTIONAL_WEBENGINE_LIBS Qt6::WebEngineQuick)
+endif()
+if(TARGET Qt6::WebEngineCore)
+    list(APPEND OPTIONAL_WEBENGINE_LIBS Qt6::WebEngineCore)
+endif()
+
 target_link_libraries(WordSprint PRIVATE
     Qt6::Core
     Qt6::Gui
     Qt6::Qml
     Qt6::Quick
-    Qt6::WebEngineQuick
-    Qt6::WebEngineCore
     Qt6::WebChannel
     Qt6::Sql
+    ${OPTIONAL_WEBENGINE_LIBS}
 )
 
 if(WIN32)

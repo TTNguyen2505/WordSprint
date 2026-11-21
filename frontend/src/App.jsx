@@ -1,5 +1,6 @@
 import TextInput from "@/components/TextInput.jsx";
 import Button from "@/components/Button.jsx";
+import { useQtBridge } from "@/hooks/useQtBridge.js";
 
 const states = [
     {
@@ -35,6 +36,8 @@ const buttonVariants = [
 const buttonStates = ["default", "hover", "pressed"];
 
 function App() {
+    useQtBridge();
+
     return (
         <main className="flex min-h-screen flex-col items-center gap-2xl bg-surface-canvas px-md py-lg font-sans text-content-primary sm:p-lg">
             <section
