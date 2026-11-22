@@ -63,7 +63,7 @@ function Slider({
       data-testid={id}
       className={twMerge(
         clsx(
-          "flex flex-col justify-between rounded-none border-2 bg-surface-panel p-[20px] transition-all duration-150 box-border",
+          "flex flex-col justify-between rounded-none border-2 bg-surface-panel p-4 transition-all duration-150 box-border",
           cardBorder,
           cardShadow,
           "w-[640px] max-w-full h-[126px]",
@@ -75,7 +75,7 @@ function Slider({
       <div className="flex items-center justify-between">
         <h2
           className={twMerge(
-            "font-sans font-bold text-heading-lg tracking-tight",
+            "font-sans font-bold text-[length:var(--primitive-font-size-24)] leading-[var(--primitive-line-height-30)] tracking-tight",
             titleColor
           )}
         >

@@ -24,8 +24,8 @@ function ModalTitle({
 
   const baseClasses = clsx(
     "font-sans font-bold uppercase tracking-tight text-content-primary",
-    "bg-transparent m-0",
-    "text-[length:var(--primitive-font-size-36)] leading-[var(--primitive-line-height-40)]"
+    "text-[length:var(--primitive-font-size-36)] leading-[var(--primitive-line-height-40)]",
+    "bg-transparent m-0"
   );
 
   return (

@@ -82,7 +82,7 @@ function Modal({
             "w-full",
             maxWidth,
             "min-h-[360px] max-h-[90vh] overflow-y-auto",
-            "bg-surface-panel border-2 border-stroke-default rounded-none",
+            "bg-surface-panel border border-stroke-default rounded-none",
             "shadow-elevation-200",
             "p-6",
             className

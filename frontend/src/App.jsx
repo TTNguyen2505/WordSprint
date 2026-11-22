@@ -1,160 +1,101 @@
 import React, { useState, useEffect, useCallback } from "react";
 import Modal from "./components/Modal.jsx";
 import ModalTitle from "./components/ModalTitle.jsx";
-import Slider from "./components/Slider.jsx";
-import InfoPill from "./components/InfoPill.jsx";
+import Navigation from "./components/Navigation.jsx";
+import LeaderboardRecord from "./components/LeaderboardRecord.jsx";
 import Button from "./components/Button.jsx";
-import PlayIcon from "./assets/icons/play.svg?react";
-import ReplayIcon from "./assets/icons/replay.svg?react";
-import ExitIcon from "./assets/icons/exit.svg?react";
+import CloseIcon from "./assets/icons/close.svg?react";
 
-// Default initial simulation state (Figma values: Quiz Solved 3/8, Time left 8:00, Total Score 450)
-const DEFAULT_GAME_STATE = {
-  solved: 3,
-  totalQuiz: 8,
-  timeLeft: 480, // 480s = 8:00
-  score: 450,
+// Mock datasets for the 5 tabs (not hardcoded in markup, loaded via state)
+const DEFAULT_LEADERBOARD_DATA = {
+  Overall: [
+    { rank: 1, player: "nguyen", score: 100000, playTime: "10:00", isCurrentPlayer: false },
+    { rank: 2, player: "nguyen_02", score: 150000, playTime: "10:00", isCurrentPlayer: true },
+    { rank: 3, player: "nguyen_03", score: 120000, playTime: "10:00", isCurrentPlayer: false },
+    { rank: 4, player: "nguyen_04", score: 120000, playTime: "10:00", isCurrentPlayer: false },
+    { rank: 5, player: "nguyen_05", score: 110000, playTime: "09:30", isCurrentPlayer: false },
+    { rank: 6, player: "nguyen_06", score: 95000, playTime: "08:45", isCurrentPlayer: false },
+    { rank: 7, player: "nguyen_07", score: 90000, playTime: "08:20", isCurrentPlayer: false },
+  ],
+  "Case 1": [
+    { rank: 1, player: "duy_bao", score: 45000, playTime: "02:15", isCurrentPlayer: false },
+    { rank: 2, player: "nguyen_02", score: 42000, playTime: "02:30", isCurrentPlayer: true },
+    { rank: 3, player: "van_dai", score: 39000, playTime: "02:45", isCurrentPlayer: false },
+    { rank: 4, player: "tuan_khang", score: 36000, playTime: "03:10", isCurrentPlayer: false },
+    { rank: 5, player: "xuan_tin", score: 31000, playTime: "03:40", isCurrentPlayer: false },
+  ],
+  "Case 2": [
+    { rank: 1, player: "tuan_khang", score: 62000, playTime: "03:05", isCurrentPlayer: false },
+    { rank: 2, player: "van_dai", score: 58000, playTime: "03:22", isCurrentPlayer: false },
+    { rank: 3, player: "duy_bao", score: 54000, playTime: "03:40", isCurrentPlayer: false },
+    { rank: 4, player: "nguyen_02", score: 51000, playTime: "04:00", isCurrentPlayer: true },
+  ],
+  "Case 3": [
+    { rank: 1, player: "xuan_tin", score: 78000, playTime: "04:10", isCurrentPlayer: false },
+    { rank: 2, player: "nguyen_02", score: 75000, playTime: "04:25", isCurrentPlayer: true },
+    { rank: 3, player: "duy_bao", score: 71000, playTime: "04:50", isCurrentPlayer: false },
+  ],
+  "Case 4": [], // Demonstrates required empty state
 };
 
-const DEFAULT_AUDIO_SETTINGS = {
-  bgm: { enabled: true, volume: 75 },
-  sfx: { enabled: false, volume: 75 },
-};
-
-function formatTimeLeft(secondsOrStr) {
-  if (typeof secondsOrStr === "string") return secondsOrStr;
-  if (typeof secondsOrStr === "number") {
-    const mins = Math.floor(secondsOrStr / 60);
-    const secs = secondsOrStr % 60;
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  }
-  return "0:00";
-}
-
-function formatQuizSolved(solved, total) {
-  if (typeof solved === "string" && solved.includes("/")) return solved;
-  return `${solved ?? 0}/${total ?? 0}`;
-}
+const TAB_ITEMS = ["Case 1", "Case 2", "Case 3", "Case 4", "Overall"];
 
 function App() {
   const [isOpen, setIsOpen] = useState(true);
-  const [gameState, setGameState] = useState(DEFAULT_GAME_STATE);
-  const [audioSettings, setAudioSettings] = useState(DEFAULT_AUDIO_SETTINGS);
+  const [activeTab, setActiveTab] = useState("Overall");
+  const [currentUserId, setCurrentUserId] = useState("nguyen_02");
+  const [records, setRecords] = useState(DEFAULT_LEADERBOARD_DATA["Overall"]);
 
   /**
-   * Flexible state receiver function.
-   * Can be invoked from game loops or testing scripts via window.updatePauseMenu(data)
-   * or window.renderPauseMenu(data).
+   * Flexible function to render leaderboard data dynamically.
+   * Can be invoked from external code/scripts via window.renderLeaderboard.
    */
-  const updatePauseMenu = useCallback((data) => {
-    if (!data) return;
-    if (
-      data.solved !== undefined ||
-      data.totalQuiz !== undefined ||
-      data.timeLeft !== undefined ||
-      data.score !== undefined
-    ) {
-      setGameState((prev) => ({
-        solved: data.solved ?? prev.solved,
-        totalQuiz: data.totalQuiz ?? prev.totalQuiz,
-        timeLeft: data.timeLeft ?? prev.timeLeft,
-        score: data.score ?? prev.score,
-      }));
+  const renderLeaderboard = useCallback((data, userId) => {
+    if (userId !== undefined) {
+      setCurrentUserId(userId);
     }
-    if (data.audioSettings) {
-      setAudioSettings((prev) => ({
-        bgm: {
-          enabled: data.audioSettings.bgm?.enabled ?? prev.bgm.enabled,
-          volume: data.audioSettings.bgm?.volume ?? prev.bgm.volume,
-        },
-        sfx: {
-          enabled: data.audioSettings.sfx?.enabled ?? prev.sfx.enabled,
-          volume: data.audioSettings.sfx?.volume ?? prev.sfx.volume,
-        },
-      }));
+    setRecords(Array.isArray(data) ? [...data] : []);
+  }, []);
+
+  /**
+   * Tab switch handler calling onTabChange callback.
+   */
+  const handleTabChange = useCallback((tabName) => {
+    setActiveTab(tabName);
+
+    // Call external callback if registered
+    if (typeof window.onTabChange === "function") {
+      window.onTabChange(tabName);
     }
-  }, []);
 
-  const handleAudioToggle = useCallback((channel, nextEnabled) => {
-    setAudioSettings((prev) => {
-      const updated = {
-        ...prev,
-        [channel]: { ...prev[channel], enabled: nextEnabled },
-      };
-      if (typeof window.onAudioSettingsChange === "function") {
-        window.onAudioSettingsChange(updated);
-      }
-      window.dispatchEvent(
-        new CustomEvent("audio-settings-changed", { detail: updated })
-      );
-      return updated;
-    });
-  }, []);
+    // Load corresponding tab dataset
+    const nextData = DEFAULT_LEADERBOARD_DATA[tabName] || [];
+    renderLeaderboard(nextData);
+  }, [renderLeaderboard]);
 
-  const handleAudioVolumeChange = useCallback((channel, nextVolume) => {
-    setAudioSettings((prev) => {
-      const updated = {
-        ...prev,
-        [channel]: { ...prev[channel], volume: nextVolume },
-      };
-      if (typeof window.onAudioSettingsChange === "function") {
-        window.onAudioSettingsChange(updated);
-      }
-      window.dispatchEvent(
-        new CustomEvent("audio-settings-changed", { detail: updated })
-      );
-      return updated;
-    });
-  }, []);
-
-  // Action button handlers
-  const handleResume = useCallback(() => {
+  const handleClose = useCallback(() => {
     setIsOpen(false);
-    if (typeof window.onResumeGame === "function") {
-      window.onResumeGame();
+    if (typeof window.onClose === "function") {
+      window.onClose();
     }
-    window.dispatchEvent(
-      new CustomEvent("game-resumed", { detail: { gameState, audioSettings } })
-    );
-  }, [gameState, audioSettings]);
+  }, []);
 
-  const handleReplay = useCallback(() => {
-    if (typeof window.onReplayGame === "function") {
-      window.onReplayGame();
-    }
-    window.dispatchEvent(
-      new CustomEvent("game-replay", { detail: { gameState, audioSettings } })
-    );
-  }, [gameState, audioSettings]);
-
-  const handleQuit = useCallback(() => {
-    if (typeof window.onQuitToMenu === "function") {
-      window.onQuitToMenu();
-    }
-    window.dispatchEvent(
-      new CustomEvent("game-quit", { detail: { gameState, audioSettings } })
-    );
-  }, [gameState, audioSettings]);
-
-  // Expose global methods for external modules and testing
+  // Expose global methods for external modules/tests
   useEffect(() => {
-    window.updatePauseMenu = updatePauseMenu;
-    window.renderPauseMenu = updatePauseMenu;
-    window.getPauseMenuState = () => ({ gameState, audioSettings, isOpen });
+    window.renderLeaderboard = renderLeaderboard;
+    window.setLeaderboardTab = handleTabChange;
     return () => {
-      delete window.updatePauseMenu;
-      delete window.renderPauseMenu;
-      delete window.getPauseMenuState;
+      delete window.renderLeaderboard;
+      delete window.setLeaderboardTab;
     };
-  }, [updatePauseMenu, gameState, audioSettings, isOpen]);
+  }, [renderLeaderboard, handleTabChange]);
 
   return (
     <main className="flex min-h-screen w-full items-center justify-center bg-surface-canvas p-4 font-sans text-content-primary">
       {/* Re-open button if modal is closed */}
       {!isOpen && (
         <Button
-          id="btn-open-modal"
-          label="Open Pause Menu"
+          label="Open Leaderboard"
           variant="primary"
           size="default"
           onClick={() => setIsOpen(true)}
@@ -162,131 +103,92 @@ function App() {
         />
       )}
 
-      {/* GAME PAUSED Modal */}
+      {/* HALL OF FAME Leaderboard Modal */}
       <Modal
         isOpen={isOpen}
-        onClose={handleResume}
-        maxWidth="max-w-[740px]"
-        className="w-[740px] max-w-full h-[710px] min-h-[710px] max-h-[95vh] border-2 border-stroke-default p-[32px] sm:p-[48px] shadow-elevation-200 flex flex-col justify-between items-center bg-surface-panel"
+        onClose={handleClose}
+        maxWidth="max-w-[752px]"
+        className="w-[752px] min-h-[auto] max-h-[92vh] border-2 border-black p-8 sm:p-12 shadow-[4px_4px_0px_#000] flex flex-col items-center gap-8"
         overlayClassName="bg-black/50 backdrop-blur-[20px]"
         closeOnBackdropClick={true}
         closeOnEscape={true}
       >
-        {/* Header with Title */}
-        <header className="flex w-full items-center justify-center pt-[8px]">
-          <ModalTitle
-            as="h1"
-            className="text-center font-sans font-bold uppercase tracking-tight text-content-primary"
-          >
-            GAME PAUSED
+        {/* 1. Header with Title */}
+        <header className="flex w-full items-center justify-center">
+          <ModalTitle as="h1" className="text-center font-sans text-4xl font-bold uppercase tracking-tight text-black">
+            HALL OF FAME
           </ModalTitle>
         </header>
 
-        {/* 1. Stage States: 3 Info Pill stats boxes */}
-        <section
-          className="flex w-full max-w-[640px] items-center justify-between gap-[16px]"
-          aria-label="Game Statistics"
-        >
-          <InfoPill
-            id="pill-quiz-solved"
-            label="Quiz Solved"
-            value={formatQuizSolved(gameState.solved, gameState.totalQuiz)}
-            showLeadingIcon={false}
-            showTrailingIcon={false}
-            className="flex-1 justify-center shadow-elevation-200"
-          />
-          <InfoPill
-            id="pill-time-left"
-            label="Time left"
-            value={formatTimeLeft(gameState.timeLeft)}
-            showLeadingIcon={false}
-            showTrailingIcon={false}
-            className="flex-1 justify-center shadow-elevation-200"
-          />
-          <InfoPill
-            id="pill-total-score"
-            label="Total Score"
-            value={gameState.score}
-            showLeadingIcon={false}
-            showTrailingIcon={false}
-            className="flex-1 justify-center shadow-elevation-200"
+        {/* 2. Navigation Tabs Bar */}
+        <section className="flex w-full justify-center">
+          <Navigation
+            items={TAB_ITEMS}
+            activeTab={activeTab}
+            onChange={handleTabChange}
+            className="w-[652px] max-w-full border-2 border-black p-1.5 shadow-[4px_4px_0px_#000]"
           />
         </section>
 
-        {/* 2. Audio Controls: Background Music and Sound Effect cards */}
-        <section
-          className="flex w-full max-w-[640px] flex-col items-center gap-[24px]"
-          aria-label="Audio Settings"
-        >
-          {/* Background Music Card */}
-          <Slider
-            id="bgm-slider-card"
-            title={`Background Music (${audioSettings.bgm.volume}%)`}
-            enabled={audioSettings.bgm.enabled}
-            value={audioSettings.bgm.volume}
-            min={0}
-            max={100}
-            step={1}
-            onToggle={(enabled) => handleAudioToggle("bgm", enabled)}
-            onChange={(volume) => handleAudioVolumeChange("bgm", volume)}
-            className="w-[640px] max-w-full"
-          />
-
-          {/* Sound Effect Card */}
-          <Slider
-            id="sfx-slider-card"
-            title={`Sound Effect (${audioSettings.sfx.volume}%)`}
-            enabled={audioSettings.sfx.enabled}
-            value={audioSettings.sfx.volume}
-            min={0}
-            max={100}
-            step={1}
-            onToggle={(enabled) => handleAudioToggle("sfx", enabled)}
-            onChange={(volume) => handleAudioVolumeChange("sfx", volume)}
-            className="w-[640px] max-w-full"
-          />
-        </section>
-
-        {/* 3. Action Navigation Buttons */}
-        <footer
-          className="flex w-full max-w-[640px] flex-col gap-[16px] pb-[8px]"
-          aria-label="Modal Actions"
-        >
-          {/* Main Action: RESUME GAME */}
-          <Button
-            id="btn-resume-game"
-            label="RESUME GAME"
-            variant="primary"
-            size="large"
-            leadingIcon={<PlayIcon className="size-[20px] [&_path]:fill-current" />}
-            showTrailingIcon={false}
-            onClick={handleResume}
-            className="w-full h-[52px] border-2 border-stroke-default shadow-elevation-200 text-button-lg font-bold bg-surface-primary-cta"
-          />
-
-          {/* Secondary Actions: REPLAY and QUIT TO MENU */}
-          <div className="flex w-full items-center justify-between gap-[24px]">
-            <Button
-              id="btn-replay-game"
-              label="REPLAY"
-              variant="secondary"
-              size="large"
-              leadingIcon={<ReplayIcon className="size-[20px] [&_path]:fill-current" />}
-              showTrailingIcon={false}
-              onClick={handleReplay}
-              className="flex-1 h-[52px] border-2 border-stroke-default shadow-elevation-200 text-button-lg font-bold"
+        {/* 3. Leaderboard Table Container */}
+        <section className="flex w-full justify-center">
+          <div className="w-[600px] max-w-full border border-black bg-white flex flex-col">
+            {/* Header Row */}
+            <LeaderboardRecord
+              variant="header"
+              rank="RANK"
+              playerName="PLAYER"
+              score="SCORE"
+              playTime="PLAY TIME"
             />
-            <Button
-              id="btn-quit-menu"
-              label="QUIT TO MENU"
-              variant="destructive"
-              size="large"
-              leadingIcon={<ExitIcon className="size-[20px] [&_path]:fill-content-inverse" />}
-              showTrailingIcon={false}
-              onClick={handleQuit}
-              className="flex-1 h-[52px] border-2 border-stroke-default shadow-elevation-200 text-button-lg font-bold bg-surface-danger text-content-inverse"
-            />
+
+            {/* Dynamic Data Rows Body */}
+            <div id="leaderboard-table-body" className="max-h-[336px] overflow-y-auto flex flex-col divide-y divide-black">
+              {records.length === 0 ? (
+                <div className="flex h-36 items-center justify-center font-sans text-base font-bold text-content-muted uppercase tracking-wider">
+                  Chưa có dữ liệu
+                </div>
+              ) : (
+                records.map((item, index) => {
+                  const rankNum = typeof item.rank === "number" ? item.rank : parseInt(item.rank, 10);
+                  const isTop1 = rankNum === 1 || item.rank === "01" || item.rank === "1" || (index === 0 && item.rank == 1);
+                  const isYou = Boolean(
+                    item.isCurrentPlayer === true ||
+                    (currentUserId && String(item.player).trim() === String(currentUserId).trim())
+                  );
+
+                  let variant = "default";
+                  if (isTop1) variant = "champion";
+                  if (isYou) variant = "you";
+
+                  return (
+                    <LeaderboardRecord
+                      key={`${item.rank}-${item.player}-${index}`}
+                      variant={variant}
+                      rank={item.rank}
+                      playerName={item.player}
+                      score={item.score}
+                      playTime={item.playTime}
+                      badgeLabel={isTop1 ? "CHAMPION" : isYou ? "YOU" : undefined}
+                    />
+                  );
+                })
+              )}
+            </div>
           </div>
+        </section>
+
+        {/* 4. Footer with Close Button */}
+        <footer className="flex w-full items-center justify-center pt-2">
+          <Button
+            label="Close"
+            variant="secondary"
+            size="default"
+            leadingIcon={<CloseIcon className="size-3.5" />}
+            showTrailingIcon={false}
+            onClick={handleClose}
+            className="w-[120px] h-[40px] border-2 border-black shadow-[4px_4px_0px_#000] text-sm font-bold"
+          />
         </footer>
       </Modal>
     </main>
