@@ -2,7 +2,7 @@ import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import React from "react";
 import TextButton from "./TextButton";
-import UserIcon from "../assets/icons/user.svg?react";
+import UserIcon from "../assets/icons/account.svg?react";
 
 /**
  * Neo‑Brutalism ProfileCard component.
@@ -33,25 +33,25 @@ function ProfileCard({
     <div
       className={twMerge(
         clsx(
-          "flex items-center justify-between gap-3 rounded-none border-2 border-black",
-          "shadow-elevation-200 bg-white p-4",
-          "max-w-[320px] w-full",
+          "flex items-center justify-between gap-[16px] rounded-none border-2 border-black",
+          "shadow-elevation-200 bg-white p-[20px]",
+          "max-w-[360px] w-full",
           className
         )
       )}
     >
       {/* Left side: icon badge + text */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-[12px]">
         {/* Icon badge */}
-        <div className="flex shrink-0 items-center justify-center w-11 h-11 rounded-none border-2 border-black bg-surface-primary-cta shadow-elevation-200">
-          {icon ?? <UserIcon className="size-[22px] text-black" aria-hidden="true" />}
+        <div className="flex shrink-0 items-center justify-center w-[44px] h-[44px] rounded-none border-2 border-black bg-surface-primary-cta shadow-elevation-200">
+          {icon ?? <UserIcon className="size-[24px] text-black" aria-hidden="true" />}
         </div>
         {/* Text column */}
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col gap-[4px]">
           <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-black">
             {label}
           </span>
-          <span className="text-sm font-mono font-medium text-black whitespace-nowrap">
+          <span className="text-sm font-mono font-bold text-black whitespace-nowrap">
             {username}
           </span>
         </div>
@@ -61,7 +61,7 @@ function ProfileCard({
       <TextButton
         label={actionLabel}
         onClick={handleClick}
-        className="self-end"
+        className="self-center"
       />
     </div>
   );

@@ -88,7 +88,7 @@ function StageCard({
     <div
       className={twMerge(
         clsx(
-          "flex flex-col gap-3 p-4 rounded-none border-2",
+          "flex flex-col gap-[12px] p-[16px] rounded-none border-2",
           cardBorder,
           cardBg,
           cardShadow,
@@ -98,50 +98,50 @@ function StageCard({
       )}
     >
       {/* Header */}
-      <div className="flex items-center justify-between gap-2">
-        <span className="px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-black">
+      <div className="flex items-center justify-between gap-[8px]">
+        <span className="px-[8px] py-[4px] text-[11px] font-mono font-bold uppercase tracking-wider text-black">
           {stageId}
         </span>
         <Badge
           variant={badgeVariant}
           disabled={isLocked}
-          className="px-2 py-1"
+          className="px-[8px] py-[3px]"
         >
           {badgeIcon} {badgeLabel}
         </Badge>
       </div>
 
       {/* Image & overlay */}
-      <div className="relative w-full aspect-[16/9] overflow-hidden rounded-none">
+      <div className="relative w-full aspect-[16/9] min-h-[130px] overflow-hidden rounded-none border-2 border-black bg-surface-primary-subtle">
         {imageSrc && (
           <img src={imageSrc} alt={imageAlt} className={imageClasses} />
         )}
         {/* Overlay box */}
-        <div className="absolute inset-0 flex items-center justify-center p-3">
+        <div style={{ top: 0, left: 0, width: "100%", height: "100%" }} className="absolute flex items-center justify-center p-[12px]">
           <div
             className={twMerge(
               clsx(
-                "px-5 py-2.5 text-center rounded-none border-2 border-black bg-white",
+                "px-[16px] py-[8px] text-center rounded-none border-2 border-black bg-white",
                 "shadow-elevation-200"
               )
             )}
           >
             <div className="text-base font-bold leading-tight text-black">{topic}</div>
-            <div className="mt-0.5 text-xs font-mono text-black">{level}</div>
+            <div className="mt-[2px] text-xs font-mono font-bold text-content-secondary">{level}</div>
           </div>
         </div>
       </div>
 
       {/* Divider */}
-      <hr className={twMerge(clsx("border-t", dividerBorder))} />
+      <hr className={twMerge(clsx("border-t-2 m-0", dividerBorder))} />
 
       {/* Footer */}
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-[8px]">
         {/* Points chip */}
         <span
           className={twMerge(
             clsx(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold rounded-none",
+              "inline-flex items-center gap-[6px] px-[10px] py-[4px] text-xs font-mono font-bold rounded-none",
               chipBg,
               chipBorder,
               chipShadow,
@@ -160,7 +160,7 @@ function StageCard({
           disabled={isLocked}
           className={twMerge(
             clsx(
-              "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-none",
+              "inline-flex items-center gap-[6px] px-[12px] py-[6px] text-xs font-bold rounded-none",
               actionBg,
               actionText,
               actionBorder,
