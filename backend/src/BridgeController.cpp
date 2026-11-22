@@ -1,29 +1,15 @@
 #include "BridgeController.h"
 
-#include <QCoreApplication>
 #include <QDebug>
-#include <QDir>
-#include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QSqlQuery>
+#include <QStringList>
 
 #include <algorithm>
 
-BridgeController::BridgeController(QObject *parent) : QObject(parent) {
-    // Ensure default SQLite database connection is available if needed
-    if (!QSqlDatabase::contains(QSqlDatabase::defaultConnection)) {
-        QSqlDatabase db = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"));
-        const QString dbPath = QCoreApplication::applicationDirPath() + QStringLiteral("/wordsprint.db");
-        db.setDatabaseName(dbPath);
-        if (!db.open()) {
-            qDebug() << "BridgeController: Default SQLite DB open notice:" << db.lastError().text();
-        }
-    }
-}
+BridgeController::BridgeController(IVocabularyRepository* repository, QObject *parent)
+    : QObject(parent), m_repository(repository) {}
 
 QJsonObject BridgeController::parseJson(const QString &jsonStr) const {
     const QString trimmed = jsonStr.trimmed();
@@ -51,53 +37,11 @@ QString BridgeController::buildErrorResponse(const QString &errorMessage) const 
     return buildResponse(obj);
 }
 
-QJsonArray BridgeController::generateFallbackWords(int stageId, int count) const {
-    Q_UNUSED(stageId);
-    QJsonArray words;
-
-    struct WordSample {
-        const char *word;
-        const char *hint;
-        const char *cefr;
-        const char *image;
-        const char *audio;
-    };
-
-    static const WordSample samplePool[] = {
-        {"APPLE", "A common red or green fruit that keeps the doctor away.", "A1", "assets/quiz/apple.png", "assets/audio/apple.mp3"},
-        {"BREAD", "A staple food prepared from dough of flour and water.", "A1", "assets/quiz/bread.png", "assets/audio/bread.mp3"},
-        {"CHAIR", "A piece of furniture designed for one person to sit on.", "A1", "assets/quiz/chair.png", "assets/audio/chair.mp3"},
-        {"DREAM", "A series of thoughts, images, and sensations occurring in sleep.", "A2", "assets/quiz/dream.png", "assets/audio/dream.mp3"},
-        {"EAGLE", "A large bird of prey with massive beak and keen eyesight.", "B1", "assets/quiz/eagle.png", "assets/audio/eagle.mp3"},
-        {"FLAME", "A hot glowing body of ignited gas produced by something on fire.", "B1", "assets/quiz/flame.png", "assets/audio/flame.mp3"},
-        {"GHOST", "An apparition of a dead person which is believed to appear.", "A2", "assets/quiz/ghost.png", "assets/audio/ghost.mp3"},
-        {"HEART", "The hollow muscular organ that pumps blood throughout the body.", "A1", "assets/quiz/heart.png", "assets/audio/heart.mp3"},
-        {"ISLAND", "A piece of land completely surrounded by water.", "A2", "assets/quiz/island.png", "assets/audio/island.mp3"},
-        {"JUNGLE", "An area of land overgrown with dense forest and tangled vegetation.", "B1", "assets/quiz/jungle.png", "assets/audio/jungle.mp3"}
-    };
-
-    const int total = static_cast<int>(sizeof(samplePool) / sizeof(samplePool[0]));
-    const int targetCount = std::min(count, total);
-
-    for (int i = 0; i < targetCount; ++i) {
-        QJsonObject w;
-        w[QStringLiteral("word_id")] = i + 1;
-        w[QStringLiteral("target_word")] = QString::fromUtf8(samplePool[i].word);
-        w[QStringLiteral("hint_text")] = QString::fromUtf8(samplePool[i].hint);
-        w[QStringLiteral("cefr_level")] = QString::fromUtf8(samplePool[i].cefr);
-        w[QStringLiteral("image_path")] = QString::fromUtf8(samplePool[i].image);
-        w[QStringLiteral("audio_path")] = QString::fromUtf8(samplePool[i].audio);
-        w[QStringLiteral("topic_id")] = 1;
-        words.append(w);
-    }
-
-    return words;
-}
-
 QString BridgeController::startStage(const QString &requestJson) {
     int stageId = 1;
+    QJsonObject req;
     if (!requestJson.trimmed().isEmpty()) {
-        const QJsonObject req = parseJson(requestJson);
+        req = parseJson(requestJson);
         if (!req.isEmpty() && req.contains(QStringLiteral("stageId"))) {
             stageId = req.value(QStringLiteral("stageId")).toInt(1);
         } else {
@@ -113,54 +57,32 @@ QString BridgeController::startStage(const QString &requestJson) {
     int questionCount = 10;
     QString cefrLevel = QStringLiteral("A1");
     int topicId = 1;
-
-    // Check database if tables exist
-    QSqlDatabase db = QSqlDatabase::database();
-    bool queriedFromDb = false;
-    QJsonArray wordsArray;
-
-    if (db.isOpen()) {
-        QSqlQuery stageQuery;
-        stageQuery.prepare(QStringLiteral("SELECT topic_id, cefr_level, time_limit, question_count "
-                                          "FROM stages WHERE stage_id = :sid"));
-        stageQuery.bindValue(QStringLiteral(":sid"), stageId);
-        if (stageQuery.exec() && stageQuery.next()) {
-            topicId = stageQuery.value(0).toInt();
-            cefrLevel = stageQuery.value(1).toString();
-            timeLimit = stageQuery.value(2).toInt();
-            questionCount = stageQuery.value(3).toInt();
-
-            QSqlQuery wordQuery;
-            wordQuery.prepare(QStringLiteral("SELECT word_id, topic_id, cefr_level, target_word, "
-                                             "hint_text, image_path, audio_path FROM word_pool "
-                                             "WHERE topic_id = :tid AND cefr_level = :lvl "
-                                             "ORDER BY RANDOM() LIMIT :cnt"));
-            wordQuery.bindValue(QStringLiteral(":tid"), topicId);
-            wordQuery.bindValue(QStringLiteral(":lvl"), cefrLevel);
-            wordQuery.bindValue(QStringLiteral(":cnt"), questionCount);
-
-            if (wordQuery.exec()) {
-                while (wordQuery.next()) {
-                    QJsonObject item;
-                    item[QStringLiteral("word_id")] = wordQuery.value(0).toInt();
-                    item[QStringLiteral("topic_id")] = wordQuery.value(1).toInt();
-                    item[QStringLiteral("cefr_level")] = wordQuery.value(2).toString();
-                    item[QStringLiteral("target_word")] = wordQuery.value(3).toString();
-                    item[QStringLiteral("hint_text")] = wordQuery.value(4).toString();
-                    item[QStringLiteral("image_path")] = wordQuery.value(5).toString();
-                    item[QStringLiteral("audio_path")] = wordQuery.value(6).toString();
-                    wordsArray.append(item);
-                }
-                if (!wordsArray.isEmpty()) {
-                    queriedFromDb = true;
-                }
-            }
-        }
+    if (!req.isEmpty()) {
+        timeLimit = req.value(QStringLiteral("timeLimit")).toInt(timeLimit);
+        questionCount = req.value(QStringLiteral("questionCount")).toInt(questionCount);
+        cefrLevel = req.value(QStringLiteral("cefrLevel")).toString(cefrLevel);
+        topicId = req.value(QStringLiteral("topicId")).toInt(topicId);
     }
 
-    // Fallback if DB not ready or returned empty
-    if (!queriedFromDb || wordsArray.isEmpty()) {
-        wordsArray = generateFallbackWords(stageId, questionCount);
+    QJsonArray wordsArray;
+    if (m_repository != nullptr) {
+        std::vector<Vocabulary> vocabularies = m_repository->getRandomVocabularies(
+            questionCount, topicId, cefrLevel.toStdString());
+        if (vocabularies.empty()) {
+            vocabularies = m_repository->getRandomVocabularies(questionCount);
+        }
+
+        for (const Vocabulary& vocabulary : vocabularies) {
+            QJsonObject item;
+            item[QStringLiteral("word_id")] = vocabulary.id;
+            item[QStringLiteral("topic_id")] = vocabulary.topicId;
+            item[QStringLiteral("cefr_level")] = QString::fromStdString(vocabulary.cefrLevel);
+            item[QStringLiteral("target_word")] = QString::fromStdString(vocabulary.word);
+            item[QStringLiteral("hint_text")] = QString();
+            item[QStringLiteral("image_path")] = QString();
+            item[QStringLiteral("audio_path")] = QString();
+            wordsArray.append(item);
+        }
     }
 
     QJsonObject response;
@@ -187,66 +109,24 @@ QString BridgeController::completeStage(const QString &requestJson) {
     const int score = req.value(QStringLiteral("score")).toInt(0);
     const int completionTime = req.value(QStringLiteral("completionTime")).toInt(0);
 
-    int recordId = 1;
+    int recordId = m_nextRecordId++;
     int highScore = score;
     int bestTime = completionTime;
     bool nextStageUnlocked = true;
     int nextStageId = stageId + 1;
 
-    QSqlDatabase db = QSqlDatabase::database();
-    if (db.isOpen()) {
-        // Insert record into stage_records
-        QSqlQuery insertQuery;
-        insertQuery.prepare(QStringLiteral("INSERT INTO stage_records (user_id, stage_id, score, completion_time) "
-                                           "VALUES (:uid, :sid, :sc, :ct)"));
-        insertQuery.bindValue(QStringLiteral(":uid"), userId);
-        insertQuery.bindValue(QStringLiteral(":sid"), stageId);
-        insertQuery.bindValue(QStringLiteral(":sc"), score);
-        insertQuery.bindValue(QStringLiteral(":ct"), completionTime);
-        if (insertQuery.exec()) {
-            recordId = insertQuery.lastInsertId().toInt();
-        }
-
-        // Query existing progress
-        QSqlQuery progressQuery;
-        progressQuery.prepare(QStringLiteral("SELECT high_score, best_time FROM user_progress "
-                                             "WHERE user_id = :uid AND stage_id = :sid"));
-        progressQuery.bindValue(QStringLiteral(":uid"), userId);
-        progressQuery.bindValue(QStringLiteral(":sid"), stageId);
-        if (progressQuery.exec() && progressQuery.next()) {
-            const int prevHigh = progressQuery.value(0).toInt();
-            const int prevBest = progressQuery.value(1).toInt();
-            highScore = std::max(score, prevHigh);
-            bestTime = (prevBest > 0) ? std::min(completionTime, prevBest) : completionTime;
-
-            QSqlQuery updateQuery;
-            updateQuery.prepare(QStringLiteral("UPDATE user_progress SET is_completed = 1, high_score = :hs, "
-                                               "best_time = :bt WHERE user_id = :uid AND stage_id = :sid"));
-            updateQuery.bindValue(QStringLiteral(":hs"), highScore);
-            updateQuery.bindValue(QStringLiteral(":bt"), bestTime);
-            updateQuery.bindValue(QStringLiteral(":uid"), userId);
-            updateQuery.bindValue(QStringLiteral(":sid"), stageId);
-            updateQuery.exec();
-        } else {
-            QSqlQuery insertProgress;
-            insertProgress.prepare(QStringLiteral("INSERT INTO user_progress (user_id, stage_id, is_unlocked, "
-                                                  "is_completed, high_score, best_time) "
-                                                  "VALUES (:uid, :sid, 1, 1, :hs, :bt)"));
-            insertProgress.bindValue(QStringLiteral(":uid"), userId);
-            insertProgress.bindValue(QStringLiteral(":sid"), stageId);
-            insertProgress.bindValue(QStringLiteral(":hs"), highScore);
-            insertProgress.bindValue(QStringLiteral(":bt"), bestTime);
-            insertProgress.exec();
-        }
-
-        // Unlock next stage
-        QSqlQuery unlockQuery;
-        unlockQuery.prepare(QStringLiteral("INSERT OR REPLACE INTO user_progress (user_id, stage_id, is_unlocked) "
-                                           "VALUES (:uid, :nid, 1)"));
-        unlockQuery.bindValue(QStringLiteral(":uid"), userId);
-        unlockQuery.bindValue(QStringLiteral(":nid"), nextStageId);
-        unlockQuery.exec();
+    const QString progressKey = QStringLiteral("%1:%2").arg(userId).arg(stageId);
+    const auto existingProgress = m_stageProgress.constFind(progressKey);
+    if (existingProgress != m_stageProgress.cend()) {
+        highScore = std::max(score, existingProgress->highScore);
+        bestTime = existingProgress->bestTime > 0
+            ? std::min(completionTime, existingProgress->bestTime)
+            : completionTime;
     }
+
+    m_stageProgress.insert(progressKey, StageProgress{recordId, highScore, bestTime});
+    m_unlockedStagesByUser.insert(
+        userId, std::max(m_unlockedStagesByUser.value(userId, 1), nextStageId));
 
     QJsonObject response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
@@ -267,7 +147,9 @@ QString BridgeController::processAnswer(const QString &requestJson) {
     }
 
     QJsonObject payload = req;
-    if (req.contains(QStringLiteral("payload")) && req.value(QStringLiteral("payload")).isObject()) {
+    const bool hasNestedPayload = req.contains(QStringLiteral("payload"))
+        && req.value(QStringLiteral("payload")).isObject();
+    if (hasNestedPayload) {
         payload = req.value(QStringLiteral("payload")).toObject();
     }
 
@@ -279,6 +161,24 @@ QString BridgeController::processAnswer(const QString &requestJson) {
         isCorrect = (answer.compare(expected, Qt::CaseInsensitive) == 0);
     } else {
         isCorrect = !answer.isEmpty();
+    }
+
+    const auto vocabIdFrom = [](const QJsonObject& object) {
+        const QStringList idKeys = {QStringLiteral("vocabId"), QStringLiteral("wordId"), QStringLiteral("id")};
+        for (const QString& key : idKeys) {
+            const int vocabId = object.value(key).toInt();
+            if (vocabId > 0) {
+                return vocabId;
+            }
+        }
+        return 0;
+    };
+    int vocabId = vocabIdFrom(payload);
+    if (vocabId <= 0 && hasNestedPayload) {
+        vocabId = vocabIdFrom(req);
+    }
+    if (vocabId > 0 && m_repository != nullptr) {
+        m_repository->updateLearningProgress(vocabId, isCorrect);
     }
 
     QJsonObject response;
@@ -314,7 +214,16 @@ QString BridgeController::processMessage(const QString &requestJson) {
 }
 
 QString BridgeController::saveProgress(const QString &requestJson) {
-    Q_UNUSED(requestJson);
+    const QJsonObject req = parseJson(requestJson);
+    if (!req.isEmpty() && req.contains(QStringLiteral("stagesUnlocked"))) {
+        const int userId = req.value(QStringLiteral("userId")).toInt(1);
+        const int stagesUnlocked = req.value(QStringLiteral("stagesUnlocked")).toInt(1);
+        if (stagesUnlocked > 0) {
+            m_unlockedStagesByUser.insert(
+                userId, std::max(m_unlockedStagesByUser.value(userId, 1), stagesUnlocked));
+        }
+    }
+
     QJsonObject response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
     response[QStringLiteral("message")] = QStringLiteral("Progress saved successfully");
@@ -322,9 +231,10 @@ QString BridgeController::saveProgress(const QString &requestJson) {
 }
 
 QString BridgeController::loadProgress(const QString &requestJson) {
-    Q_UNUSED(requestJson);
+    const QJsonObject req = parseJson(requestJson);
+    const int userId = req.value(QStringLiteral("userId")).toInt(1);
     QJsonObject response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
-    response[QStringLiteral("stagesUnlocked")] = 1;
+    response[QStringLiteral("stagesUnlocked")] = m_unlockedStagesByUser.value(userId, 1);
     return buildResponse(response);
 }
