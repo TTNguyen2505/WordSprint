@@ -3,8 +3,10 @@ PRAGMA foreign_keys = ON;
 INSERT OR IGNORE INTO users (user_id, username) VALUES
     (1, 'Sample Player');
 
-INSERT OR IGNORE INTO user_settings (user_id) VALUES
-    (1);
+INSERT OR IGNORE INTO user_settings (
+    user_id, bgm_enabled, sfx_enabled, bgm_volume, sfx_volume
+) VALUES
+    (1, 1, 1, 80, 100);
 
 INSERT OR IGNORE INTO topics (topic_id, topic_name, description) VALUES
     (1, 'Daily Communication', 'Everyday greetings, messages, and conversations.'),

@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS stages (
     unlock_order INTEGER NOT NULL UNIQUE,
     time_limit INTEGER NOT NULL DEFAULT 60,
     question_count INTEGER NOT NULL DEFAULT 10,
-    FOREIGN KEY (topic_id) REFERENCES topics(topic_id) ON DELETE CASCADE
+    FOREIGN KEY (topic_id) REFERENCES topics(topic_id)
 );
 
 CREATE TABLE IF NOT EXISTS word_pool (
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS word_pool (
     hint_text TEXT,
     image_path TEXT,
     audio_path TEXT NOT NULL,
-    FOREIGN KEY (topic_id) REFERENCES topics(topic_id) ON DELETE CASCADE
+    FOREIGN KEY (topic_id) REFERENCES topics(topic_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_progress (
@@ -50,8 +50,8 @@ CREATE TABLE IF NOT EXISTS user_progress (
     high_score INTEGER NOT NULL DEFAULT 0,
     best_time INTEGER,
     PRIMARY KEY (user_id, stage_id),
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (stage_id) REFERENCES stages(stage_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (stage_id) REFERENCES stages(stage_id)
 );
 
 CREATE TABLE IF NOT EXISTS stage_records (
@@ -61,21 +61,12 @@ CREATE TABLE IF NOT EXISTS stage_records (
     score INTEGER NOT NULL,
     completion_time INTEGER NOT NULL,
     played_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-    FOREIGN KEY (stage_id) REFERENCES stages(stage_id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(user_id),
+    FOREIGN KEY (stage_id) REFERENCES stages(stage_id)
 );
-
-CREATE INDEX IF NOT EXISTS idx_stages_topic_id
-    ON stages(topic_id);
 
 CREATE INDEX IF NOT EXISTS idx_word_pool_topic_cefr
     ON word_pool(topic_id, cefr_level);
-
-CREATE INDEX IF NOT EXISTS idx_user_progress_stage_id
-    ON user_progress(stage_id);
-
-CREATE INDEX IF NOT EXISTS idx_stage_records_user_id
-    ON stage_records(user_id);
 
 CREATE INDEX IF NOT EXISTS idx_stage_records_leaderboard
     ON stage_records(stage_id, score DESC, completion_time ASC);
