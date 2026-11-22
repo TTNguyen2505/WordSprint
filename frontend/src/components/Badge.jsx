@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
 import PlayIcon from "../assets/icons/play.svg?react";
 
 /**
@@ -17,49 +16,53 @@ import PlayIcon from "../assets/icons/play.svg?react";
  *   - className (string) – optional extra Tailwind classes.
  */
 function Badge({
-  label = "BADGE TITLE",
-  children,
-  variant = "default",
-  disabled = false,
-  showIcon = true,
-  icon,
-  className,
-}) {
-  const isDisabled = disabled;
-  const content = children ?? label;
-
-  const variantStyles = {
-    default: "bg-white border-black shadow-elevation-200 text-black",
-    pink: "bg-surface-highlight border-black shadow-elevation-200 text-white",
-    green: "bg-surface-success border-black shadow-elevation-200 text-black",
-    red: "bg-surface-danger border-black shadow-elevation-200 text-white",
-    black: "bg-black border-black shadow-elevation-200 text-white",
-    disabled: "bg-surface-disabled border-gray-400 shadow-none text-content-muted",
-  };
-
-  const appliedVariant = isDisabled ? "disabled" : variant;
-  const variantClass = variantStyles[appliedVariant] ?? variantStyles.default;
-
-  const baseClasses = clsx(
-    "inline-flex items-center gap-1.5 rounded-none px-2.5 py-1 w-fit",
-    !isDisabled && "cursor-pointer",
-    isDisabled && "cursor-not-allowed opacity-50",
-    variantClass,
+    label = "BADGE TITLE",
+    children,
+    variant = "default",
+    disabled = false,
+    showIcon = true,
+    icon,
     className
-  );
+}) {
+    const isDisabled = disabled;
+    const content = children ?? label;
 
-  return (
-    <span className={twMerge(baseClasses)}>
-      {showIcon && (
-        <span className="flex items-center">
-          {icon ?? <PlayIcon className="size-[12px]" aria-hidden="true" />}
+    const variantStyles = {
+        default:
+            "bg-surface-panel border-stroke-default shadow-elevation-200 text-content-primary",
+        pink: "bg-surface-highlight border-stroke-default shadow-elevation-200 text-content-inverse",
+        green: "bg-surface-success border-stroke-default shadow-elevation-200 text-content-primary",
+        red: "bg-surface-danger border-stroke-default shadow-elevation-200 text-content-inverse",
+        black: "bg-surface-inverse border-stroke-default shadow-elevation-200 text-content-inverse",
+        disabled:
+            "bg-surface-disabled border-stroke-disabled shadow-none text-content-muted"
+    };
+
+    const appliedVariant = isDisabled ? "disabled" : variant;
+    const variantClass = variantStyles[appliedVariant] ?? variantStyles.default;
+
+    const baseClasses = clsx(
+        "inline-flex items-center gap-xs rounded-none px-sm py-3xs w-fit border border-stroke-default",
+        !isDisabled && "cursor-pointer",
+        isDisabled && "cursor-not-allowed opacity-50",
+        variantClass,
+        className
+    );
+
+    return (
+        <span className={twMerge(baseClasses)}>
+            {showIcon && (
+                <span className="flex items-center">
+                    {icon ?? (
+                        <PlayIcon className="size-[12px]" aria-hidden="true" />
+                    )}
+                </span>
+            )}
+            <span className="font-mono font-bold uppercase text-[11px] leading-none tracking-wider whitespace-nowrap">
+                {content}
+            </span>
         </span>
-      )}
-      <span className="font-mono font-bold uppercase text-xs tracking-wider whitespace-nowrap">
-        {content}
-      </span>
-    </span>
-  );
+    );
 }
 
 export default Badge;

@@ -54,6 +54,7 @@ function TextInput({
     required = false,
     maxLength,
     id,
+    autoFocus = false,
     "aria-label": ariaLabel
 }) {
     const [internalValue, setInternalValue] = useState(defaultValue);
@@ -129,6 +130,7 @@ function TextInput({
                             inputClassName
                         )}
                         disabled={disabled}
+                        autoFocus={autoFocus}
                         id={inputId}
                         maxLength={maxLength}
                         name={name}
