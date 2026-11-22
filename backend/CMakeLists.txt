@@ -50,6 +50,14 @@ qt_add_executable(WordSprint
     src/main.cpp
     src/BridgeController.h
     src/BridgeController.cpp
+    src/models/Topic.h
+    src/models/Vocabulary.h
+    src/models/LearningProgress.h
+    src/database/DatabaseManager.h
+    src/database/DatabaseManager.cpp
+    src/repositories/IVocabularyRepository.h
+    src/repositories/SqliteVocabularyRepository.h
+    src/repositories/SqliteVocabularyRepository.cpp
 )
 
 set_target_properties(WordSprint PROPERTIES
