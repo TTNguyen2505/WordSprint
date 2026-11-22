@@ -33,7 +33,7 @@ function Tab({
     // Hover state (only when not active/disabled)
     !isActive && !isDisabled && "hover:bg-neutral-100",
     // Active selected state
-    isActive && "bg-surface-primary-cta border-black text-black",
+    isActive && "bg-surface-primary-cta border-black text-black active",
     // Disabled state
     isDisabled && "text-content-muted opacity-50 cursor-not-allowed",
     // Cursor pointer when interactive

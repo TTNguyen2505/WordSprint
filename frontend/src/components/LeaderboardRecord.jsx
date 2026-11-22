@@ -52,7 +52,7 @@ function LeaderboardRecord({
       <Badge
         variant={badgeVariant}
         showIcon={false}
-        className="ml-2.5"
+        className={clsx("ml-2.5 shadow-[2px_2px_0px_#000]", isChampion ? "badge-champion" : "badge-you")}
       >
         {label}
       </Badge>
@@ -61,16 +61,16 @@ function LeaderboardRecord({
 
   // Base row classes.
   const baseRowClasses = clsx(
-    "w-full grid grid-cols-[64px_1fr_112px_96px] items-center px-4 min-h-[48px] border border-black rounded-none",
+    "w-full grid grid-cols-[80px_1fr_120px_120px] items-center px-2 sm:px-4 min-h-[48px] border-b border-black rounded-none last:border-b-0",
     {
       // Header variant – static styling.
-      "bg-white font-sans font-bold uppercase text-xs tracking-wider text-black": isHeader,
+      "bg-white font-sans font-bold uppercase text-base text-black": isHeader,
       // Champion and default variants share base font.
       "bg-white font-mono text-sm text-black": !isHeader,
       // Default hover background.
       "hover:bg-[#FFF5B8]": !isHeader && !isChampion && !isYou,
       // You variant bright yellow background.
-      "bg-[#FFE600]": isYou,
+      "bg-surface-primary-cta current-player": isYou,
     },
     className
   );
@@ -87,25 +87,26 @@ function LeaderboardRecord({
       role={isHeader ? undefined : "row"}
       onClick={handleClick}
       className={twMerge(baseRowClasses)}
+      data-rank={isHeader ? undefined : formattedRank}
     >
       {/* Rank */}
-      <div className="text-center">
+      <div className="text-center font-mono">
         {isHeader ? "RANK" : formattedRank}
       </div>
 
       {/* Player column */}
-      <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
-        {isHeader ? "PLAYER" : playerName}
+      <div className={clsx("flex items-center gap-2 min-w-0 overflow-hidden", isHeader ? "justify-center" : "justify-start")}>
+        <span className="truncate">{isHeader ? "PLAYER" : playerName}</span>
         {badge}
       </div>
 
       {/* Score */}
-      <div className="text-right tabular-nums">
+      <div className={clsx("tabular-nums pr-2 sm:pr-4", isHeader ? "text-center font-sans" : "text-right font-mono")}>
         {isHeader ? "SCORE" : formattedScore}
       </div>
 
       {/* Play Time */}
-      <div className="text-right tabular-nums">
+      <div className={clsx("tabular-nums pr-2 sm:pr-4", isHeader ? "text-center font-sans" : "text-right font-mono")}>
         {isHeader ? "PLAY TIME" : playTime}
       </div>
     </div>
