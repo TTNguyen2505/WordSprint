@@ -1,0 +1,76 @@
+PRAGMA foreign_keys = ON;
+
+INSERT OR IGNORE INTO topics (id, name, description) VALUES
+    (1, 'Daily Communication', 'Everyday greetings, messages, and conversations.'),
+    (2, 'Travel & Culture', 'Travel planning, transport, and cultural places.'),
+    (3, 'Technology & IT', 'Digital devices, software, and information technology.'),
+    (4, 'Business & Career', 'Workplace communication, meetings, and professional growth.'),
+    (5, 'Academic & Science', 'Scientific concepts, research, and learning.');
+
+INSERT OR IGNORE INTO vocabularies (
+    id, topic_id, word, phonetic, part_of_speech, cefr_level, meaning, example_sentence
+) VALUES
+    (1, 1, 'hello', '/həˈloʊ/', 'interjection', 'A1', 'xin chào', 'Hello, Maya, how are you today?'),
+    (2, 2, 'ticket', '/ˈtɪkɪt/', 'noun', 'A1', 'vé', 'I bought a ticket at the station.'),
+    (3, 3, 'screen', '/skriːn/', 'noun', 'A1', 'màn hình', 'The screen is bright and easy to read.'),
+    (4, 4, 'salary', '/ˈsæləri/', 'noun', 'A1', 'tiền lương', 'Her salary arrives at the end of each month.'),
+    (5, 5, 'plant', '/plænt/', 'noun', 'A1', 'thực vật; cây', 'This plant needs sunlight and water.'),
+    (6, 1, 'message', '/ˈmesɪdʒ/', 'noun', 'A2', 'tin nhắn; lời nhắn', 'I sent a message to my teacher.'),
+    (7, 2, 'journey', '/ˈdʒɜːrni/', 'noun', 'A2', 'cuộc hành trình', 'Our journey to the island took two hours.'),
+    (8, 3, 'download', '/ˌdaʊnˈloʊd/', 'verb', 'A2', 'tải xuống', 'You can download the app for free.'),
+    (9, 4, 'meeting', '/ˈmiːtɪŋ/', 'noun', 'A2', 'cuộc họp', 'The meeting starts at nine.'),
+    (10, 5, 'energy', '/ˈenərdʒi/', 'noun', 'A2', 'năng lượng', 'Solar panels turn sunlight into energy.'),
+    (11, 1, 'explain', '/ɪkˈspleɪn/', 'verb', 'B1', 'giải thích', 'Could you explain the new rule?'),
+    (12, 2, 'luggage', '/ˈlʌɡɪdʒ/', 'noun', 'B1', 'hành lý', 'We left our luggage at the hotel.'),
+    (13, 3, 'update', '/ˈʌpdeɪt/', 'noun', 'B1', 'bản cập nhật', 'The latest update fixed the login problem.'),
+    (14, 4, 'colleague', '/ˈkɑːliːɡ/', 'noun', 'B1', 'đồng nghiệp', 'My colleague shared the project plan.'),
+    (15, 5, 'evidence', '/ˈevɪdəns/', 'noun', 'B1', 'bằng chứng', 'The experiment provided clear evidence.'),
+    (16, 1, 'negotiate', '/nɪˈɡoʊʃieɪt/', 'verb', 'B2', 'đàm phán; thương lượng', 'They negotiated a later deadline.'),
+    (17, 2, 'itinerary', '/aɪˈtɪnəreri/', 'noun', 'B2', 'lịch trình chuyến đi', 'Our itinerary includes three museums.'),
+    (18, 3, 'encrypt', '/ɪnˈkrɪpt/', 'verb', 'B2', 'mã hóa', 'The service encrypts files before storing them.'),
+    (19, 4, 'revenue', '/ˈrevənuː/', 'noun', 'B2', 'doanh thu', 'The company increased its revenue last year.'),
+    (20, 5, 'hypothesis', '/haɪˈpɑːθəsɪs/', 'noun', 'B2', 'giả thuyết', 'The team tested a hypothesis about plant growth.'),
+    (21, 1, 'articulate', '/ɑːrˈtɪkjəleɪt/', 'verb', 'C1', 'diễn đạt rõ ràng', 'She articulated her concerns during the discussion.'),
+    (22, 2, 'sustainable', '/səˈsteɪnəbəl/', 'adjective', 'C1', 'bền vững', 'The city is investing in sustainable tourism.'),
+    (23, 3, 'vulnerability', '/ˌvʌlnərəˈbɪləti/', 'noun', 'C1', 'lỗ hổng bảo mật; điểm yếu', 'The audit revealed a vulnerability in the software.'),
+    (24, 4, 'appraisal', '/əˈpreɪzəl/', 'noun', 'C1', 'sự đánh giá; buổi đánh giá', 'Her annual appraisal included clear goals.'),
+    (25, 5, 'empirical', '/ɪmˈpɪrɪkəl/', 'adjective', 'C1', 'dựa trên thực nghiệm', 'The claim needs empirical support.'),
+    (26, 1, 'conciliatory', '/kənˈsɪliətɔːri/', 'adjective', 'C2', 'có tính hòa giải; xoa dịu', 'He offered a conciliatory response after the disagreement.'),
+    (27, 2, 'confluence', '/ˈkɑːnfluəns/', 'noun', 'C2', 'nơi hợp lưu; sự hội tụ', 'The old town grew near the confluence of two rivers.'),
+    (28, 3, 'obfuscate', '/ˈɑːbfəskeɪt/', 'verb', 'C2', 'làm cho khó hiểu; che giấu', 'The documentation should clarify the process rather than obfuscate it.'),
+    (29, 4, 'fiduciary', '/fɪˈduːʃieri/', 'noun', 'C2', 'người có trách nhiệm ủy thác', 'A fiduciary must act in the client''s best interests.'),
+    (30, 5, 'corroborate', '/kəˈrɑːbəreɪt/', 'verb', 'C2', 'xác nhận bằng chứng bổ trợ', 'Further measurements helped corroborate the initial findings.');
+
+INSERT OR IGNORE INTO learning_progress (
+    vocab_id, correct_count, wrong_count, mastery_level, last_reviewed
+) VALUES
+    (1, 0, 0, 0, NULL),
+    (2, 0, 0, 0, NULL),
+    (3, 0, 0, 0, NULL),
+    (4, 0, 0, 0, NULL),
+    (5, 0, 0, 0, NULL),
+    (6, 0, 0, 0, NULL),
+    (7, 0, 0, 0, NULL),
+    (8, 0, 0, 0, NULL),
+    (9, 0, 0, 0, NULL),
+    (10, 0, 0, 0, NULL),
+    (11, 0, 0, 0, NULL),
+    (12, 0, 0, 0, NULL),
+    (13, 0, 0, 0, NULL),
+    (14, 0, 0, 0, NULL),
+    (15, 0, 0, 0, NULL),
+    (16, 0, 0, 0, NULL),
+    (17, 0, 0, 0, NULL),
+    (18, 0, 0, 0, NULL),
+    (19, 0, 0, 0, NULL),
+    (20, 0, 0, 0, NULL),
+    (21, 0, 0, 0, NULL),
+    (22, 0, 0, 0, NULL),
+    (23, 0, 0, 0, NULL),
+    (24, 0, 0, 0, NULL),
+    (25, 0, 0, 0, NULL),
+    (26, 0, 0, 0, NULL),
+    (27, 0, 0, 0, NULL),
+    (28, 0, 0, 0, NULL),
+    (29, 0, 0, 0, NULL),
+    (30, 0, 0, 0, NULL);
