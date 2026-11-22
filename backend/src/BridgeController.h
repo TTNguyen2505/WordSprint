@@ -1,11 +1,10 @@
 #pragma once
 
-#include <QHash>
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QObject>
 #include <QString>
+#include <QVariantList>
 #include <QVariantMap>
 
 #include "repositories/IVocabularyRepository.h"
@@ -16,8 +15,8 @@
  * QObject-derived controller exposed to the React frontend through Qt WebChannel.
  * Implements the communication contract specified in Chapter 2.4 and Chapter 2.5:
  *  - startStage: loads vocabulary through the repository and returns stage data to React.
- *  - completeStage: updates in-memory stage progress and returns a completion summary.
- *  - processAnswer: evaluates an answer and records vocabulary progress through the repository.
+ *  - completeStage: records a stage result and persists progress through the repository.
+ *  - processAnswer: evaluates an answer; stage results are persisted by completeStage.
  *  - processMessage: universal dispatcher for JSON actions from the web frontend.
  */
 class BridgeController : public QObject {
@@ -38,8 +37,11 @@ public slots:
      */
     Q_INVOKABLE QString startStage(const QString &requestJson);
 
+    Q_INVOKABLE QString getAllTopics();
+    Q_INVOKABLE QString getStagesByTopicId(int topicId);
+
     /**
-     * @brief Complete a stage and update in-memory progress.
+     * @brief Complete a stage and persist its record and progress.
      * @param requestJson JSON string, e.g. { "userId": 1, "stageId": 1, "score": 90, "completionTime": 42 }
      * @return JSON string response with status, record, updated progress, and next stage info.
      */
@@ -60,7 +62,7 @@ public slots:
     Q_INVOKABLE QString processMessage(const QString &requestJson);
 
     /**
-     * @brief Save user progress state in memory.
+     * @brief Save user progress state through the repository.
      */
     Q_INVOKABLE QString saveProgress(const QString &requestJson);
 
@@ -79,18 +81,8 @@ private:
     bool m_isReady = true;
     IVocabularyRepository* m_repository = nullptr;
 
-    struct StageProgress {
-        int recordId = 0;
-        int highScore = 0;
-        int bestTime = 0;
-    };
-
-    QHash<QString, StageProgress> m_stageProgress;
-    QHash<int, int> m_unlockedStagesByUser;
-    int m_nextRecordId = 1;
-
     // Safe JSON conversion helpers
     QJsonObject parseJson(const QString &jsonStr) const;
-    QString buildResponse(const QJsonObject &obj) const;
+    QString buildResponse(const QVariantMap &obj) const;
     QString buildErrorResponse(const QString &errorMessage) const;
 };
