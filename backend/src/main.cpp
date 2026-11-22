@@ -1,11 +1,16 @@
 #include <QCommandLineOption>
 #include <QCommandLineParser>
+#include <QDebug>
 #include <QDir>
 #include <QFileInfo>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QStandardPaths>
 #include <QUrl>
 #include <QWebChannel>
+#include <QStringList>
+
+#include <memory>
 
 #if __has_include(<QtWebEngineQuick/qtwebenginequickglobal.h>)
 #include <QtWebEngineQuick/qtwebenginequickglobal.h>
@@ -13,6 +18,8 @@
 #endif
 
 #include "BridgeController.h"
+#include "database/DatabaseManager.h"
+#include "repositories/SqliteVocabularyRepository.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
@@ -25,9 +32,63 @@ int main(int argc, char *argv[]) {
     QtWebEngineQuick::initialize();
 #endif
 
+    // Keep the database objects alive until after QGuiApplication is destroyed.
+    std::unique_ptr<DatabaseManager> databaseManager;
+    std::unique_ptr<SqliteVocabularyRepository> vocabularyRepository;
+
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
     app.setOrganizationName(QStringLiteral("WordSprint"));
+
+    databaseManager = std::make_unique<DatabaseManager>();
+
+    QString dataDirectory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (dataDirectory.isEmpty()) {
+        dataDirectory = QCoreApplication::applicationDirPath();
+    }
+    if (!QDir().mkpath(dataDirectory)) {
+        qWarning() << "WordSprint: Could not create application data directory:" << dataDirectory;
+    }
+
+    const QString databasePath = QDir(dataDirectory).filePath(QStringLiteral("wordsprint.db"));
+    if (!databaseManager->openDatabase(databasePath.toStdString())) {
+        qWarning() << "WordSprint: Could not open the vocabulary database:"
+                   << QString::fromStdString(databaseManager->lastError());
+    } else {
+        const QString applicationDirectory = QCoreApplication::applicationDirPath();
+        const QStringList databaseDirectories = {
+            QDir(applicationDirectory).filePath(QStringLiteral("database")),
+            QDir(applicationDirectory).filePath(QStringLiteral("../database")),
+            QDir(applicationDirectory).filePath(QStringLiteral("../../backend/database")),
+            QDir::current().filePath(QStringLiteral("backend/database")),
+            QDir::current().filePath(QStringLiteral("database"))
+        };
+
+        QString schemaPath;
+        QString seedPath;
+        for (const QString& directory : databaseDirectories) {
+            const QFileInfo schemaInfo(QDir(directory).filePath(QStringLiteral("schema.sql")));
+            const QFileInfo seedInfo(QDir(directory).filePath(QStringLiteral("seed_data.sql")));
+            if (schemaInfo.isFile() && seedInfo.isFile()) {
+                schemaPath = schemaInfo.absoluteFilePath();
+                seedPath = seedInfo.absoluteFilePath();
+                break;
+            }
+        }
+
+        if (schemaPath.isEmpty() || seedPath.isEmpty()) {
+            qWarning() << "WordSprint: schema.sql and seed_data.sql were not found; skipping database initialization.";
+        } else if (databaseManager->connection().tables().isEmpty()) {
+            if (!databaseManager->initializeDatabase(schemaPath.toStdString(), seedPath.toStdString())) {
+                qWarning() << "WordSprint: Could not initialize the vocabulary database:"
+                           << QString::fromStdString(databaseManager->lastError());
+            }
+        } else {
+            qInfo() << "WordSprint: Existing database tables found; skipping schema and seed initialization.";
+        }
+    }
+
+    vocabularyRepository = std::make_unique<SqliteVocabularyRepository>(*databaseManager);
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral("WordSprint Desktop Client"));
@@ -79,7 +140,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Set up BridgeController and QWebChannel
-    BridgeController bridgeController;
+    BridgeController bridgeController(vocabularyRepository.get());
     QWebChannel webChannel;
     webChannel.registerObject(QStringLiteral("bridgeController"), &bridgeController);
     webChannel.registerObject(QStringLiteral("bridge"), &bridgeController);

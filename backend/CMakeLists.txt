@@ -60,6 +60,22 @@ qt_add_executable(WordSprint
     src/repositories/SqliteVocabularyRepository.cpp
 )
 
+set(DATABASE_SCHEMA_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/schema.sql")
+set(DATABASE_SEED_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/seed_data.sql")
+if(EXISTS "${DATABASE_SCHEMA_FILE}" AND EXISTS "${DATABASE_SEED_FILE}")
+    add_custom_command(TARGET WordSprint POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:WordSprint>/database"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${DATABASE_SCHEMA_FILE}"
+                "$<TARGET_FILE_DIR:WordSprint>/database/schema.sql"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${DATABASE_SEED_FILE}"
+                "$<TARGET_FILE_DIR:WordSprint>/database/seed_data.sql"
+        COMMENT "Copying database schema and seed files..."
+        VERBATIM
+    )
+endif()
+
 set_target_properties(WordSprint PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE

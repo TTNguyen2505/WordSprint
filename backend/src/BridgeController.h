@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QHash>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -7,14 +8,16 @@
 #include <QString>
 #include <QVariantMap>
 
+#include "repositories/IVocabularyRepository.h"
+
 /**
  * @brief BridgeController
  *
  * QObject-derived controller exposed to the React frontend through Qt WebChannel.
  * Implements the communication contract specified in Chapter 2.4 and Chapter 2.5:
- *  - startStage: queries stage configuration and word items, returning JSON array to React.
- *  - completeStage: saves record, updates user progress, unlocks next stage, returning summary JSON.
- *  - processAnswer: evaluates submitted puzzle answer and returns score/timer updates.
+ *  - startStage: loads vocabulary through the repository and returns stage data to React.
+ *  - completeStage: updates in-memory stage progress and returns a completion summary.
+ *  - processAnswer: evaluates an answer and records vocabulary progress through the repository.
  *  - processMessage: universal dispatcher for JSON actions from the web frontend.
  */
 class BridgeController : public QObject {
@@ -22,7 +25,7 @@ class BridgeController : public QObject {
     Q_PROPERTY(bool isReady READ isReady NOTIFY isReadyChanged)
 
 public:
-    explicit BridgeController(QObject *parent = nullptr);
+    explicit BridgeController(IVocabularyRepository* repository = nullptr, QObject *parent = nullptr);
     ~BridgeController() override = default;
 
     bool isReady() const { return m_isReady; }
@@ -36,7 +39,7 @@ public slots:
     Q_INVOKABLE QString startStage(const QString &requestJson);
 
     /**
-     * @brief Complete a stage and persist progress.
+     * @brief Complete a stage and update in-memory progress.
      * @param requestJson JSON string, e.g. { "userId": 1, "stageId": 1, "score": 90, "completionTime": 42 }
      * @return JSON string response with status, record, updated progress, and next stage info.
      */
@@ -57,7 +60,7 @@ public slots:
     Q_INVOKABLE QString processMessage(const QString &requestJson);
 
     /**
-     * @brief Persist user progress state.
+     * @brief Save user progress state in memory.
      */
     Q_INVOKABLE QString saveProgress(const QString &requestJson);
 
@@ -74,12 +77,20 @@ signals:
 
 private:
     bool m_isReady = true;
+    IVocabularyRepository* m_repository = nullptr;
+
+    struct StageProgress {
+        int recordId = 0;
+        int highScore = 0;
+        int bestTime = 0;
+    };
+
+    QHash<QString, StageProgress> m_stageProgress;
+    QHash<int, int> m_unlockedStagesByUser;
+    int m_nextRecordId = 1;
 
     // Safe JSON conversion helpers
     QJsonObject parseJson(const QString &jsonStr) const;
     QString buildResponse(const QJsonObject &obj) const;
     QString buildErrorResponse(const QString &errorMessage) const;
-
-    // Fallback word dataset matching Chapter 2.5 schema when DB table is not yet seeded
-    QJsonArray generateFallbackWords(int stageId, int count) const;
 };
