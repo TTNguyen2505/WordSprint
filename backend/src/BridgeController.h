@@ -6,6 +6,7 @@
 #include <QJsonObject>
 #include <QObject>
 #include <QString>
+#include <QVariantList>
 #include <QVariantMap>
 
 #include "repositories/IVocabularyRepository.h"
@@ -37,6 +38,9 @@ public slots:
      * @return JSON string response containing stage parameters and word items list.
      */
     Q_INVOKABLE QString startStage(const QString &requestJson);
+
+    Q_INVOKABLE QString getAllTopics();
+    Q_INVOKABLE QString getStagesByTopicId(int topicId);
 
     /**
      * @brief Complete a stage and update in-memory progress.
@@ -91,6 +95,6 @@ private:
 
     // Safe JSON conversion helpers
     QJsonObject parseJson(const QString &jsonStr) const;
-    QString buildResponse(const QJsonObject &obj) const;
+    QString buildResponse(const QVariantMap &obj) const;
     QString buildErrorResponse(const QString &errorMessage) const;
 };

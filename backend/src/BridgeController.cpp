@@ -7,6 +7,13 @@
 #include <QStringList>
 
 #include <algorithm>
+#include <optional>
+#include <vector>
+
+BridgeController::BridgeController(IVocabularyRepository* repository, QObject *parent)
+    : QObject(parent), m_repository(repository) {}
+
+}  // namespace
 
 BridgeController::BridgeController(IVocabularyRepository* repository, QObject *parent)
     : QObject(parent), m_repository(repository) {}
@@ -26,12 +33,12 @@ QJsonObject BridgeController::parseJson(const QString &jsonStr) const {
     return doc.object();
 }
 
-QString BridgeController::buildResponse(const QJsonObject &obj) const {
-    return QString::fromUtf8(QJsonDocument(obj).toJson(QJsonDocument::Compact));
+QString BridgeController::buildResponse(const QVariantMap &obj) const {
+    return QString::fromUtf8(QJsonDocument::fromVariant(obj).toJson(QJsonDocument::Compact));
 }
 
 QString BridgeController::buildErrorResponse(const QString &errorMessage) const {
-    QJsonObject obj;
+    QVariantMap obj;
     obj[QStringLiteral("status")] = QStringLiteral("error");
     obj[QStringLiteral("message")] = errorMessage;
     return buildResponse(obj);
@@ -46,7 +53,7 @@ QString BridgeController::startStage(const QString &requestJson) {
             stageId = req.value(QStringLiteral("stageId")).toInt(1);
         } else {
             bool ok = false;
-            int directId = requestJson.toInt(&ok);
+            const int directId = trimmedRequest.toInt(&ok);
             if (ok && directId > 0) {
                 stageId = directId;
             }
@@ -85,16 +92,35 @@ QString BridgeController::startStage(const QString &requestJson) {
         }
     }
 
-    QJsonObject response;
-    response[QStringLiteral("status")] = QStringLiteral("ok");
-    response[QStringLiteral("stageId")] = stageId;
-    response[QStringLiteral("topicId")] = topicId;
-    response[QStringLiteral("cefrLevel")] = cefrLevel;
-    response[QStringLiteral("timeLimit")] = timeLimit;
-    response[QStringLiteral("questionCount")] = wordsArray.size();
-    response[QStringLiteral("words")] = wordsArray;
+    const std::vector<Vocabulary> vocabularies = m_repository->getRandomVocabularies(
+        stage->question_count, stage->topic_id, stage->cefr_level);
+    if (vocabularies.empty()) {
+        return buildErrorResponse(QStringLiteral("No vocabulary is available for this stage"));
+    }
 
-    emit stageStarted(stageId);
+    QVariantList words;
+    for (const Vocabulary& vocabulary : vocabularies) {
+        QVariantMap item;
+        item[QStringLiteral("word_id")] = vocabulary.word_id;
+        item[QStringLiteral("topic_id")] = vocabulary.topic_id;
+        item[QStringLiteral("cefr_level")] = QString::fromStdString(vocabulary.cefr_level);
+        item[QStringLiteral("target_word")] = QString::fromStdString(vocabulary.target_word);
+        item[QStringLiteral("hint_text")] = optionalStringValue(vocabulary.hint_text);
+        item[QStringLiteral("image_path")] = optionalStringValue(vocabulary.image_path);
+        item[QStringLiteral("audio_path")] = QString::fromStdString(vocabulary.audio_path);
+        words.append(item);
+    }
+
+    QVariantMap response;
+    response[QStringLiteral("status")] = QStringLiteral("ok");
+    response[QStringLiteral("stageId")] = stage->stage_id;
+    response[QStringLiteral("topicId")] = stage->topic_id;
+    response[QStringLiteral("cefrLevel")] = QString::fromStdString(stage->cefr_level);
+    response[QStringLiteral("timeLimit")] = stage->time_limit;
+    response[QStringLiteral("questionCount")] = words.size();
+    response[QStringLiteral("words")] = words;
+
+    emit stageStarted(stage->stage_id);
     return buildResponse(response);
 }
 
@@ -102,6 +128,9 @@ QString BridgeController::completeStage(const QString &requestJson) {
     const QJsonObject req = parseJson(requestJson);
     if (req.isEmpty()) {
         return buildErrorResponse(QStringLiteral("Invalid JSON payload for completeStage"));
+    }
+    if (m_repository == nullptr) {
+        return buildErrorResponse(QStringLiteral("Repository is unavailable"));
     }
 
     const int userId = req.value(QStringLiteral("userId")).toInt(1);
@@ -130,9 +159,9 @@ QString BridgeController::completeStage(const QString &requestJson) {
 
     QJsonObject response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
-    response[QStringLiteral("recordId")] = recordId;
-    response[QStringLiteral("highScore")] = highScore;
-    response[QStringLiteral("bestTime")] = bestTime;
+    response[QStringLiteral("recordId")] = *recordId;
+    response[QStringLiteral("highScore")] = progress.high_score;
+    response[QStringLiteral("bestTime")] = progress.best_time.value_or(completionTime);
     response[QStringLiteral("nextStageUnlocked")] = nextStageUnlocked;
     response[QStringLiteral("nextStageId")] = nextStageId;
 
@@ -186,7 +215,6 @@ QString BridgeController::processAnswer(const QString &requestJson) {
     response[QStringLiteral("correct")] = isCorrect;
     response[QStringLiteral("score")] = isCorrect ? 100 : 0;
     response[QStringLiteral("timeRemaining")] = payload.value(QStringLiteral("timeRemaining")).toDouble(60.0);
-
     return buildResponse(response);
 }
 
@@ -206,8 +234,14 @@ QString BridgeController::processMessage(const QString &requestJson) {
     if (action == QStringLiteral("processAnswer")) {
         return processAnswer(requestJson);
     }
+    if (action == QStringLiteral("getAllTopics")) {
+        return getAllTopics();
+    }
+    if (action == QStringLiteral("getStagesByTopicId")) {
+        return getStagesByTopicId(req.value(QStringLiteral("topicId")).toInt());
+    }
 
-    QJsonObject response;
+    QVariantMap response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
     response[QStringLiteral("message")] = QStringLiteral("Action processed: ") + action;
     return buildResponse(response);

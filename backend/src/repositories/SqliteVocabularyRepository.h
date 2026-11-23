@@ -9,6 +9,8 @@ public:
     explicit SqliteVocabularyRepository(DatabaseManager& databaseManager);
 
     std::vector<Topic> getAllTopics() override;
+    std::vector<Stage> getStagesByTopicId(int topic_id) override;
+    std::optional<Stage> getStageById(int stage_id) override;
     std::vector<Vocabulary> getVocabulariesByTopic(int topicId) override;
     std::vector<Vocabulary> getVocabulariesByLevel(const std::string& cefrLevel) override;
     std::vector<Vocabulary> getRandomVocabularies(
