@@ -3,10 +3,24 @@ import Modal from "./components/Modal.jsx";
 import ModalTitle from "./components/ModalTitle.jsx";
 import Navigation from "./components/Navigation.jsx";
 import LeaderboardRecord from "./components/LeaderboardRecord.jsx";
+import InfoPill from "./components/InfoPill.jsx";
+import Badge from "./components/Badge.jsx";
 import Button from "./components/Button.jsx";
-import CloseIcon from "./assets/icons/close.svg?react";
+import StageCard from "./components/StageCard.jsx";
+import ProgressSummaryCard from "./components/ProgressSummaryCard.jsx";
+import ProfileCard from "./components/ProfileCard.jsx";
 
-// Mock datasets for the 5 tabs (not hardcoded in markup, loaded via state)
+import heroImg from "./assets/hero.png";
+import ReplayIcon from "./assets/icons/replay.svg?react";
+import ExitIcon from "./assets/icons/exit.svg?react";
+import TrophyIcon from "./assets/icons/trophy.svg?react";
+import ArrowForwardIcon from "./assets/icons/arrow_forward_1.svg?react";
+import CheckIcon from "./assets/icons/check.svg?react";
+import CloseIcon from "./assets/icons/close.svg?react";
+import AddIcon from "./assets/icons/add.svg?react";
+import AccountIcon from "./assets/icons/account.svg?react";
+
+// Mock datasets for the 5 tabs in Hall of Fame modal (OOP-50)
 const DEFAULT_LEADERBOARD_DATA = {
     Overall: [
         {
@@ -153,6 +167,74 @@ const DEFAULT_LEADERBOARD_DATA = {
 };
 
 const TAB_ITEMS = ["Case 1", "Case 2", "Case 3", "Case 4", "Overall"];
+
+// Default campaign stages for the Main Menu (Stage Select)
+const DEFAULT_CAMPAIGN_STAGES = [
+  {
+    id: 1,
+    stageId: "STAGE 1",
+    topic: "School",
+    level: "A1",
+    status: "solved",
+    score: 150,
+  },
+  {
+    id: 2,
+    stageId: "STAGE 2",
+    topic: "Family",
+    level: "A2",
+    status: "solved",
+    score: 250,
+  },
+  {
+    id: 3,
+    stageId: "STAGE 3",
+    topic: "Work",
+    level: "B1",
+    status: "solved",
+    score: 300,
+  },
+  {
+    id: 4,
+    stageId: "STAGE 4",
+    topic: "Travel",
+    level: "B2",
+    status: "solved",
+    score: 300,
+  },
+  {
+    id: 5,
+    stageId: "STAGE 5",
+    topic: "School",
+    level: "C1",
+    status: "solved",
+    score: 450,
+  },
+];
+
+// Default initial simulation state for Stage Result (Figma Frame 1: Time's up / Failed)
+const DEFAULT_STAGE_RESULT = {
+  stageId: 1,
+  stageName: "STAGE 1: SCHOOL",
+  solved: 3,
+  totalQuiz: 8,
+  playTime: 80, // 80s -> 1:20
+  score: 150,
+  rank: null,
+  campaignScore: 1450,
+  unlockThreshold: 4,
+  isAllCleared: false,
+};
+
+function formatPlayTime(secondsOrStr) {
+  if (typeof secondsOrStr === "string") return secondsOrStr;
+  if (typeof secondsOrStr === "number") {
+    const mins = Math.floor(secondsOrStr / 60);
+    const secs = secondsOrStr % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  }
+  return "0:00";
+}
 
 function App() {
     const [isOpen, setIsOpen] = useState(true);

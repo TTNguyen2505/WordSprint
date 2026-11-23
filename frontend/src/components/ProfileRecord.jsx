@@ -1,6 +1,7 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import Badge from "./Badge";
+import DeleteIcon from "../assets/icons/delete.svg?react";
 
 /**
  * Neo‑Brutalism ProfileRecord component.

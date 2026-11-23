@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import TextButton from "./TextButton";
-import UserIcon from "../assets/icons/user.svg?react";
+import UserIcon from "../assets/icons/account.svg?react";
 
 /**
  * Neo‑Brutalism ProfileCard component.
