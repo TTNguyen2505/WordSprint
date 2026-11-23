@@ -3,6 +3,7 @@ import Button from "./components/Button";
 import Modal from "./components/Modal";
 import ModalTitle from "./components/ModalTitle";
 import CreateUserModal from "./screens/CreateUserModal";
+import GameSettingsModal from "./screens/GameSettingsModal";
 import LeaderboardModal from "./screens/LeaderboardModal";
 import MenuScreen from "./screens/MenuScreen";
 import PlayScreen from "./screens/PlayScreen";
@@ -27,6 +28,7 @@ function Application() {
     const [selectedStage, setSelectedStage] = useState(null);
     const [stageRun, setStageRun] = useState(0);
     const [stageResult, setStageResult] = useState(null);
+    const [audioSettings, setAudioSettings] = useState(null);
     const unavailableTitleId = useId();
     const activeProfile = profiles.find((profile) => profile.id === activeId);
 
@@ -54,6 +56,12 @@ function Application() {
         setModal(null);
     };
 
+    const quitStage = () => {
+        setSelectedStage(null);
+        setStageResult(null);
+        setModal(null);
+    };
+
     if (selectedStage) {
         const stageIndex = activeProfile.stages.findIndex(
             (stage) => stage.stageId === selectedStage.stageId
@@ -68,6 +76,8 @@ function Application() {
                         username={activeProfile.name}
                         topic={selectedStage.topic}
                         level={selectedStage.level}
+                        onReplay={() => startStage(selectedStage)}
+                        onQuit={quitStage}
                         onPreviewResult={(result) =>
                             setStageResult(
                                 result === "timeUp"
@@ -91,10 +101,7 @@ function Application() {
                         nextStageLevel={nextStage?.level}
                         onNextStage={() => startStage(nextStage)}
                         onReplay={() => startStage(selectedStage)}
-                        onQuit={() => {
-                            setSelectedStage(null);
-                            setStageResult(null);
-                        }}
+                        onQuit={quitStage}
                         onLeaderboard={() => setModal("leaderboard")}
                     />
                 )}
@@ -115,12 +122,22 @@ function Application() {
                 onLeaderboard={() => setModal("leaderboard")}
                 onPlay={() => unavailable("Gameplay")}
                 onHelp={() => unavailable("Help")}
-                onSettings={() => unavailable("Settings")}
+                onSettings={() => setModal("settings")}
                 onExit={() => unavailable("Exit game")}
                 onStageAction={startStage}
             />
             {modal === "leaderboard" && (
                 <LeaderboardModal onClose={() => setModal(null)} />
+            )}
+            {modal === "settings" && (
+                <GameSettingsModal
+                    initialMusicEnabled={audioSettings?.musicEnabled}
+                    initialMusicVolume={audioSettings?.musicVolume}
+                    initialSoundEnabled={audioSettings?.soundEnabled}
+                    initialSoundVolume={audioSettings?.soundVolume}
+                    onSave={setAudioSettings}
+                    onClose={() => setModal(null)}
+                />
             )}
             {modal === "profiles" && (
                 <SelectProfileModal

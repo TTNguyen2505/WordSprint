@@ -1,0 +1,95 @@
+import { useId, useState } from "react";
+import CloseIcon from "../assets/icons/close.svg?react";
+import SaveIcon from "../assets/icons/save.svg?react";
+import AudioSettings from "../components/AudioSettings";
+import Button from "../components/Button";
+import Modal from "../components/Modal";
+import ModalTitle from "../components/ModalTitle";
+
+function GameSettingsModal({
+    isOpen = true,
+    initialMusicEnabled = true,
+    initialMusicVolume = 75,
+    initialSoundEnabled = false,
+    initialSoundVolume = 75,
+    onClose,
+    onSave
+}) {
+    const titleId = useId();
+    const [savedSettings, setSavedSettings] = useState(() => ({
+        musicEnabled: initialMusicEnabled,
+        musicVolume: initialMusicVolume,
+        soundEnabled: initialSoundEnabled,
+        soundVolume: initialSoundVolume
+    }));
+    const [settings, setSettings] = useState(savedSettings);
+
+    const updateSetting = (key, value) => {
+        setSettings((current) => ({ ...current, [key]: value }));
+    };
+
+    const handleClose = () => {
+        setSettings(savedSettings);
+        onClose?.();
+    };
+
+    const handleSave = () => {
+        setSavedSettings(settings);
+        onSave?.(settings);
+        onClose?.();
+    };
+
+    return (
+        <Modal
+            isOpen={isOpen}
+            onClose={handleClose}
+            aria-labelledby={titleId}
+            header={
+                <ModalTitle
+                    id={titleId}
+                    className="w-full text-center text-[length:var(--primitive-font-size-36)] leading-[var(--primitive-line-height-40)]"
+                >
+                    GAME SETTINGS
+                </ModalTitle>
+            }
+            body={
+                <AudioSettings
+                    {...settings}
+                    onMusicToggle={(value) =>
+                        updateSetting("musicEnabled", value)
+                    }
+                    onMusicVolumeChange={(value) =>
+                        updateSetting("musicVolume", value)
+                    }
+                    onSoundToggle={(value) =>
+                        updateSetting("soundEnabled", value)
+                    }
+                    onSoundVolumeChange={(value) =>
+                        updateSetting("soundVolume", value)
+                    }
+                />
+            }
+            footer={
+                <div className="flex gap-2xl">
+                    <Button
+                        label="Close"
+                        size="default"
+                        variant="secondary"
+                        leadingIcon={<CloseIcon className="size-full" />}
+                        showTrailingIcon={false}
+                        onClick={handleClose}
+                    />
+                    <Button
+                        label="Save"
+                        size="default"
+                        leadingIcon={<SaveIcon className="size-full" />}
+                        showTrailingIcon={false}
+                        onClick={handleSave}
+                    />
+                </div>
+            }
+        />
+    );
+}
+
+export default GameSettingsModal;
