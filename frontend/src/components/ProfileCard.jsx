@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
 import TextButton from "./TextButton";
 import UserIcon from "../assets/icons/account.svg?react";
 
@@ -16,18 +15,18 @@ import UserIcon from "../assets/icons/account.svg?react";
  *   - className (string) – optional extra Tailwind classes for the outer card.
  */
 function ProfileCard({
-  label = "CURRENT PLAYER",
-  username = "TTNguyen2505",
-  actionLabel = "Switch Profile",
-  onSwitchProfile,
-  icon,
-  className,
+    label = "CURRENT PLAYER",
+    username = "TTNguyen2505",
+    actionLabel = "Switch Profile",
+    onSwitchProfile,
+    icon,
+    className
 }) {
-  const handleClick = (e) => {
-    if (typeof onSwitchProfile === "function") {
-      onSwitchProfile(e);
-    }
-  };
+    const handleClick = (e) => {
+        if (typeof onSwitchProfile === "function") {
+            onSwitchProfile(e);
+        }
+    };
 
   return (
     <div

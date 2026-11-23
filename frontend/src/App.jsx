@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Modal from "./components/Modal.jsx";
 import ModalTitle from "./components/ModalTitle.jsx";
 import Navigation from "./components/Navigation.jsx";
@@ -17,6 +17,8 @@ import TrophyIcon from "./assets/icons/trophy.svg?react";
 import ArrowForwardIcon from "./assets/icons/arrow_forward_1.svg?react";
 import CheckIcon from "./assets/icons/check.svg?react";
 import CloseIcon from "./assets/icons/close.svg?react";
+import AddIcon from "./assets/icons/add.svg?react";
+import AccountIcon from "./assets/icons/account.svg?react";
 
 // Mock datasets for the 5 tabs in Hall of Fame modal (OOP-50)
 const DEFAULT_LEADERBOARD_DATA = {
@@ -650,28 +652,95 @@ function App() {
                 <div className="flex h-36 items-center justify-center font-sans text-base font-bold text-content-muted uppercase tracking-wider">
                   Chưa có dữ liệu
                 </div>
-              ) : (
-                records.map((item, index) => {
-                  const rankNum = typeof item.rank === "number" ? item.rank : parseInt(item.rank, 10);
-                  const isTop1 = rankNum === 1 || item.rank === "01" || item.rank === "1" || (index === 0 && item.rank == 1);
-                  const isYou = Boolean(
-                    item.isCurrentPlayer === true ||
-                    (currentUserId && String(item.player).trim() === String(currentUserId).trim())
-                  );
+            )}
 
-                  let variant = "default";
-                  if (isTop1) variant = "champion";
-                  if (isYou) variant = "you";
+            {/* ========================================================================= */}
+            {/* 1. Modal "SELECT A PROFILE" (Figma Node 2282:2090)                         */}
+            {/* ========================================================================= */}
+            <Modal
+                isOpen={isSelectProfileOpen}
+                onClose={() => setIsSelectProfileOpen(false)}
+                maxWidth="max-w-[560px]"
+                className="w-[560px] min-h-[auto] max-h-[92vh] border-2 border-stroke-default p-lg shadow-elevation-200 flex flex-col items-center gap-lg bg-surface-panel"
+                overlayClassName="bg-black/50 backdrop-blur-[20px]"
+                closeOnBackdropClick={true}
+                closeOnEscape={true}
+            >
+                {/* Header */}
+                <header className="flex w-full items-center justify-center">
+                    <ModalTitle
+                        as="h1"
+                        className="text-center font-sans text-heading-lg font-bold uppercase tracking-tight text-content-primary"
+                    >
+                        SELECT A PROFILE
+                    </ModalTitle>
+                </header>
 
-                  return (
-                    <LeaderboardRecord
-                      key={`${item.rank}-${item.player}-${index}`}
-                      variant={variant}
-                      rank={item.rank}
-                      playerName={item.player}
-                      score={item.score}
-                      playTime={item.playTime}
-                      badgeLabel={isTop1 ? "CHAMPION" : isYou ? "YOU" : undefined}
+                {/* Profiles Table Container */}
+                <section className="flex w-full justify-center">
+                    <div className="w-full border-2 border-stroke-default bg-surface-panel flex flex-col shadow-elevation-200">
+                        {/* Header Row */}
+                        <ProfileRecord
+                            variant="header"
+                            playerName="PLAYER"
+                            progress="PROGRESS"
+                        />
+
+                        {/* Dynamic Profiles Rows Body (rendered from state, not hardcoded) */}
+                        <div
+                            id="profile-table-body"
+                            className="max-h-[300px] overflow-y-auto flex flex-col divide-y-2 divide-stroke-default border-t-2 border-stroke-default"
+                        >
+                            {profiles.length === 0 ? (
+                                <div className="flex h-28 items-center justify-center font-sans text-sm font-bold text-content-muted uppercase tracking-wider">
+                                    Chưa có hồ sơ người chơi
+                                </div>
+                            ) : (
+                                profiles.map((profile) => {
+                                    const isYou =
+                                        String(profile.id) ===
+                                            String(activeProfileId) ||
+                                        profile.username === activeProfileId ||
+                                        (activeProfile &&
+                                            profile.username ===
+                                                activeProfile.username);
+
+                                    return (
+                                        <ProfileRecord
+                                            key={profile.id}
+                                            variant={isYou ? "you" : "default"}
+                                            playerName={profile.username}
+                                            progress={
+                                                profile.progress || "0/12"
+                                            }
+                                            badgeLabel="YOU"
+                                            onSelect={() =>
+                                                handleSelectProfile(profile.id)
+                                            }
+                                            onDelete={(e) =>
+                                                handleDeleteProfile(
+                                                    profile.id,
+                                                    e
+                                                )
+                                            }
+                                        />
+                                    );
+                                })
+                            )}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Footer Buttons: "✕ Close" and "+ Add" */}
+                <footer className="flex w-full items-center justify-between gap-md pt-xs">
+                    <Button
+                        label="Close"
+                        variant="secondary"
+                        size="default"
+                        leadingIcon={<CloseIcon className="size-icon-sm" />}
+                        showTrailingIcon={false}
+                        onClick={() => setIsSelectProfileOpen(false)}
+                        className="min-w-[130px] border-2 border-stroke-default shadow-elevation-200 text-button-default font-bold font-sans"
                     />
                   );
                 })

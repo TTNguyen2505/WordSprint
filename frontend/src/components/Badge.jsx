@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
 import PlayIcon from "../assets/icons/play.svg?react";
 
 /**
@@ -26,8 +25,8 @@ function Badge({
   className,
   id,
 }) {
-  const isDisabled = disabled;
-  const content = children ?? label;
+    const isDisabled = disabled;
+    const content = children ?? label;
 
   const variantStyles = {
     default: "bg-surface-panel border-stroke-default shadow-elevation-200 text-content-primary",
@@ -38,8 +37,8 @@ function Badge({
     disabled: "bg-surface-disabled border-stroke-disabled shadow-elevation-0 text-content-muted",
   };
 
-  const appliedVariant = isDisabled ? "disabled" : variant;
-  const variantClass = variantStyles[appliedVariant] ?? variantStyles.default;
+    const appliedVariant = isDisabled ? "disabled" : variant;
+    const variantClass = variantStyles[appliedVariant] ?? variantStyles.default;
 
   const baseClasses = clsx(
     "inline-flex items-center gap-[6px] rounded-none px-[12px] py-[4px] w-fit border-2 box-border transition-all",
