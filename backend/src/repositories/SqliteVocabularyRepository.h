@@ -17,15 +17,8 @@ public:
         int limit,
         int topicId = -1,
         const std::string& cefrLevel = "") override;
-    std::vector<StageRecord> getStageRecordsByUserId(int user_id) override;
-    std::optional<int> insertStageRecord(
-        int user_id,
-        int stage_id,
-        int score,
-        int completion_time) override;
-    std::optional<UserProgress> getUserProgress(int user_id, int stage_id) override;
-    bool saveUserProgress(const UserProgress& progress) override;
-    bool unlockStage(int user_id, int stage_id) override;
+    std::optional<LearningProgress> getProgressByVocabId(int vocabId) override;
+    bool updateLearningProgress(int vocabId, bool isCorrect) override;
 
 private:
     DatabaseManager& m_databaseManager;
