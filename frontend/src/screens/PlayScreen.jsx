@@ -16,7 +16,8 @@ function PlayScreen({
     score = 0,
     topic = "SCHOOL",
     level = "A1",
-    time = "10:00"
+    time = "10:00",
+    onPreviewResult
 }) {
     const [activeQuestion, setActiveQuestion] = useState(0);
     const [answers, setAnswers] = useState(() => Array(questionCount).fill(""));
@@ -179,7 +180,31 @@ function PlayScreen({
                         </p>
                     )}
                 </div>
-                <div />
+                {onPreviewResult ? (
+                    <div className="flex items-center gap-sm pb-lg">
+                        <span className="text-body-default">Mock results:</span>
+                        <Button
+                            label="Stage cleared"
+                            size="small"
+                            variant="secondary"
+                            showLeadingIcon={false}
+                            showTrailingIcon={false}
+                            disabled={paused}
+                            onClick={() => onPreviewResult("cleared")}
+                        />
+                        <Button
+                            label="Time's up"
+                            size="small"
+                            variant="secondary"
+                            showLeadingIcon={false}
+                            showTrailingIcon={false}
+                            disabled={paused}
+                            onClick={() => onPreviewResult("timeUp")}
+                        />
+                    </div>
+                ) : (
+                    <div />
+                )}
             </section>
         </main>
     );
