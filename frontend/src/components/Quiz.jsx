@@ -115,7 +115,7 @@ function Quiz({
                 </nav>
             </header>
 
-            <div className="aspect-[16/9] w-full overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
+            <div className="aspect-[16/9] w-full max-w-[480px] overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
                 <img
                     src={imageSrc}
                     alt={imageAlt}
@@ -148,7 +148,7 @@ function Quiz({
 
             <form
                 onSubmit={handleSubmit}
-                className="flex w-full flex-col gap-md"
+                className="flex w-full max-w-[480px] flex-col gap-md"
             >
                 <TextInput
                     className="w-full"

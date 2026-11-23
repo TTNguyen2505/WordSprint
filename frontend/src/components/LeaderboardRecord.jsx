@@ -54,11 +54,13 @@ function LeaderboardRecord({
         <Cell
             type="Header"
             data="PLAYER"
+            role="columnheader"
             className="w-[280px] shrink-0 justify-center"
         />
     ) : isFirstRecord || isActive ? (
         <Cell
             type="Text"
+            role="cell"
             className="w-[280px] shrink-0 gap-xs"
             onClick={onClick}
         >
@@ -71,6 +73,7 @@ function LeaderboardRecord({
         <Cell
             type="Text"
             data={playerName}
+            role="cell"
             showBadge={false}
             className="w-[280px] shrink-0"
             onClick={onClick}
@@ -81,6 +84,7 @@ function LeaderboardRecord({
         <Cell
             type={isHeader ? "Header" : "Numerical"}
             data={isHeader ? "SCORE" : formattedScore}
+            role={isHeader ? "columnheader" : "cell"}
             className={clsx("w-[120px] shrink-0", !isHeader && "justify-end")}
         />
     );
@@ -88,6 +92,7 @@ function LeaderboardRecord({
         <Cell
             type={isHeader ? "Header" : "Numerical"}
             data={isHeader ? "PLAY TIME" : playTime}
+            role={isHeader ? "columnheader" : "cell"}
             className={clsx("w-[120px] shrink-0", !isHeader && "justify-end")}
         />
     );
@@ -98,7 +103,7 @@ function LeaderboardRecord({
 
     return (
         <div
-            role={isHeader ? undefined : "row"}
+            role="row"
             onClick={handleClick}
             className={twMerge(
                 clsx(
@@ -116,6 +121,7 @@ function LeaderboardRecord({
             <Cell
                 type={isHeader ? "Header" : "Rank"}
                 data={isHeader ? "RANK" : formattedRank}
+                role={isHeader ? "columnheader" : "cell"}
                 className="w-[80px] shrink-0 justify-center"
             />
             {playerCell}
