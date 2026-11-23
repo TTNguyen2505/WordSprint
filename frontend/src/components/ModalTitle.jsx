@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
 
 /**
  * Neo‑Brutalism ModalTitle component.
@@ -12,27 +11,21 @@ import React from "react";
  *   - id (string) – optional id for aria‑labelling.
  *   - className (string) – optional extra Tailwind classes.
  */
-function ModalTitle({
-  title = "TITLE",
-  children,
-  as = "h2",
-  id,
-  className,
-}) {
-  const Content = children ?? title;
-  const Tag = as;
+function ModalTitle({ title = "TITLE", children, as = "h2", id, className }) {
+    const Content = children ?? title;
+    const Tag = as;
 
-  const baseClasses = clsx(
-    "font-sans font-bold uppercase tracking-tight text-content-primary",
-    "text-[length:var(--primitive-font-size-36)] leading-[var(--primitive-line-height-40)]",
-    "bg-transparent m-0"
-  );
+    const baseClasses = clsx(
+        "font-sans font-bold uppercase tracking-tight text-content-primary",
+        "text-[length:var(--primitive-font-size-36)] leading-[var(--primitive-line-height-40)]",
+        "bg-transparent m-0"
+    );
 
-  return (
-    <Tag id={id} className={twMerge(baseClasses, className)}>
-      {Content}
-    </Tag>
-  );
+    return (
+        <Tag id={id} className={twMerge(baseClasses, className)}>
+            {Content}
+        </Tag>
+    );
 }
 
 export default ModalTitle;

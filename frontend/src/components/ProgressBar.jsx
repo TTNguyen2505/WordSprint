@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
 import CheckIcon from "../assets/icons/check.svg?react";
 
 /**
@@ -16,73 +15,78 @@ import CheckIcon from "../assets/icons/check.svg?react";
  *   - className (string) – optional extra Tailwind classes for the outer wrapper.
  */
 function ProgressBar({
-  value = 0,
-  max = 100,
-  status,
-  statusLabel,
-  metricLabel,
-  showCompletedIcon = true,
-  className,
+    value = 0,
+    max = 100,
+    status,
+    statusLabel,
+    metricLabel,
+    showCompletedIcon = true,
+    className
 }) {
-  const clampedValue = Math.min(Math.max(value, 0), max);
-  const isCompleted = status === "completed" || clampedValue >= max;
-  const effectiveStatus = isCompleted ? "completed" : "in-progress";
+    const clampedValue = Math.min(Math.max(value, 0), max);
+    const isCompleted = status === "completed" || clampedValue >= max;
+    // Determine labels when not provided.
+    const defaultStatusLabel = isCompleted
+        ? "COMPLETED STATUS LABEL"
+        : "IN PROGRESS STATUS LABEL";
+    const leftLabel = statusLabel ?? defaultStatusLabel;
 
-  // Determine labels when not provided.
-  const defaultStatusLabel = isCompleted
-    ? "COMPLETED STATUS LABEL"
-    : "IN PROGRESS STATUS LABEL";
-  const leftLabel = statusLabel ?? defaultStatusLabel;
+    // Width percentage for fill bar.
+    const percent = max === 0 ? 0 : (clampedValue / max) * 100;
 
-  // Width percentage for fill bar.
-  const percent = max === 0 ? 0 : (clampedValue / max) * 100;
+    // Colors based on state.
+    const fillBg = isCompleted
+        ? "bg-surface-success"
+        : "bg-surface-primary-cta";
 
-  // Colors based on state.
-  const fillBg = isCompleted ? "bg-surface-success" : "bg-surface-primary-cta";
-
-  return (
-    <div className={twMerge(clsx("flex flex-col gap-1.5 w-full", className))}>
-      {/* Header row */}
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          {isCompleted && showCompletedIcon && (
-            <CheckIcon className="size-[14px] text-black" aria-hidden="true" />
-          )}
-          <span className="font-mono font-bold uppercase text-xs tracking-wider text-black">
-            {leftLabel}
-          </span>
-        </div>
-        {metricLabel && (
-          <span className="font-mono font-bold uppercase text-xs tracking-wider text-black">
-            {metricLabel}
-          </span>
-        )}
-      </div>
-
-      {/* Progress track */}
-      <div
-        role="progressbar"
-        aria-valuenow={clampedValue}
-        aria-valuemin={0}
-        aria-valuemax={max}
-        className={clsx(
-          "w-full h-4 rounded-none border border-black bg-white p-[2px]",
-          "overflow-hidden"
-        )}
-      >
+    return (
         <div
-          className={twMerge(
-            clsx(
-              "h-full border border-black",
-              fillBg,
-              "transition-all duration-300 ease-snap"
-            )
-          )}
-          style={{ width: `${percent}%` }}
-        />
-      </div>
-    </div>
-  );
+            className={twMerge(clsx("flex flex-col gap-1.5 w-full", className))}
+        >
+            {/* Header row */}
+            <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1.5">
+                    {isCompleted && showCompletedIcon && (
+                        <CheckIcon
+                            className="size-[14px] text-content-primary"
+                            aria-hidden="true"
+                        />
+                    )}
+                    <span className="font-mono font-bold uppercase text-xs tracking-wider text-content-primary">
+                        {leftLabel}
+                    </span>
+                </div>
+                {metricLabel && (
+                    <span className="font-mono font-bold uppercase text-xs tracking-wider text-content-primary">
+                        {metricLabel}
+                    </span>
+                )}
+            </div>
+
+            {/* Progress track */}
+            <div
+                role="progressbar"
+                aria-valuenow={clampedValue}
+                aria-valuemin={0}
+                aria-valuemax={max}
+                className={clsx(
+                    "w-full h-4 rounded-none border border-stroke-default bg-surface-panel p-3xs",
+                    "overflow-hidden"
+                )}
+            >
+                <div
+                    className={twMerge(
+                        clsx(
+                            "h-full border border-stroke-default",
+                            fillBg,
+                            "transition-all duration-300 ease-snap"
+                        )
+                    )}
+                    style={{ width: `${percent}%` }}
+                />
+            </div>
+        </div>
+    );
 }
 
 export default ProgressBar;
