@@ -2,7 +2,7 @@
 
 This directory contains WordSprint's React frontend. It can be installed, run, checked, and built independently of the Qt desktop application. The same frontend is also used by the root project, where Qt WebEngine displays it inside the desktop shell.
 
-> **Current status:** The frontend currently shows a leaderboard demo. Reusable UI components and design tokens are available in `src/`; the vocabulary puzzles and gameplay described in the [product overview](../english-vocabulary-puzzle-game.md) are planned features, not completed functionality.
+> **Current status:** The frontend opens on the menu. Profile selection, creation, and deletion use sample data held only for the current session. Gameplay and the other menu screens are not yet implemented.
 
 ## Design system
 

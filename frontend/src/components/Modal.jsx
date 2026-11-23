@@ -15,7 +15,8 @@ function Modal({
     closeOnEscape = true,
     maxWidth = "max-w-[752px]",
     className,
-    overlayClassName
+    overlayClassName,
+    "aria-labelledby": ariaLabelledBy
 }) {
     const [shouldRender, setShouldRender] = useState(isOpen);
     const [isClosing, setIsClosing] = useState(false);
@@ -92,6 +93,7 @@ function Modal({
             <section
                 role="dialog"
                 aria-modal="true"
+                aria-labelledby={ariaLabelledBy}
                 className={twMerge(
                     clsx(
                         "flex w-full flex-col items-center justify-center gap-3xl rounded-none border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel px-2xl py-xl shadow-elevation-200",

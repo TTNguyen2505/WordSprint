@@ -26,6 +26,7 @@ function Cell({
     onAction,
     actionLabel = "Delete",
     as = "div",
+    role,
     className
 }) {
     const cellType = type ?? legacyTypes[variant] ?? "Header";
@@ -85,6 +86,7 @@ function Cell({
 
     return (
         <Wrapper
+            role={role}
             className={twMerge(
                 clsx(
                     "inline-flex h-[var(--primitive-space-48)] shrink-0 items-center px-xs",
