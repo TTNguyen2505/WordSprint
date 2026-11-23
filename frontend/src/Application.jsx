@@ -3,7 +3,9 @@ import Button from "./components/Button";
 import Modal from "./components/Modal";
 import ModalTitle from "./components/ModalTitle";
 import CreateUserModal from "./screens/CreateUserModal";
+import LeaderboardModal from "./screens/LeaderboardModal";
 import MenuScreen from "./screens/MenuScreen";
+import PlayScreen from "./screens/PlayScreen";
 import SelectProfileModal from "./screens/SelectProfileModal";
 import sampleStages from "./sampleStages";
 
@@ -21,6 +23,7 @@ function Application() {
     const [profiles, setProfiles] = useState(initialProfiles);
     const [activeId, setActiveId] = useState(initialProfiles[0].id);
     const [modal, setModal] = useState(null);
+    const [selectedStage, setSelectedStage] = useState(null);
     const unavailableTitleId = useId();
     const activeProfile = profiles.find((profile) => profile.id === activeId);
 
@@ -41,6 +44,16 @@ function Application() {
 
     const unavailable = (feature) => setModal({ unavailable: feature });
 
+    if (selectedStage) {
+        return (
+            <PlayScreen
+                username={activeProfile.name}
+                topic={selectedStage.topic}
+                level={selectedStage.level}
+            />
+        );
+    }
+
     return (
         <>
             <MenuScreen
@@ -48,13 +61,16 @@ function Application() {
                 score={activeProfile.score}
                 stages={activeProfile.stages}
                 onSwitchProfile={() => setModal("profiles")}
-                onLeaderboard={() => unavailable("Leaderboard")}
+                onLeaderboard={() => setModal("leaderboard")}
                 onPlay={() => unavailable("Gameplay")}
                 onHelp={() => unavailable("Help")}
                 onSettings={() => unavailable("Settings")}
                 onExit={() => unavailable("Exit game")}
-                onStageAction={() => unavailable("Gameplay")}
+                onStageAction={setSelectedStage}
             />
+            {modal === "leaderboard" && (
+                <LeaderboardModal onClose={() => setModal(null)} />
+            )}
             {modal === "profiles" && (
                 <SelectProfileModal
                     profiles={profiles.map((profile) => ({

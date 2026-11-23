@@ -20,9 +20,11 @@ function ScoreCard({
 
     return (
         <div
+            onClick={onAction}
             className={twMerge(
                 clsx(
                     "inline-flex w-fit max-w-full items-center gap-lg rounded-none border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel p-md shadow-elevation-200 transition-[translate,box-shadow] duration-[var(--duration-normal)] ease-snap hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] hover:shadow-elevation-300",
+                    onAction && "cursor-pointer",
                     isHover && "shadow-elevation-300",
                     className
                 )
@@ -49,7 +51,6 @@ function ScoreCard({
                 size="small"
                 showLeadingIcon={false}
                 trailingIcon={<ArrowForwardIcon className="size-full" />}
-                onClick={onAction}
             />
         </div>
     );
