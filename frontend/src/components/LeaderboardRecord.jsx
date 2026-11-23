@@ -1,6 +1,5 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
 import Badge from "./Badge";
 
 /**
@@ -18,99 +17,119 @@ import Badge from "./Badge";
  *   - className (string) – optional extra Tailwind classes.
  */
 function LeaderboardRecord({
-  variant = "default",
-  rank = "01",
-  playerName = "player_name",
-  score = "120,000",
-  playTime = "10:00",
-  badgeLabel,
-  onClick,
-  className,
-}) {
-  const isHeader = variant === "header";
-  const isChampion = variant === "champion";
-  const isYou = variant === "you";
-
-  // Normalise rank – pad numbers to two digits.
-  const formattedRank =
-    typeof rank === "number"
-      ? String(rank).padStart(2, "0")
-      : String(rank).padStart(2, "0");
-
-  // Normalise score – add commas for numbers.
-  const formattedScore =
-    typeof score === "number"
-      ? score.toLocaleString()
-      : String(score);
-
-  // Badge handling.
-  let badge = null;
-  if (isChampion || isYou) {
-    const label = badgeLabel ?? (isChampion ? "CHAMPION" : "YOU");
-    const badgeVariant = isChampion ? "pink" : "black";
-    badge = (
-      <Badge
-        variant={badgeVariant}
-        showIcon={false}
-        className={clsx("ml-2.5 shadow-[2px_2px_0px_#000]", isChampion ? "badge-champion" : "badge-you")}
-      >
-        {label}
-      </Badge>
-    );
-  }
-
-  // Base row classes.
-  const baseRowClasses = clsx(
-    "w-full grid grid-cols-[80px_1fr_120px_120px] items-center px-2 sm:px-4 min-h-[48px] border-b border-black rounded-none last:border-b-0",
-    {
-      // Header variant – static styling.
-      "bg-white font-sans font-bold uppercase text-base text-black": isHeader,
-      // Champion and default variants share base font.
-      "bg-white font-mono text-sm text-black": !isHeader,
-      // Default hover background.
-      "hover:bg-[#FFF5B8]": !isHeader && !isChampion && !isYou,
-      // You variant bright yellow background.
-      "bg-surface-primary-cta current-player": isYou,
-    },
+    variant = "default",
+    rank = "01",
+    playerName = "player_name",
+    score = "120,000",
+    playTime = "10:00",
+    badgeLabel,
+    onClick,
     className
-  );
+}) {
+    const isHeader = variant === "header";
+    const isChampion = variant === "champion";
+    const isYou = variant === "you";
 
-  // Click handling – only for non‑header rows.
-  const handleClick = (e) => {
-    if (!isHeader && typeof onClick === "function") {
-      onClick(e);
+    // Normalise rank – pad numbers to two digits.
+    const formattedRank =
+        typeof rank === "number"
+            ? String(rank).padStart(2, "0")
+            : String(rank).padStart(2, "0");
+
+    // Normalise score – add commas for numbers.
+    const formattedScore =
+        typeof score === "number" ? score.toLocaleString() : String(score);
+
+    // Badge handling.
+    let badge = null;
+    if (isChampion || isYou) {
+        const label = badgeLabel ?? (isChampion ? "CHAMPION" : "YOU");
+        const badgeVariant = isChampion ? "pink" : "black";
+        badge = (
+            <Badge
+                variant={badgeVariant}
+                showIcon={false}
+                className={clsx(
+                    "ml-2.5 shadow-elevation-100",
+                    isChampion ? "badge-champion" : "badge-you"
+                )}
+            >
+                {label}
+            </Badge>
+        );
     }
-  };
 
-  return (
-    <div
-      role={isHeader ? undefined : "row"}
-      onClick={handleClick}
-      className={twMerge(baseRowClasses)}
-      data-rank={isHeader ? undefined : formattedRank}
-    >
-      {/* Rank */}
-      <div className="text-center font-mono">
-        {isHeader ? "RANK" : formattedRank}
-      </div>
+    // Base row classes.
+    const baseRowClasses = clsx(
+        "w-full grid grid-cols-[80px_1fr_120px_120px] items-center px-2 sm:px-4 min-h-[48px] border-b border-stroke-default rounded-none last:border-b-0",
+        {
+            // Header variant – static styling.
+            "bg-surface-panel font-sans font-bold uppercase text-base text-content-primary":
+                isHeader,
+            // Champion and default variants share base font.
+            "bg-surface-panel font-mono text-sm text-content-primary":
+                !isHeader,
+            // Default hover background.
+            "hover:bg-[#FFF5B8]": !isHeader && !isChampion && !isYou,
+            // You variant bright yellow background.
+            "bg-surface-primary-cta current-player": isYou
+        },
+        className
+    );
 
-      {/* Player column */}
-      <div className={clsx("flex items-center gap-2 min-w-0 overflow-hidden", isHeader ? "justify-center" : "justify-start")}>
-        <span className="truncate">{isHeader ? "PLAYER" : playerName}</span>
-        {badge}
-      </div>
+    // Click handling – only for non‑header rows.
+    const handleClick = (e) => {
+        if (!isHeader && typeof onClick === "function") {
+            onClick(e);
+        }
+    };
 
-      {/* Score */}
-      <div className={clsx("tabular-nums pr-2 sm:pr-4", isHeader ? "text-center font-sans" : "text-right font-mono")}>
-        {isHeader ? "SCORE" : formattedScore}
-      </div>
+    return (
+        <div
+            role={isHeader ? undefined : "row"}
+            onClick={handleClick}
+            className={twMerge(baseRowClasses)}
+            data-rank={isHeader ? undefined : formattedRank}
+        >
+            {/* Rank */}
+            <div className="text-center font-mono">
+                {isHeader ? "RANK" : formattedRank}
+            </div>
 
-      {/* Play Time */}
-      <div className={clsx("tabular-nums pr-2 sm:pr-4", isHeader ? "text-center font-sans" : "text-right font-mono")}>
-        {isHeader ? "PLAY TIME" : playTime}
-      </div>
-    </div>
-  );
+            {/* Player column */}
+            <div
+                className={clsx(
+                    "flex items-center gap-2 min-w-0 overflow-hidden",
+                    isHeader ? "justify-center" : "justify-start"
+                )}
+            >
+                <span className="truncate">
+                    {isHeader ? "PLAYER" : playerName}
+                </span>
+                {badge}
+            </div>
+
+            {/* Score */}
+            <div
+                className={clsx(
+                    "tabular-nums pr-2 sm:pr-4",
+                    isHeader ? "text-center font-sans" : "text-right font-mono"
+                )}
+            >
+                {isHeader ? "SCORE" : formattedScore}
+            </div>
+
+            {/* Play Time */}
+            <div
+                className={clsx(
+                    "tabular-nums pr-2 sm:pr-4",
+                    isHeader ? "text-center font-sans" : "text-right font-mono"
+                )}
+            >
+                {isHeader ? "PLAY TIME" : playTime}
+            </div>
+        </div>
+    );
 }
 
 export default LeaderboardRecord;

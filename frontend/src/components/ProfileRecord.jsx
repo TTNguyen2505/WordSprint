@@ -23,16 +23,15 @@ function ProfileRecord({
 
     // Base row classes
     const baseRowClasses = clsx(
-        "w-full grid grid-cols-[1fr_104px_64px] items-center px-md min-h-[48px] rounded-none transition-colors duration-150 cursor-pointer select-none",
+        "w-full grid grid-cols-[1fr_104px_64px] items-center px-4 min-h-[48px] border border-stroke-default rounded-none transition-colors duration-150",
         {
             // Header variant – static styling
-            "bg-surface-panel font-sans font-bold uppercase text-xs tracking-wider text-content-primary cursor-default":
+            "bg-surface-panel font-sans font-bold uppercase text-xs tracking-wider text-content-primary":
                 isHeader,
-            // You (active) variant – vibrant yellow background
-            "bg-surface-primary-cta font-mono text-sm text-content-primary font-bold":
-                isYou,
-            // Default variant – white background, subtle yellow hover effect
-            "bg-surface-panel font-mono text-sm text-content-primary hover:bg-surface-primary-subtle":
+            // You (active) variant – yellow background
+            "bg-[#FFE600] font-mono text-sm text-content-primary": isYou,
+            // Default variant – regular font, hover effect
+            "bg-surface-panel font-mono text-sm text-content-primary hover:bg-[#FFF5B8]":
                 !isHeader && !isYou
         },
         className
@@ -55,7 +54,7 @@ function ProfileRecord({
 
     // Badge – only for the "you" variant
     const youBadge = isYou ? (
-        <Badge variant="black" showIcon={false} className="ml-xs px-xs py-3xs">
+        <Badge variant="black" showIcon={false} className="ml-2.5">
             {badgeLabel}
         </Badge>
     ) : null;
@@ -64,18 +63,16 @@ function ProfileRecord({
         <div
             role={isHeader ? undefined : "row"}
             onClick={handleRowClick}
-            data-player={isHeader ? undefined : playerName}
-            data-variant={variant}
             className={twMerge(baseRowClasses)}
         >
             {/* PLAYER column */}
-            <div className="flex items-center gap-xs min-w-0 overflow-hidden">
-                <span>{isHeader ? "PLAYER" : playerName}</span>
+            <div className="flex items-center gap-2.5 min-w-0 overflow-hidden">
+                {isHeader ? "PLAYER" : playerName}
                 {youBadge}
             </div>
 
             {/* PROGRESS column */}
-            <div className="text-right tabular-nums font-mono font-medium">
+            <div className="text-right tabular-nums">
                 {isHeader ? "PROGRESS" : progress}
             </div>
 
@@ -84,21 +81,18 @@ function ProfileRecord({
                 {!isHeader && !isYou && (
                     <button
                         type="button"
-                        aria-label={`${deleteAriaLabel} ${playerName}`}
-                        data-delete-player={playerName}
+                        aria-label={deleteAriaLabel}
                         onClick={handleDelete}
                         className={twMerge(
                             clsx(
-                                "w-7 h-7 bg-surface-panel border-2 border-stroke-default rounded-none shadow-[2px_2px_0px_#000]",
+                                "w-7 h-7 bg-surface-panel border border-stroke-default rounded-none shadow-elevation-100",
                                 "inline-flex items-center justify-center text-content-primary",
-                                "cursor-pointer hover:bg-surface-primary-cta active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
+                                "cursor-pointer hover:bg-[#FFE600] active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all"
                             )
                         )}
                     >
-                        <DeleteIcon
-                            className="size-icon-xs text-content-primary"
-                            aria-hidden="true"
-                        />
+                        {/* Simple trash icon using Unicode */}
+                        <span aria-hidden="true">🗑️</span>
                     </button>
                 )}
             </div>

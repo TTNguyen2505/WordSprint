@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 /**
  * Neo‑Brutalism Modal component.
@@ -20,109 +20,108 @@ import React, { useEffect } from "react";
  *   - overlayClassName (string) – additional classes for the backdrop overlay.
  */
 function Modal({
-  isOpen = true,
-  onClose,
-  children,
-  title,
-  showCloseButton = false,
-  closeOnBackdropClick = true,
-  closeOnEscape = true,
-  maxWidth = "max-w-[680px]",
-  className,
-  overlayClassName,
+    isOpen = true,
+    onClose,
+    children,
+    title,
+    showCloseButton = false,
+    closeOnBackdropClick = true,
+    closeOnEscape = true,
+    maxWidth = "max-w-[680px]",
+    className,
+    overlayClassName
 }) {
-  // Prevent background scroll while the modal is open
-  useEffect(() => {
-    if (isOpen) {
-      const originalOverflow = document.body.style.overflow;
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalOverflow;
-      };
-    }
-  }, [isOpen]);
+    // Prevent background scroll while the modal is open
+    useEffect(() => {
+        if (isOpen) {
+            const originalOverflow = document.body.style.overflow;
+            document.body.style.overflow = "hidden";
+            return () => {
+                document.body.style.overflow = originalOverflow;
+            };
+        }
+    }, [isOpen]);
 
-  // Escape key handling
-  useEffect(() => {
-    if (!isOpen || !closeOnEscape) return undefined;
-    const handler = (e) => {
-      if (e.key === "Escape" && typeof onClose === "function") {
-        onClose();
-      }
+    // Escape key handling
+    useEffect(() => {
+        if (!isOpen || !closeOnEscape) return undefined;
+        const handler = (e) => {
+            if (e.key === "Escape" && typeof onClose === "function") {
+                onClose();
+            }
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, [isOpen, closeOnEscape, onClose]);
+
+    if (!isOpen) return null;
+
+    const handleBackdropClick = () => {
+        if (closeOnBackdropClick && typeof onClose === "function") {
+            onClose();
+        }
     };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [isOpen, closeOnEscape, onClose]);
 
-  if (!isOpen) return null;
+    const stopPropagation = (e) => e.stopPropagation();
 
-  const handleBackdropClick = () => {
-    if (closeOnBackdropClick && typeof onClose === "function") {
-      onClose();
-    }
-  };
-
-  const stopPropagation = (e) => e.stopPropagation();
-
-  return (
-    <div
-      style={{ top: 0, left: 0, right: 0, bottom: 0 }}
-      className={twMerge(
-        clsx(
-          "fixed z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50",
-          overlayClassName
-        )
-      )}
-      onClick={handleBackdropClick}
-    >
-      <section
-        role="dialog"
-        aria-modal="true"
-        className={twMerge(
-          clsx(
-            "w-full",
-            maxWidth,
-            "min-h-[360px] max-h-[90vh] overflow-y-auto",
-            "bg-surface-panel border border-stroke-default rounded-none",
-            "shadow-elevation-200",
-            "p-6",
-            className
-          )
-        )}
-        onClick={stopPropagation}
-      >
-        {/* Optional header */}
-        {(title || showCloseButton) && (
-          <header className="flex items-center justify-between mb-4">
-            {title && (
-              <h2 className="font-bold text-black text-lg">
-                {title}
-              </h2>
+    return (
+        <div
+            className={twMerge(
+                clsx(
+                    "fixed inset-0 z-50 flex items-center justify-center p-md sm:p-lg bg-black/50",
+                    overlayClassName
+                )
             )}
-            {showCloseButton && (
-              <button
-                type="button"
-                aria-label="Close modal"
-                onClick={onClose}
+            onClick={handleBackdropClick}
+        >
+            <section
+                role="dialog"
+                aria-modal="true"
                 className={twMerge(
-                  clsx(
-                    "w-7 h-7 bg-white border border-black rounded-none",
-                    "shadow-[4px_4px_0px_#000]",
-                    "inline-flex items-center justify-center text-black",
-                    "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-                  )
+                    clsx(
+                        "w-full",
+                        maxWidth,
+                        "min-h-[360px] max-h-[90vh] overflow-y-auto",
+                        "bg-surface-panel border border-stroke-default rounded-none",
+                        "shadow-elevation-200",
+                        "p-lg",
+                        className
+                    )
                 )}
-              >
-                &times;
-              </button>
-            )}
-          </header>
-        )}
-        {/* Main content */}
-        {children}
-      </section>
-    </div>
-  );
+                onClick={stopPropagation}
+            >
+                {/* Optional header */}
+                {(title || showCloseButton) && (
+                    <header className="flex items-center justify-between mb-md">
+                        {title && (
+                            <h2 className="font-bold text-content-primary text-lg">
+                                {title}
+                            </h2>
+                        )}
+                        {showCloseButton && (
+                            <button
+                                type="button"
+                                aria-label="Close modal"
+                                onClick={onClose}
+                                className={twMerge(
+                                    clsx(
+                                        "w-7 h-7 bg-surface-panel border border-stroke-default rounded-none",
+                                        "shadow-elevation-200",
+                                        "inline-flex items-center justify-center text-content-primary",
+                                        "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
+                                    )
+                                )}
+                            >
+                                &times;
+                            </button>
+                        )}
+                    </header>
+                )}
+                {/* Main content */}
+                {children}
+            </section>
+        </div>
+    );
 }
 
 export default Modal;

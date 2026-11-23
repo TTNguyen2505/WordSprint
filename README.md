@@ -2,7 +2,7 @@
 
 WordSprint is a desktop English vocabulary puzzle game. It aims to help learners practice vocabulary, listening, reaction speed, and typing through short, timed challenges.
 
-> **Current status:** The frontend still displays the React/Vite starter screen. The gameplay and features described below are product goals and have not yet been fully implemented.
+> **Current status:** The frontend currently displays a leaderboard demo and includes reusable UI components and design tokens. The gameplay and features described below are product goals and have not yet been fully implemented.
 
 ## Product vision
 

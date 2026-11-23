@@ -2,7 +2,13 @@
 
 This directory contains WordSprint's React frontend. It can be installed, run, checked, and built independently of the Qt desktop application. The same frontend is also used by the root project, where Qt WebEngine displays it inside the desktop shell.
 
-> **Current status:** The frontend still shows the React/Vite starter screen. The vocabulary puzzles and gameplay described in the [product overview](../english-vocabulary-puzzle-game.md) are planned features, not completed functionality.
+> **Current status:** The frontend currently shows a leaderboard demo. Reusable UI components and design tokens are available in `src/`; the vocabulary puzzles and gameplay described in the [product overview](../english-vocabulary-puzzle-game.md) are planned features, not completed functionality.
+
+## Design system
+
+Shared CSS tokens and typography utilities are defined in [`src/index.css`](src/index.css). They cover the palette, semantic colors, spacing, icon sizes, stroke widths, elevations, blur, and the existing frontend text styles. Use these utilities instead of repeating a literal value when it matches a token, for example `bg-surface-primary-cta`, `text-body-default`, `gap-md`, `border-stroke-default`, and `shadow-elevation-200`.
+
+Reusable UI components are in [`src/components/`](src/components/), including buttons, badges, tabs, inputs, modals, cards, and quiz elements. Keep component styles bound to the shared tokens when their existing values match exactly; retain one-off values that do not have a corresponding token.
 
 ## Requirements
 
