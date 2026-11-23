@@ -2,23 +2,11 @@ import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import PlayIcon from "../assets/icons/play.svg?react";
 
-/**
- * Neo‑Brutalism Badge component.
- * Inline tag/pill with optional leading icon and variant styling.
- *
- * Props:
- *   - label (string) – fallback text, defaults to "BADGE TITLE".
- *   - children (ReactNode) – content to display, takes precedence over `label`.
- *   - variant (string) – one of "default", "pink", "green", "red", "black", "disabled"; default "default".
- *   - disabled (boolean) – forces disabled styling, default false.
- *   - showIcon (boolean) – whether to show a leading icon, default true.
- *   - icon (ReactNode) – custom leading icon; if omitted and `showIcon` is true, renders a default play triangle.
- *   - className (string) – optional extra Tailwind classes.
- */
 function Badge({
     label = "BADGE TITLE",
     children,
     variant = "default",
+    type = "Default",
     disabled = false,
     showIcon = true,
     icon,
@@ -27,40 +15,54 @@ function Badge({
     const isDisabled = disabled;
     const content = children ?? label;
 
-    const variantStyles = {
-        default:
-            "bg-surface-panel border-stroke-default shadow-elevation-200 text-content-primary",
-        pink: "bg-surface-highlight border-stroke-default shadow-elevation-200 text-content-inverse",
-        green: "bg-surface-success border-stroke-default shadow-elevation-200 text-content-primary",
-        red: "bg-surface-danger border-stroke-default shadow-elevation-200 text-content-inverse",
-        black: "bg-surface-inverse border-stroke-default shadow-elevation-200 text-content-inverse",
-        disabled:
-            "bg-surface-disabled border-gray-400 shadow-none text-content-muted"
+    const typeAliases = {
+        default: "Default",
+        pink: "Highlight",
+        green: "Success",
+        red: "Danger",
+        black: "Inverse",
+        disabled: "Disabled"
     };
 
-    const appliedVariant = isDisabled ? "disabled" : variant;
-    const variantClass = variantStyles[appliedVariant] ?? variantStyles.default;
+    const typeStyles = {
+        Default:
+            "bg-surface-panel border-stroke-default shadow-elevation-100 text-content-primary",
+        Highlight:
+            "bg-surface-highlight border-stroke-default shadow-elevation-100 text-content-inverse",
+        Success:
+            "bg-surface-success border-stroke-default shadow-elevation-100 text-content-primary",
+        Danger: "bg-surface-danger border-stroke-default shadow-elevation-100 text-content-inverse",
+        Inverse:
+            "bg-surface-inverse border-stroke-default shadow-elevation-100 text-content-inverse",
+        Disabled:
+            "bg-surface-disabled border-stroke-disabled shadow-elevation-0 text-content-muted"
+    };
+
+    const requestedType = variant !== "default" ? variant : type;
+    const badgeType = isDisabled
+        ? "Disabled"
+        : (typeAliases[requestedType] ?? requestedType);
+    const typeClass = typeStyles[badgeType] ?? typeStyles.Default;
 
     const baseClasses = clsx(
-        "inline-flex items-center gap-1.5 rounded-none px-2.5 py-1 w-fit",
-        !isDisabled && "cursor-pointer",
-        isDisabled && "cursor-not-allowed opacity-50",
-        variantClass,
+        "inline-flex w-fit items-center gap-2xs rounded-none border-[length:var(--border-width-subtle)] px-xs py-2xs",
+        typeClass,
         className
     );
 
     return (
         <span className={twMerge(baseClasses)}>
             {showIcon && (
-                <span className="flex items-center">
+                <span className="flex size-icon-xs shrink-0 items-center justify-center text-current">
                     {icon ?? (
-                        <PlayIcon className="size-[12px]" aria-hidden="true" />
+                        <PlayIcon
+                            className="size-icon-xs text-current"
+                            aria-hidden="true"
+                        />
                     )}
                 </span>
             )}
-            <span className="font-mono font-bold uppercase text-xs tracking-wider whitespace-nowrap">
-                {content}
-            </span>
+            <span className="text-mono-badge whitespace-nowrap">{content}</span>
         </span>
     );
 }

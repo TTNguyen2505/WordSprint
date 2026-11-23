@@ -9,11 +9,12 @@ const sizeStyles = {
         label: "text-button-sm",
         states: {
             default: "shadow-elevation-100",
-            hover: "shadow-elevation-200 -translate-x-[1px] -translate-y-[1px]",
-            pressed: "shadow-elevation-50 translate-x-[2px] translate-y-[2px]"
+            hover: "shadow-elevation-200 -translate-x-[var(--primitive-depth-50)] -translate-y-[var(--primitive-depth-50)]",
+            pressed:
+                "shadow-elevation-50 translate-x-[var(--primitive-depth-100)] translate-y-[var(--primitive-depth-100)]"
         },
         interactions:
-            "hover:shadow-elevation-200 hover:-translate-x-[1px] hover:-translate-y-[1px] active:shadow-elevation-50 active:translate-x-[2px] active:translate-y-[2px]"
+            "hover:shadow-elevation-200 hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] active:shadow-elevation-50 active:translate-x-[var(--primitive-depth-100)] active:translate-y-[var(--primitive-depth-100)]"
     },
     default: {
         container: "gap-xs min-w-[120px] px-md py-xs",
@@ -21,11 +22,12 @@ const sizeStyles = {
         label: "text-button-default",
         states: {
             default: "shadow-elevation-200",
-            hover: "shadow-elevation-300 -translate-x-[1px] -translate-y-[1px]",
-            pressed: "shadow-elevation-50 translate-x-[2px] translate-y-[2px]"
+            hover: "shadow-elevation-300 -translate-x-[var(--primitive-depth-50)] -translate-y-[var(--primitive-depth-50)]",
+            pressed:
+                "shadow-elevation-50 translate-x-[var(--primitive-depth-100)] translate-y-[var(--primitive-depth-100)]"
         },
         interactions:
-            "hover:shadow-elevation-300 hover:-translate-x-[1px] hover:-translate-y-[1px] active:shadow-elevation-50 active:translate-x-[2px] active:translate-y-[2px]"
+            "hover:shadow-elevation-300 hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] active:shadow-elevation-50 active:translate-x-[var(--primitive-depth-100)] active:translate-y-[var(--primitive-depth-100)]"
     },
     large: {
         container: "gap-xs min-w-[120px] px-lg py-sm",
@@ -33,11 +35,12 @@ const sizeStyles = {
         label: "text-button-lg",
         states: {
             default: "shadow-elevation-200",
-            hover: "shadow-elevation-300 -translate-x-[1px] -translate-y-[1px]",
-            pressed: "shadow-elevation-50 translate-x-[2px] translate-y-[2px]"
+            hover: "shadow-elevation-300 -translate-x-[var(--primitive-depth-50)] -translate-y-[var(--primitive-depth-50)]",
+            pressed:
+                "shadow-elevation-50 translate-x-[var(--primitive-depth-100)] translate-y-[var(--primitive-depth-100)]"
         },
         interactions:
-            "hover:shadow-elevation-300 hover:-translate-x-[1px] hover:-translate-y-[1px] active:shadow-elevation-50 active:translate-x-[2px] active:translate-y-[2px]"
+            "hover:shadow-elevation-300 hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] active:shadow-elevation-50 active:translate-x-[var(--primitive-depth-100)] active:translate-y-[var(--primitive-depth-100)]"
     }
 };
 
@@ -91,6 +94,9 @@ function Button({
     const stateStyle = isDisabled
         ? ""
         : styles.states[state] || styles.states.default;
+    const variantStyle = isDisabled
+        ? variantStyles.disabled
+        : variantStyles[variant] || variantStyles.primary;
 
     return (
         <button
@@ -98,9 +104,9 @@ function Button({
             className={clsx(
                 twMerge(
                     clsx(
-                        "inline-flex items-center justify-center border-2 border-solid font-bold transition-[translate,box-shadow] duration-[180ms] ease-snap",
+                        "inline-flex items-center justify-center border-[length:var(--border-width-default)] transition-[translate,box-shadow] duration-[var(--duration-normal)] ease-snap",
                         styles.container,
-                        variantStyles[variant],
+                        variantStyle,
                         stateStyle,
                         !isDisabled &&
                             state === "default" &&

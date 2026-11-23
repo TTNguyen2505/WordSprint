@@ -1,23 +1,19 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import Badge from "./Badge";
+import Cell from "./Cell";
 
-/**
- * Neo‑Brutalism LeaderboardRecord component.
- * Renders a single row for a leaderboard with four visual variants.
- *
- * Props:
- *   - variant ("header" | "champion" | "default" | "you") – visual style.
- *   - rank (number|string) – rank value (default "01").
- *   - playerName (string) – name of the player (default "player_name").
- *   - score (number|string) – player score (default "120,000").
- *   - playTime (string) – formatted play time (default "10:00").
- *   - badgeLabel (string) – custom badge text; defaults to "CHAMPION" for champion variant and "YOU" for you variant.
- *   - onClick (function) – optional click handler for data rows.
- *   - className (string) – optional extra Tailwind classes.
- */
+const legacyTypes = {
+    header: "Header",
+    champion: "First Record",
+    you: "Active",
+    default: "Default"
+};
+
 function LeaderboardRecord({
-    variant = "default",
+    type,
+    state = "Default",
+    variant,
     rank = "01",
     playerName = "player_name",
     score = "120,000",
@@ -26,108 +22,105 @@ function LeaderboardRecord({
     onClick,
     className
 }) {
-    const isHeader = variant === "header";
-    const isChampion = variant === "champion";
-    const isYou = variant === "you";
-
-    // Normalise rank – pad numbers to two digits.
-    const formattedRank =
-        typeof rank === "number"
-            ? String(rank).padStart(2, "0")
-            : String(rank).padStart(2, "0");
-
-    // Normalise score – add commas for numbers.
+    const recordType = type ?? legacyTypes[variant] ?? "Default";
+    const isHeader = recordType === "Header";
+    const isFirstRecord = recordType === "First Record";
+    const isActive = recordType === "Active";
+    const isDefault = recordType === "Default";
+    const isHover = state === "Hover";
+    const formattedRank = String(rank).padStart(2, "0");
     const formattedScore =
         typeof score === "number" ? score.toLocaleString() : String(score);
-
-    // Badge handling.
-    let badge = null;
-    if (isChampion || isYou) {
-        const label = badgeLabel ?? (isChampion ? "CHAMPION" : "YOU");
-        const badgeVariant = isChampion ? "pink" : "black";
-        badge = (
+    const badgeText =
+        badgeLabel ?? (isFirstRecord ? "CHAMPION" : isActive ? "YOU" : "");
+    const badge =
+        isFirstRecord || isActive ? (
             <Badge
-                variant={badgeVariant}
+                type={isFirstRecord ? "Highlight" : "Inverse"}
                 showIcon={false}
-                className={clsx(
-                    "ml-2.5 shadow-elevation-100",
-                    isChampion ? "badge-champion" : "badge-you"
-                )}
+                className="shadow-elevation-100"
             >
-                {label}
+                {badgeText}
             </Badge>
-        );
-    }
+        ) : null;
 
-    // Base row classes.
-    const baseRowClasses = clsx(
-        "w-full grid grid-cols-[80px_1fr_120px_120px] items-center px-2 sm:px-4 min-h-[48px] border-b border-stroke-default rounded-none last:border-b-0",
-        {
-            // Header variant – static styling.
-            "bg-surface-panel font-sans font-bold uppercase text-base text-content-primary":
-                isHeader,
-            // Champion and default variants share base font.
-            "bg-surface-panel font-mono text-sm text-content-primary":
-                !isHeader,
-            // Default hover background.
-            "hover:bg-[#FFF5B8]": !isHeader && !isChampion && !isYou,
-            // You variant bright yellow background.
-            "bg-surface-primary-cta current-player": isYou
-        },
-        className
+    const rowBackground = isActive
+        ? "bg-surface-primary-cta"
+        : isDefault && isHover
+          ? "bg-surface-primary-subtle"
+          : "bg-surface-panel";
+
+    const playerCell = isHeader ? (
+        <Cell
+            type="Header"
+            data="PLAYER"
+            className="w-[280px] shrink-0 justify-center"
+        />
+    ) : isFirstRecord || isActive ? (
+        <Cell
+            type="Text"
+            className="w-[280px] shrink-0 gap-xs"
+            onClick={onClick}
+        >
+            <span className="truncate font-mono text-mono-data">
+                {playerName}
+            </span>
+            {badge}
+        </Cell>
+    ) : (
+        <Cell
+            type="Text"
+            data={playerName}
+            showBadge={false}
+            className="w-[280px] shrink-0"
+            onClick={onClick}
+        />
     );
 
-    // Click handling – only for non‑header rows.
-    const handleClick = (e) => {
-        if (!isHeader && typeof onClick === "function") {
-            onClick(e);
-        }
+    const scoreCell = (
+        <Cell
+            type={isHeader ? "Header" : "Numerical"}
+            data={isHeader ? "SCORE" : formattedScore}
+            className={clsx("w-[120px] shrink-0", !isHeader && "justify-end")}
+        />
+    );
+    const playTimeCell = (
+        <Cell
+            type={isHeader ? "Header" : "Numerical"}
+            data={isHeader ? "PLAY TIME" : playTime}
+            className={clsx("w-[120px] shrink-0", !isHeader && "justify-end")}
+        />
+    );
+
+    const handleClick = (event) => {
+        if (!isHeader) onClick?.(event);
     };
 
     return (
         <div
             role={isHeader ? undefined : "row"}
             onClick={handleClick}
-            className={twMerge(baseRowClasses)}
+            className={twMerge(
+                clsx(
+                    "flex h-12 w-[600px] min-w-[600px] items-start border-[length:var(--border-width-subtle)] border-stroke-default",
+                    rowBackground,
+                    isDefault &&
+                        "transition-colors duration-[var(--duration-fast)] ease-snap hover:bg-surface-primary-subtle",
+                    className
+                )
+            )}
             data-rank={isHeader ? undefined : formattedRank}
+            data-type={recordType}
+            data-state={state}
         >
-            {/* Rank */}
-            <div className="text-center font-mono">
-                {isHeader ? "RANK" : formattedRank}
-            </div>
-
-            {/* Player column */}
-            <div
-                className={clsx(
-                    "flex items-center gap-2 min-w-0 overflow-hidden",
-                    isHeader ? "justify-center" : "justify-start"
-                )}
-            >
-                <span className="truncate">
-                    {isHeader ? "PLAYER" : playerName}
-                </span>
-                {badge}
-            </div>
-
-            {/* Score */}
-            <div
-                className={clsx(
-                    "tabular-nums pr-2 sm:pr-4",
-                    isHeader ? "text-center font-sans" : "text-right font-mono"
-                )}
-            >
-                {isHeader ? "SCORE" : formattedScore}
-            </div>
-
-            {/* Play Time */}
-            <div
-                className={clsx(
-                    "tabular-nums pr-2 sm:pr-4",
-                    isHeader ? "text-center font-sans" : "text-right font-mono"
-                )}
-            >
-                {isHeader ? "PLAY TIME" : playTime}
-            </div>
+            <Cell
+                type={isHeader ? "Header" : "Rank"}
+                data={isHeader ? "RANK" : formattedRank}
+                className="w-[80px] shrink-0 justify-center"
+            />
+            {playerCell}
+            {scoreCell}
+            {playTimeCell}
         </div>
     );
 }

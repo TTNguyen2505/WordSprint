@@ -1,27 +1,22 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
+import sampleThumbnail from "../assets/sample-stage-card-thumbnail.jpg";
+import BoltIcon from "../assets/icons/bolt.svg?react";
+import CheckIcon from "../assets/icons/check.svg?react";
+import LockIcon from "../assets/icons/lock.svg?react";
+import PlayIcon from "../assets/icons/play.svg?react";
+import ReplayIcon from "../assets/icons/replay.svg?react";
+import ScoreIcon from "../assets/icons/score.svg?react";
 import Badge from "./Badge";
+import Button from "./Button";
 
-/**
- * Neo‑Brutalism StageCard component.
- *
- * Props:
- *   - stageId (string) – label displayed in the top‑left tag (default: "STAGE ID").
- *   - status ("solved" | "available" | "locked") – visual state (default: "available").
- *   - topic (string) – title shown over the image (default: "Topic").
- *   - level (string) – subtitle (e.g., "A1") displayed under the topic (default: "A1").
- *   - imageSrc (string) – background image URL for the stage preview.
- *   - imageAlt (string) – alt text for the image (default: "Stage preview").
- *   - score (number|string) – points earned for this stage (default: 0).
- *   - onAction (function) – click handler for the action button (Play/Replay).
- *   - className (string) – optional extra Tailwind classes for the outer card.
- */
 function StageCard({
     stageId = "STAGE ID",
     status = "available",
+    state = "default",
     topic = "Topic",
     level = "A1",
-    imageSrc,
+    imageSrc = sampleThumbnail,
     imageAlt = "Stage preview",
     score = 0,
     onAction,
@@ -29,157 +24,146 @@ function StageCard({
 }) {
     const isLocked = status === "locked";
     const isSolved = status === "solved";
-    const isAvailable = status === "available";
+    const isHover = state === "hover";
+    const isInteractive = !isLocked && typeof onAction === "function";
 
-    // Card background and shadow based on state
-    const cardBg = isLocked ? "bg-surface-disabled" : "bg-surface-panel";
-    const cardBorder = isLocked ? "border-gray-400" : "border-stroke-default";
-    const cardShadow = isLocked ? "shadow-none" : "shadow-elevation-200";
-
-    // Header badge variant mapping
-    const badgeVariant = isSolved ? "green" : isAvailable ? "pink" : "disabled";
-    const badgeIcon = isSolved ? "✓" : isAvailable ? "⚡" : "🔒";
-    const badgeLabel = isSolved
-        ? "SOLVED"
-        : isAvailable
-          ? "AVAILABLE"
-          : "LOCKED";
-
-    // Action button styling
-    const actionLabel = isSolved ? "Replay" : isAvailable ? "Play" : "Locked";
-    const actionBg = isLocked
+    const cardBackground = isLocked
         ? "bg-surface-disabled"
         : isSolved
           ? "bg-surface-panel"
-          : "bg-surface-inverse";
-    const actionText = isLocked
-        ? "text-content-muted"
-        : isSolved
-          ? "text-content-primary"
-          : "text-content-inverse";
-    const actionBorder = isLocked ? "border-gray-400" : "border-stroke-default";
-    const actionShadow = isLocked ? "shadow-none" : "shadow-elevation-200";
-    const actionIcon = isSolved ? "↺" : isAvailable ? "▶" : "🔒";
-
-    // Points chip styling (same for all states – disabled variant when locked)
-    const chipBg = isLocked ? "bg-surface-disabled" : "bg-surface-panel";
-    const chipBorder = isLocked ? "border-gray-400" : "border-stroke-default";
-    const chipShadow = isLocked ? "shadow-none" : "shadow-elevation-200";
-
-    // Divider colour
-    const dividerBorder = isLocked
-        ? "border-gray-400"
+          : "bg-surface-primary-cta";
+    const cardBorder = isLocked
+        ? "border-stroke-disabled"
         : "border-stroke-default";
-
-    // Image style – grayscale when locked
-    const imageClasses = clsx(
-        "w-full h-full object-cover",
-        isLocked && "grayscale opacity-50"
+    const cardShadow = isLocked
+        ? "shadow-elevation-0"
+        : isHover
+          ? "shadow-elevation-400"
+          : "shadow-elevation-200";
+    const statusType = isLocked ? "Lock" : isSolved ? "Success" : "Highlight";
+    const statusLabel = isLocked ? "LOCKED" : isSolved ? "SOLVED" : "AVAILABLE";
+    const statusIcon = isLocked ? (
+        <LockIcon className="size-full text-current" aria-hidden="true" />
+    ) : isSolved ? (
+        <CheckIcon className="size-full text-current" aria-hidden="true" />
+    ) : (
+        <BoltIcon className="size-full text-current" aria-hidden="true" />
+    );
+    const actionLabel = isLocked ? "Locked" : isSolved ? "Replay" : "Play";
+    const actionVariant = isLocked
+        ? "disabled"
+        : isSolved
+          ? "secondary"
+          : "inverse";
+    const actionIcon = isLocked ? (
+        <LockIcon className="size-icon-xs text-current" aria-hidden="true" />
+    ) : isSolved ? (
+        <ReplayIcon className="size-icon-xs text-current" aria-hidden="true" />
+    ) : (
+        <PlayIcon className="size-icon-xs text-current" aria-hidden="true" />
     );
 
-    const handleClick = () => {
-        if (!isLocked && typeof onAction === "function") {
-            onAction();
-        }
+    const handleAction = () => {
+        if (isInteractive) onAction();
     };
 
     return (
         <div
             className={twMerge(
                 clsx(
-                    "flex flex-col gap-3 p-4 rounded-none border-2",
+                    "flex w-fit max-w-full flex-col items-start gap-md rounded-none border-[length:var(--border-width-heavy)] px-lg py-md",
+                    cardBackground,
                     cardBorder,
-                    cardBg,
                     cardShadow,
-                    "max-w-[300px] w-full",
+                    !isLocked &&
+                        "transition-[box-shadow,translate] duration-[var(--duration-normal)] ease-snap hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] hover:shadow-elevation-400",
+                    isHover &&
+                        !isLocked &&
+                        "-translate-x-[var(--primitive-depth-50)] -translate-y-[var(--primitive-depth-50)]",
                     className
                 )
             )}
         >
-            {/* Header */}
-            <div className="flex items-center justify-between gap-2">
-                <span className="px-2 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-content-primary">
+            <div className="flex w-full items-center justify-between">
+                <Badge type="Default" showIcon={false} disabled={isLocked}>
                     {stageId}
-                </span>
+                </Badge>
                 <Badge
-                    variant={badgeVariant}
+                    type={statusType}
+                    showIcon
+                    icon={statusIcon}
                     disabled={isLocked}
-                    className="px-2 py-1"
                 >
-                    {badgeIcon} {badgeLabel}
+                    {statusLabel}
                 </Badge>
             </div>
 
-            {/* Image & overlay */}
-            <div className="relative w-full aspect-[16/9] overflow-hidden rounded-none">
+            <div
+                className={twMerge(
+                    clsx(
+                        "relative aspect-[21/9] w-[270px] shrink-0 overflow-hidden rounded-none border-[length:var(--border-width-default)]",
+                        isLocked
+                            ? "border-stroke-disabled"
+                            : "border-stroke-default",
+                        isLocked && "opacity-50"
+                    )
+                )}
+            >
                 {imageSrc && (
                     <img
                         src={imageSrc}
                         alt={imageAlt}
-                        className={imageClasses}
+                        className="absolute inset-0 size-full object-cover"
                     />
                 )}
-                {/* Overlay box */}
-                <div className="absolute inset-0 flex items-center justify-center p-3">
+                <div className="absolute inset-0 flex items-center justify-center">
                     <div
                         className={twMerge(
                             clsx(
-                                "px-5 py-2.5 text-center rounded-none border-2 border-stroke-default bg-surface-panel",
-                                "shadow-elevation-200"
+                                "flex flex-col items-center justify-center rounded-none border-[length:var(--border-width-subtle)] px-md py-3xs",
+                                isLocked
+                                    ? "border-stroke-disabled bg-surface-disabled text-content-muted shadow-elevation-0"
+                                    : "border-stroke-default bg-surface-panel text-content-primary shadow-elevation-100"
                             )
                         )}
                     >
-                        <div className="text-base font-bold leading-tight text-content-primary">
-                            {topic}
-                        </div>
-                        <div className="mt-0.5 text-xs font-mono text-content-primary">
-                            {level}
-                        </div>
+                        <span className="text-heading-md">{topic}</span>
+                        <span className="text-body-sm">{level}</span>
                     </div>
                 </div>
             </div>
 
-            {/* Divider */}
-            <hr className={twMerge(clsx("border-t", dividerBorder))} />
+            <div
+                className={twMerge(
+                    "h-0 w-full border-t-[length:var(--border-width-default)]",
+                    isLocked
+                        ? "border-stroke-disabled"
+                        : "border-stroke-default"
+                )}
+            />
 
-            {/* Footer */}
-            <div className="flex items-center justify-between gap-2">
-                {/* Points chip */}
-                <span
-                    className={twMerge(
-                        clsx(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-bold rounded-none",
-                            chipBg,
-                            chipBorder,
-                            chipShadow,
-                            "text-content-primary"
-                        )
-                    )}
-                >
-                    {/* Simple medal icon using Unicode */}
-                    <span aria-hidden="true">🏅</span> {score}
-                </span>
-
-                {/* Action button */}
-                <button
-                    type="button"
-                    onClick={handleClick}
+            <div className="flex w-full items-center justify-between">
+                <Badge
+                    type="Default"
                     disabled={isLocked}
-                    className={twMerge(
-                        clsx(
-                            "inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-none",
-                            actionBg,
-                            actionText,
-                            actionBorder,
-                            actionShadow,
-                            !isLocked &&
-                                "cursor-pointer hover:shadow-elevation-300 hover:-translate-x-[1px] hover:-translate-y-[1px]",
-                            isLocked && "cursor-not-allowed opacity-50"
-                        )
-                    )}
+                    icon={
+                        <ScoreIcon
+                            className="size-full text-current"
+                            aria-hidden="true"
+                        />
+                    }
                 >
-                    {actionIcon} {actionLabel}
-                </button>
+                    {score}
+                </Badge>
+                <Button
+                    label={actionLabel}
+                    variant={actionVariant}
+                    size="small"
+                    leadingIcon={actionIcon}
+                    showTrailingIcon={false}
+                    onClick={handleAction}
+                    disabled={isLocked}
+                />
             </div>
         </div>
     );
