@@ -7,6 +7,7 @@ import LeaderboardModal from "./screens/LeaderboardModal";
 import MenuScreen from "./screens/MenuScreen";
 import PlayScreen from "./screens/PlayScreen";
 import SelectProfileModal from "./screens/SelectProfileModal";
+import StageResultModal from "./screens/StageResultModal";
 import sampleStages from "./sampleStages";
 
 const initialProfiles = [
@@ -24,6 +25,8 @@ function Application() {
     const [activeId, setActiveId] = useState(initialProfiles[0].id);
     const [modal, setModal] = useState(null);
     const [selectedStage, setSelectedStage] = useState(null);
+    const [stageRun, setStageRun] = useState(0);
+    const [stageResult, setStageResult] = useState(null);
     const unavailableTitleId = useId();
     const activeProfile = profiles.find((profile) => profile.id === activeId);
 
@@ -44,13 +47,61 @@ function Application() {
 
     const unavailable = (feature) => setModal({ unavailable: feature });
 
+    const startStage = (stage) => {
+        setSelectedStage(stage);
+        setStageRun((current) => current + 1);
+        setStageResult(null);
+        setModal(null);
+    };
+
     if (selectedStage) {
+        const stageIndex = activeProfile.stages.findIndex(
+            (stage) => stage.stageId === selectedStage.stageId
+        );
+        const nextStage = activeProfile.stages[stageIndex + 1];
+
         return (
-            <PlayScreen
-                username={activeProfile.name}
-                topic={selectedStage.topic}
-                level={selectedStage.level}
-            />
+            <>
+                <div inert={Boolean(stageResult)}>
+                    <PlayScreen
+                        key={stageRun}
+                        username={activeProfile.name}
+                        topic={selectedStage.topic}
+                        level={selectedStage.level}
+                        onPreviewResult={(result) =>
+                            setStageResult(
+                                result === "timeUp"
+                                    ? "timeUp"
+                                    : nextStage
+                                      ? "stageCleared"
+                                      : "campaignCleared"
+                            )
+                        }
+                    />
+                </div>
+                {stageResult && modal !== "leaderboard" && (
+                    <StageResultModal
+                        result={stageResult}
+                        stageTitle={`${selectedStage.stageId}: ${selectedStage.topic}`}
+                        nextStageTitle={
+                            nextStage
+                                ? `${nextStage.stageId}: ${nextStage.topic}`
+                                : undefined
+                        }
+                        nextStageLevel={nextStage?.level}
+                        onNextStage={() => startStage(nextStage)}
+                        onReplay={() => startStage(selectedStage)}
+                        onQuit={() => {
+                            setSelectedStage(null);
+                            setStageResult(null);
+                        }}
+                        onLeaderboard={() => setModal("leaderboard")}
+                    />
+                )}
+                {modal === "leaderboard" && (
+                    <LeaderboardModal onClose={() => setModal(null)} />
+                )}
+            </>
         );
     }
 
@@ -66,7 +117,7 @@ function Application() {
                 onHelp={() => unavailable("Help")}
                 onSettings={() => unavailable("Settings")}
                 onExit={() => unavailable("Exit game")}
-                onStageAction={setSelectedStage}
+                onStageAction={startStage}
             />
             {modal === "leaderboard" && (
                 <LeaderboardModal onClose={() => setModal(null)} />
