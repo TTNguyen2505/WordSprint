@@ -24,24 +24,25 @@ function Badge({
   showIcon = true,
   icon,
   className,
+  id,
 }) {
   const isDisabled = disabled;
   const content = children ?? label;
 
   const variantStyles = {
-    default: "bg-white border-black shadow-elevation-200 text-black",
-    pink: "bg-surface-highlight border-black shadow-elevation-200 text-white",
-    green: "bg-surface-success border-black shadow-elevation-200 text-black",
-    red: "bg-surface-danger border-black shadow-elevation-200 text-white",
-    black: "bg-black border-black shadow-elevation-200 text-white",
-    disabled: "bg-surface-disabled border-gray-400 shadow-none text-content-muted",
+    default: "bg-surface-panel border-stroke-default shadow-elevation-200 text-content-primary",
+    pink: "bg-surface-highlight border-stroke-default shadow-elevation-200 text-content-inverse",
+    green: "bg-surface-success border-stroke-default shadow-elevation-200 text-content-primary",
+    red: "bg-surface-danger border-stroke-default shadow-elevation-200 text-content-inverse",
+    black: "bg-surface-inverse border-stroke-default shadow-elevation-200 text-content-inverse",
+    disabled: "bg-surface-disabled border-stroke-disabled shadow-elevation-0 text-content-muted",
   };
 
   const appliedVariant = isDisabled ? "disabled" : variant;
   const variantClass = variantStyles[appliedVariant] ?? variantStyles.default;
 
   const baseClasses = clsx(
-    "inline-flex items-center gap-1.5 rounded-none px-2.5 py-1 w-fit",
+    "inline-flex items-center gap-[6px] rounded-none px-[12px] py-[4px] w-fit border-2 box-border transition-all",
     !isDisabled && "cursor-pointer",
     isDisabled && "cursor-not-allowed opacity-50",
     variantClass,
@@ -49,13 +50,13 @@ function Badge({
   );
 
   return (
-    <span className={twMerge(baseClasses)}>
+    <span id={id} data-testid={id} className={twMerge(baseClasses)}>
       {showIcon && (
         <span className="flex items-center">
           {icon ?? <PlayIcon className="size-[12px]" aria-hidden="true" />}
         </span>
       )}
-      <span className="font-mono font-bold uppercase text-xs tracking-wider whitespace-nowrap">
+      <span className="font-mono font-bold uppercase text-[12px] leading-[16px] tracking-wider whitespace-nowrap">
         {content}
       </span>
     </span>
