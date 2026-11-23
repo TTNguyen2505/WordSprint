@@ -66,9 +66,10 @@ function Modal({
 
   return (
     <div
+      style={{ top: 0, left: 0, right: 0, bottom: 0 }}
       className={twMerge(
         clsx(
-          "fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50",
+          "fixed z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50",
           overlayClassName
         )
       )}

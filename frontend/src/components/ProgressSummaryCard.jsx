@@ -61,8 +61,8 @@ function ProgressSummaryCard({
 
   const containerClasses = twMerge(
     clsx(
-      "w-full max-w-[660px] min-h-[172px] bg-white border border-black rounded-none",
-      "shadow-[4px_4px_0px_#000] p-6 flex flex-col justify-between gap-6",
+      "w-full max-w-[660px] min-h-[140px] bg-white border-2 border-black rounded-none",
+      "shadow-[4px_4px_0px_#000] p-[20px] flex flex-col justify-between gap-[16px]",
       interactive &&
         "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-[6px_6px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all",
       className
@@ -73,18 +73,18 @@ function ProgressSummaryCard({
     <div className={containerClasses} onClick={onClick} role={interactive ? "button" : undefined}>
       {/* Top row – status badge */}
       <div className="flex items-center justify-between">
-        <Badge variant={badgeVariant} showIcon={true} className="px-2 py-1">
+        <Badge variant={badgeVariant} showIcon={true} className="px-[10px] py-[3px]">
           {finalBadgeLabel}
         </Badge>
       </div>
 
       {/* Bottom content block */}
-      <div className="flex flex-col gap-1.5">
-        <span className="text-sm font-medium uppercase tracking-wide text-black">
+      <div className="flex flex-col gap-[6px]">
+        <span className="text-xs font-mono font-bold uppercase tracking-wide text-black">
           {finalEyebrow}
         </span>
-        <div className="flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-lg font-bold text-black leading-snug">
+        <div className="flex flex-wrap items-end justify-between gap-[16px]">
+          <h2 className="text-lg font-sans font-bold text-black leading-snug m-0">
             {finalTitle}
           </h2>
           <InfoPill

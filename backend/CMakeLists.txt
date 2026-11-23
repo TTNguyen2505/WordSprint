@@ -50,9 +50,11 @@ qt_add_executable(WordSprint
     src/main.cpp
     src/BridgeController.h
     src/BridgeController.cpp
+    src/models/Stage.h
+    src/models/StageRecord.h
     src/models/Topic.h
+    src/models/UserProgress.h
     src/models/Vocabulary.h
-    src/models/LearningProgress.h
     src/database/DatabaseManager.h
     src/database/DatabaseManager.cpp
     src/repositories/IVocabularyRepository.h
