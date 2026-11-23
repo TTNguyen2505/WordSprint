@@ -16,9 +16,7 @@ function ModalTitle({ title = "TITLE", children, as = "h2", id, className }) {
     const Tag = as;
 
     const baseClasses = clsx(
-        "font-sans font-bold uppercase tracking-tight text-content-primary",
-        "text-[length:var(--primitive-font-size-36)] leading-[var(--primitive-line-height-40)]",
-        "bg-transparent m-0"
+        "font-sans text-[length:var(--primitive-font-size-24)] font-bold leading-[var(--primitive-line-height-30)] tracking-[var(--primitive-letter-spacing-tight)] text-content-primary"
     );
 
     return (

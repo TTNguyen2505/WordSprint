@@ -1,19 +1,25 @@
+import { useState } from "react";
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useState } from "react";
+import thumbnail from "../assets/quiz-question-thumbnail.png";
+import ArrowBackIcon from "../assets/icons/arrow_back_1.svg?react";
+import ArrowForwardIcon from "../assets/icons/arrow_forward_1.svg?react";
+import MusicNoteIcon from "../assets/icons/music_note.svg?react";
 import Badge from "./Badge";
+import Button from "./Button";
 import QuizLetter from "./QuizLetter";
+import TextInput from "./TextInput";
 
-/**
- * Neo‑Brutalism Quiz component.
- * Supports three modes: scramble, fill‑blank, audio.
- * Implements badge, navigation, illustration, optional audio button, letter tiles,
- * answer input, clear/submit actions and an instruction prompt.
- */
+const DEFAULT_LETTERS = {
+    scramble: ["U", "Q", "S", "E", "T", "O", "I", "N"],
+    "fill-blank": ["Q", "U", "", "S", "T", "", "O", "N"],
+    audio: Array(8).fill("")
+};
+
 function Quiz({
     mode = "scramble",
     badgeLabel,
-    imageSrc,
+    imageSrc = thumbnail,
     imageAlt = "Quiz clue illustration",
     letters,
     answer,
@@ -31,239 +37,157 @@ function Quiz({
     disabled = false,
     className
 }) {
-    // ----- Helpers -----
     const modeLabels = {
         scramble: "SCRAMBLE",
         "fill-blank": "FILL BLANK",
         audio: "AUDIO"
     };
-
-    const currentBadgeLabel = badgeLabel ?? modeLabels[mode] ?? "SCRAMBLE";
-
-    // ----- Answer state (controlled / uncontrolled) -----
+    const currentBadgeLabel =
+        badgeLabel ?? modeLabels[mode] ?? modeLabels.scramble;
     const [internalAnswer, setInternalAnswer] = useState(answer ?? "");
+    const effectiveLetters = letters ?? DEFAULT_LETTERS[mode] ?? [];
+    const currentInstruction =
+        instruction ??
+        {
+            scramble: "Rearrange all the letters above into the correct word.",
+            "fill-blank": "Type the full word, including the missing letters.",
+            audio: "Listen carefully and type the word you hear."
+        }[mode] ??
+        "";
 
-    const currentAnswer = answer !== undefined ? answer : internalAnswer;
-
-    const handleInputChange = (e) => {
-        const val = e.target.value;
-        if (answer === undefined) {
-            setInternalAnswer(val);
-        }
-        if (typeof onChange === "function") {
-            onChange(val);
-        }
+    const handleInputChange = (event) => {
+        const nextAnswer = event.target.value;
+        if (answer === undefined) setInternalAnswer(nextAnswer);
+        onChange?.(nextAnswer);
     };
 
     const handleClear = () => {
-        if (answer === undefined) {
-            setInternalAnswer("");
-        }
-        if (typeof onClear === "function") {
-            onClear();
-        }
-        if (typeof onChange === "function") {
-            onChange("");
-        }
+        if (answer === undefined) setInternalAnswer("");
+        onClear?.();
+        onChange?.("");
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const trimmed = currentAnswer.trim();
-        if (typeof onSubmit === "function") {
-            onSubmit(trimmed);
-        }
+    const handleSubmit = (event) => {
+        event.preventDefault();
+        onSubmit?.((answer ?? internalAnswer).trim());
     };
 
-    // ----- Letters handling -----
-    const defaultLetterCount = 8;
-    const effectiveLetters =
-        letters ?? (mode === "audio" ? Array(defaultLetterCount).fill("") : []);
-
-    // ----- Instruction default per mode -----
-    const defaultInstructions = {
-        scramble: "Rearrange all the letters above into the correct word.",
-        "fill-blank": "Type the full word, including the missing letters.",
-        audio: "Listen carefully and type the word you hear."
-    };
-
-    const currentInstruction = instruction ?? defaultInstructions[mode] ?? "";
-
-    // ----- Button disabled logic -----
-    const isPrevDisabled = disabled || !hasPrevious;
-    const isNextDisabled = disabled || !hasNext;
+    const currentAnswer = answer ?? internalAnswer;
     const isPlayDisabled = disabled || playsRemaining <= 0;
-    const isSubmitDisabled = disabled;
-    const isClearDisabled = disabled;
-
     return (
-        <div
+        <section
             className={twMerge(
                 clsx(
-                    "w-full max-w-[580px] bg-surface-panel border border-stroke-default rounded-none",
-                    "shadow-elevation-200 p-6 flex flex-col gap-5",
+                    "flex w-full max-w-[548px] flex-col items-center border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel px-xl py-lg shadow-elevation-200",
+                    "gap-xl",
                     className
                 )
             )}
         >
-            {/* Header row */}
-            <div className="flex items-center justify-between gap-2">
-                {/* Mode badge */}
-                <Badge variant="pink" showIcon={false} className="px-2 py-1">
+            <header className="flex w-full items-center justify-between">
+                <Badge type="Highlight" showIcon={false}>
                     {currentBadgeLabel}
                 </Badge>
-                {/* Navigation */}
-                <div className="flex items-center gap-2">
-                    <button
-                        type="button"
+                <nav
+                    aria-label="Quiz navigation"
+                    className="flex items-center gap-sm"
+                >
+                    <Button
+                        label="Previous"
+                        variant="secondary"
+                        size="default"
+                        leadingIcon={<ArrowBackIcon className="size-full" />}
+                        showTrailingIcon={false}
                         onClick={onPrevious}
-                        disabled={isPrevDisabled}
-                        className={twMerge(
-                            clsx(
-                                "inline-flex items-center gap-1 px-3 py-2 border border-stroke-default rounded-none",
-                                "bg-surface-panel text-content-primary",
-                                "shadow-elevation-200",
-                                !isPrevDisabled &&
-                                    "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] transition-all",
-                                isPrevDisabled &&
-                                    "opacity-50 cursor-not-allowed"
-                            )
-                        )}
-                    >
-                        <span aria-hidden="true">&lt;</span> Previous
-                    </button>
-                    <button
-                        type="button"
-                        onClick={onNext}
-                        disabled={isNextDisabled}
-                        className={twMerge(
-                            clsx(
-                                "inline-flex items-center gap-1 px-3 py-2 border border-stroke-default rounded-none",
-                                "bg-surface-panel text-content-primary",
-                                "shadow-elevation-200",
-                                !isNextDisabled &&
-                                    "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] transition-all",
-                                isNextDisabled &&
-                                    "opacity-50 cursor-not-allowed"
-                            )
-                        )}
-                    >
-                        Next <span aria-hidden="true">&gt;</span>
-                    </button>
-                </div>
-            </div>
-
-            {/* Illustration frame */}
-            <div className="w-full aspect-[16/9] border border-stroke-default rounded-none shadow-elevation-200 overflow-hidden bg-surface-panel flex items-center justify-center">
-                {imageSrc ? (
-                    <img
-                        src={imageSrc}
-                        alt={imageAlt}
-                        className="w-full h-full object-cover"
+                        disabled={disabled || !hasPrevious}
                     />
-                ) : (
-                    <span className="text-content-muted">No image</span>
-                )}
+                    <Button
+                        label="Next"
+                        variant="secondary"
+                        size="default"
+                        showLeadingIcon={false}
+                        trailingIcon={
+                            <ArrowForwardIcon className="size-full" />
+                        }
+                        onClick={onNext}
+                        disabled={disabled || !hasNext}
+                    />
+                </nav>
+            </header>
+
+            <div className="aspect-[16/9] w-full overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
+                <img
+                    src={imageSrc}
+                    alt={imageAlt}
+                    className="size-full object-cover"
+                />
             </div>
 
-            {/* Audio button – only for audio mode */}
             {mode === "audio" && (
-                <div className="flex justify-center">
-                    <button
-                        type="button"
-                        onClick={onPlaySound}
-                        disabled={isPlayDisabled}
-                        className={twMerge(
-                            clsx(
-                                "inline-flex items-center gap-2 px-6 py-2.5 border border-stroke-default rounded-none",
-                                "bg-surface-primary-cta text-content-primary font-mono font-bold uppercase text-xs",
-                                "shadow-elevation-200",
-                                !isPlayDisabled &&
-                                    "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] transition-all",
-                                isPlayDisabled &&
-                                    "opacity-50 cursor-not-allowed"
-                            )
-                        )}
-                    >
-                        <span aria-hidden="true">♪</span> PLAY SOUND (
-                        {playsRemaining}/{maxPlays})
-                    </button>
-                </div>
+                <Button
+                    label={`PLAY SOUND (${playsRemaining}/${maxPlays})`}
+                    variant="primary"
+                    size="large"
+                    leadingIcon={<MusicNoteIcon className="size-full" />}
+                    showTrailingIcon={false}
+                    onClick={onPlaySound}
+                    disabled={isPlayDisabled}
+                />
             )}
 
-            {/* Letter tiles row */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
-                {effectiveLetters.map((ltr, idx) => (
+            <div className="flex w-full flex-wrap items-start justify-center gap-sm">
+                {effectiveLetters.map((letter, index) => (
                     <QuizLetter
-                        key={idx}
-                        letter={ltr}
-                        // For interactive modes you might want an onClick, but spec does not require it.
+                        key={`${letter}-${index}`}
+                        letter={letter}
+                        blank={String(letter).trim().length === 0}
+                        disabled={disabled}
                     />
                 ))}
             </div>
 
-            {/* Answer input and action buttons */}
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                <input
-                    type="text"
+            <form
+                onSubmit={handleSubmit}
+                className="flex w-full flex-col gap-md"
+            >
+                <TextInput
+                    className="w-full"
                     value={currentAnswer}
                     onChange={handleInputChange}
                     placeholder="Enter your answer here"
+                    showTitle={false}
+                    showSupportingText={false}
+                    showLeadingIcon={false}
+                    aria-label="Enter your answer here"
                     disabled={disabled}
-                    className={twMerge(
-                        clsx(
-                            "w-full bg-surface-panel border border-stroke-default rounded-none",
-                            "shadow-elevation-200 px-3.5 py-2.5",
-                            "text-sm font-mono text-content-primary placeholder:text-neutral-400",
-                            "focus:outline-none focus:bg-[#FFFDF0]",
-                            disabled && "opacity-50 cursor-not-allowed"
-                        )
-                    )}
                 />
-                <div className="flex items-center justify-end gap-2.5">
-                    <button
-                        type="button"
+                <div className="flex w-full items-center justify-end gap-sm">
+                    <Button
+                        label="Clear"
+                        variant="secondary"
+                        size="default"
+                        showLeadingIcon={false}
+                        showTrailingIcon={false}
                         onClick={handleClear}
-                        disabled={isClearDisabled}
-                        className={twMerge(
-                            clsx(
-                                "px-5 py-2 text-xs font-bold border border-stroke-default rounded-none",
-                                "bg-surface-panel text-content-primary",
-                                "shadow-elevation-200",
-                                !isClearDisabled &&
-                                    "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] transition-all",
-                                isClearDisabled &&
-                                    "opacity-50 cursor-not-allowed"
-                            )
-                        )}
-                    >
-                        Clear
-                    </button>
-                    <button
+                        disabled={disabled}
+                        type="button"
+                    />
+                    <Button
+                        label="Submit"
+                        variant="primary"
+                        size="default"
+                        showLeadingIcon={false}
+                        showTrailingIcon={false}
+                        disabled={disabled}
                         type="submit"
-                        disabled={isSubmitDisabled}
-                        className={twMerge(
-                            clsx(
-                                "px-5 py-2 text-xs font-bold border border-stroke-default rounded-none",
-                                "bg-surface-primary-cta text-content-primary",
-                                "shadow-elevation-200",
-                                !isSubmitDisabled &&
-                                    "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] transition-all",
-                                isSubmitDisabled &&
-                                    "opacity-50 cursor-not-allowed"
-                            )
-                        )}
-                    >
-                        Submit
-                    </button>
+                    />
                 </div>
             </form>
 
-            {/* Instruction helper */}
-            <p className="text-center text-xs text-neutral-700 font-medium">
+            <p className="text-body-default text-center text-content-primary">
                 {currentInstruction}
             </p>
-        </div>
+        </section>
     );
 }
 

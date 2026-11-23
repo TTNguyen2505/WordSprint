@@ -1,49 +1,25 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 
-/**
- * Neo‑Brutalism QuizLetter component – a square tile used for quiz slots.
- *
- * Props:
- *   - letter (string) – character to display; empty string renders an underscore placeholder.
- *   - onClick (function) – optional click handler; when provided the tile is interactive.
- *   - disabled (boolean) – disables interaction and applies muted styling (default false).
- *   - status ("default" | "selected" | "correct" | "error") – visual state variant.
- *       * default – white background with black border and offset shadow.
- *       * selected – same base but could be highlighted later (currently maps to default).
- *       * correct – uses the success (green) accent background.
- *       * error – uses the danger (red) accent background.
- *   - className (string) – optional extra Tailwind classes.
- */
 function QuizLetter({
-    letter = "",
+    letter = "L",
+    blank = false,
     onClick,
     disabled = false,
-    status = "default",
     className
 }) {
     const isDisabled = disabled;
-    const hasLetter = String(letter).trim().length > 0;
-
-    // Base background based on status
-    const bgMap = {
-        default: "bg-surface-panel",
-        selected: "bg-surface-panel",
-        correct: "bg-surface-success",
-        error: "bg-surface-danger"
-    };
-
-    const bgClass = bgMap[status] ?? bgMap.default;
+    const displayedLetter = String(letter).trim().charAt(0).toUpperCase();
+    const isBlank = blank || displayedLetter.length === 0;
 
     const baseClasses = clsx(
-        "inline-flex items-center justify-center shrink-0 w-12 h-12",
-        "rounded-none border-2 border-stroke-default",
-        bgClass,
+        "inline-flex size-[var(--primitive-space-48)] shrink-0 items-center justify-center rounded-none border-[length:var(--border-width-default)] border-stroke-default",
+        "bg-surface-panel",
         "shadow-elevation-200",
         !isDisabled &&
             onClick &&
-            "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] transition-transform",
-        isDisabled && "opacity-50 cursor-not-allowed",
+            "cursor-pointer transition-[translate,box-shadow] duration-[var(--duration-fast)] ease-snap hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] active:translate-x-[var(--primitive-depth-100)] active:translate-y-[var(--primitive-depth-100)]",
+        isDisabled && "cursor-not-allowed opacity-50",
         className
     );
 
@@ -59,12 +35,14 @@ function QuizLetter({
             onClick={handleClick}
             className={twMerge(baseClasses)}
         >
-            {hasLetter ? (
-                <span className="text-xl font-bold uppercase text-content-primary select-none">
-                    {String(letter).toUpperCase()}
+            {isBlank ? (
+                <span className="text-heading-md select-none text-content-primary">
+                    _
                 </span>
             ) : (
-                <span className="relative w-3.5 h-[2.5px] bg-surface-inverse" />
+                <span className="text-heading-md select-none text-content-primary">
+                    {displayedLetter}
+                </span>
             )}
         </div>
     );

@@ -1,24 +1,13 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
+import BoltIcon from "../assets/icons/bolt.svg?react";
+import CheckIcon from "../assets/icons/check.svg?react";
 import Badge from "./Badge";
 import InfoPill from "./InfoPill";
 
-/**
- * Neo‑Brutalism ProgressSummaryCard component.
- * Displays a status badge, an eyebrow, a title, and a key/value metadata pill.
- *
- * Props:
- *   - status ("available" | "completed") – visual variant (default "available").
- *   - badgeLabel (string) – badge text; defaults based on `status`.
- *   - eyebrow (string) – upper‑case subtitle; defaults based on `status`.
- *   - title (string) – main heading; defaults based on `status`.
- *   - metaLabel (string) – label for the InfoPill; defaults based on `status`.
- *   - metaValue (string|number) – value for the InfoPill; defaults based on `status`.
- *   - onClick (function) – optional click handler for the whole card (adds hover/press feedback).
- *   - className (string) – optional extra Tailwind classes.
- */
 function ProgressSummaryCard({
-    status = "available",
+    type = "Next stage",
+    status,
     badgeLabel,
     eyebrow,
     title,
@@ -27,43 +16,43 @@ function ProgressSummaryCard({
     onClick,
     className
 }) {
-    // Determine defaults based on status
-    const defaults = {
-        available: {
-            badgeLabel: "AVAILABLE",
-            eyebrow: "NEXT STAGE",
-            title: "Stage 2: Family",
-            metaLabel: "Level",
-            metaValue: "A2",
-            badgeVariant: "pink"
-        },
-        completed: {
-            badgeLabel: "COMPLETED",
-            eyebrow: "OVERALL PROGRESS",
-            title: "All Stages Conquered!",
-            metaLabel: "Campaign Score",
-            metaValue: "5420",
-            badgeVariant: "green"
-        }
-    };
-
-    const cfg = defaults[status] || defaults.available;
+    const resolvedType =
+        status === "completed"
+            ? "Campaign complete"
+            : status === "available"
+              ? "Next stage"
+              : type;
+    const isComplete = resolvedType === "Campaign complete";
+    const cfg = isComplete
+        ? {
+              badgeLabel: "COMPLETED",
+              eyebrow: "OVERALL PROGRESS",
+              title: "All Stages Conquered!",
+              metaLabel: "Campaign Score",
+              metaValue: "5420",
+              badgeType: "Success"
+          }
+        : {
+              badgeLabel: "AVAILABLE",
+              eyebrow: "NEXT STAGE",
+              title: "Stage 2: Family",
+              metaLabel: "Level",
+              metaValue: "A2",
+              badgeType: "Highlight"
+          };
 
     const finalBadgeLabel = badgeLabel ?? cfg.badgeLabel;
     const finalEyebrow = eyebrow ?? cfg.eyebrow;
     const finalTitle = title ?? cfg.title;
     const finalMetaLabel = metaLabel ?? cfg.metaLabel;
     const finalMetaValue = metaValue ?? cfg.metaValue;
-    const badgeVariant = cfg.badgeVariant;
-
     const interactive = typeof onClick === "function";
 
     const containerClasses = twMerge(
         clsx(
-            "w-full max-w-[660px] min-h-[172px] bg-surface-panel border border-stroke-default rounded-none",
-            "shadow-elevation-200 p-6 flex flex-col justify-between gap-6",
+            "flex w-full max-w-[640px] flex-col items-start gap-xl rounded-none border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel px-lg py-md shadow-elevation-200",
             interactive &&
-                "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] hover:shadow-elevation-300 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all",
+                "cursor-pointer transition-[translate,box-shadow] duration-[var(--duration-normal)] ease-snap hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] hover:shadow-elevation-300 active:translate-x-[var(--primitive-depth-100)] active:translate-y-[var(--primitive-depth-100)] active:shadow-elevation-50",
             className
         )
     );
@@ -74,35 +63,41 @@ function ProgressSummaryCard({
             onClick={onClick}
             role={interactive ? "button" : undefined}
         >
-            {/* Top row – status badge */}
-            <div className="flex items-center justify-between">
+            <div className="flex w-full shrink-0 items-center">
                 <Badge
-                    variant={badgeVariant}
-                    showIcon={true}
-                    className="px-2 py-1"
+                    type={cfg.badgeType}
+                    showIcon
+                    icon={
+                        isComplete ? (
+                            <CheckIcon
+                                className="size-icon-xs text-current"
+                                aria-hidden="true"
+                            />
+                        ) : (
+                            <BoltIcon
+                                className="size-icon-xs text-current"
+                                aria-hidden="true"
+                            />
+                        )
+                    }
                 >
                     {finalBadgeLabel}
                 </Badge>
             </div>
 
-            {/* Bottom content block */}
-            <div className="flex flex-col gap-1.5">
-                <span className="text-sm font-medium uppercase tracking-wide text-content-primary">
-                    {finalEyebrow}
-                </span>
-                <div className="flex flex-wrap items-end justify-between gap-4">
-                    <h2 className="text-lg font-bold text-content-primary leading-snug">
-                        {finalTitle}
-                    </h2>
-                    <InfoPill
-                        label={finalMetaLabel}
-                        variant="default"
-                        showIcon={false}
-                        showTrailingIcon={false}
-                    >
-                        {finalMetaValue}
-                    </InfoPill>
+            <div className="flex w-full shrink-0 items-end justify-between">
+                <div className="flex shrink-0 flex-col gap-sm leading-[var(--primitive-line-height-30)] text-content-primary">
+                    <p className="text-subheading-lg">{finalEyebrow}</p>
+                    <h2 className="text-heading-lg">{finalTitle}</h2>
                 </div>
+                <InfoPill
+                    type="Metadata"
+                    label={finalMetaLabel}
+                    value={finalMetaValue}
+                    showLeadingIcon={false}
+                    showTrailingIcon={false}
+                    className="gap-md px-sm py-xs shadow-elevation-200"
+                />
             </div>
         </div>
     );

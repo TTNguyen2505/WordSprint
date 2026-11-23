@@ -2,27 +2,11 @@ import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import PlayIcon from "../assets/icons/play.svg?react";
 
-/**
- * Neo‑Brutalism InfoPill component.
- * Displays a key/value pair with optional leading and trailing icons.
- *
- * Props:
- *   - label (string) – text for the key (default: "Key").
- *   - value (string|number) – value text (default: "Value").
- *   - variant ("default" | "pink" | "green" | "red" | "black" | "disabled") – visual variant (default: "default").
- *   - disabled (boolean) – forces disabled styling (default: false).
- *   - showIcon (boolean) – compatibility flag for leading icon visibility.
- *   - showLeadingIcon (boolean) – whether to render a leading icon (default: true).
- *   - leadingIcon (ReactNode) – custom leading icon; falls back to a play triangle.
- *   - showTrailingIcon (boolean) – whether to render a trailing icon (default: true).
- *   - trailingIcon (ReactNode) – custom trailing icon; falls back to a play triangle.
- *   - className (string) – optional extra Tailwind classes.
- *   - children (ReactNode) – value fallback if provided.
- */
 function InfoPill({
     label = "Key",
     value = "Value",
     children,
+    type = "Metadata",
     variant = "default",
     disabled = false,
     showIcon,
@@ -34,50 +18,70 @@ function InfoPill({
     id
 }) {
     const displayValue = children ?? value;
-    const isDisabled = disabled;
-    const appliedVariant = isDisabled ? "disabled" : variant;
-
-    const variantStyles = {
-        default:
-            "bg-surface-panel border-stroke-default shadow-elevation-200 text-content-primary",
-        pink: "bg-surface-highlight border-stroke-default shadow-elevation-200 text-content-inverse",
-        green: "bg-surface-success border-stroke-default shadow-elevation-200 text-content-primary",
-        red: "bg-surface-danger border-stroke-default shadow-elevation-200 text-content-inverse",
-        black: "bg-surface-inverse border-stroke-default shadow-elevation-200 text-content-inverse",
-        disabled:
-            "bg-surface-disabled border-stroke-disabled shadow-elevation-0 text-content-muted"
+    const typeAliases = {
+        default: "Metadata",
+        pink: "Highlight",
+        green: "Success",
+        red: "Danger",
+        black: "Inverse",
+        disabled: "Lock"
     };
-
-    const variantClass = variantStyles[appliedVariant] ?? variantStyles.default;
+    const requestedType = variant !== "default" ? variant : type;
+    const pillType = disabled
+        ? "Lock"
+        : (typeAliases[requestedType] ?? requestedType);
+    const typeStyles = {
+        Metadata:
+            "bg-surface-panel border-stroke-default shadow-elevation-200 text-content-primary",
+        Highlight:
+            "bg-surface-highlight border-stroke-default shadow-elevation-200 text-content-inverse",
+        Success:
+            "bg-surface-success border-stroke-default shadow-elevation-200 text-content-primary",
+        Danger: "bg-surface-danger border-stroke-default shadow-elevation-200 text-content-inverse",
+        Lock: "bg-surface-disabled border-stroke-disabled shadow-elevation-0 text-content-muted",
+        Inverse:
+            "bg-surface-inverse border-stroke-default shadow-elevation-200 text-content-inverse"
+    };
     const hasLeading = showIcon !== false && showLeadingIcon;
-
-    const baseClasses = clsx(
-        "inline-flex items-center justify-center gap-xs rounded-none px-md py-xs h-[38px] border-2 box-border transition-all",
-        !isDisabled && "cursor-pointer",
-        isDisabled && "cursor-not-allowed opacity-50",
-        variantClass,
-        className
-    );
+    const typeClass = typeStyles[pillType] ?? typeStyles.Metadata;
 
     return (
-        <div id={id} data-testid={id} className={twMerge(baseClasses)}>
-            {hasLeading && (
-                <span className="flex items-center">
-                    {leadingIcon ?? (
-                        <PlayIcon className="size-[12px]" aria-hidden="true" />
-                    )}
-                </span>
+        <div
+            id={id}
+            data-testid={id}
+            className={twMerge(
+                clsx(
+                    "inline-flex w-fit items-center gap-md rounded-none border-[length:var(--border-width-subtle)] px-sm py-xs",
+                    typeClass,
+                    className
+                )
             )}
-            <span className="inline-flex items-center gap-xs whitespace-nowrap">
-                <span className="text-body-default text-current">{label}</span>
-                <span className="text-body-default-bold text-current">
-                    {displayValue}
+        >
+            <div className="flex shrink-0 items-center gap-sm">
+                {hasLeading && (
+                    <span className="flex size-icon-md shrink-0 items-center justify-center text-current">
+                        {leadingIcon ?? (
+                            <PlayIcon
+                                className="size-full text-current"
+                                aria-hidden="true"
+                            />
+                        )}
+                    </span>
+                )}
+                <span className="flex items-center gap-xs whitespace-nowrap text-body-default text-current">
+                    <span>{label}</span>
+                    <span className="text-body-default-bold">
+                        {displayValue}
+                    </span>
                 </span>
-            </span>
+            </div>
             {showTrailingIcon && (
-                <span className="flex items-center">
+                <span className="flex size-icon-md shrink-0 items-center justify-center text-current">
                     {trailingIcon ?? (
-                        <PlayIcon className="size-[12px]" aria-hidden="true" />
+                        <PlayIcon
+                            className="size-full text-current"
+                            aria-hidden="true"
+                        />
                     )}
                 </span>
             )}

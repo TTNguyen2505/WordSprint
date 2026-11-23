@@ -1,285 +1,137 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+import Badge from "./components/Badge.jsx";
+import Button from "./components/Button.jsx";
+import Cell from "./components/Cell.jsx";
+import IconButton from "./components/IconButton.jsx";
+import InfoPill from "./components/InfoPill.jsx";
+import LeaderboardRecord from "./components/LeaderboardRecord.jsx";
 import Modal from "./components/Modal.jsx";
 import ModalTitle from "./components/ModalTitle.jsx";
 import Navigation from "./components/Navigation.jsx";
-import LeaderboardRecord from "./components/LeaderboardRecord.jsx";
-import InfoPill from "./components/InfoPill.jsx";
-import Badge from "./components/Badge.jsx";
-import Button from "./components/Button.jsx";
-import StageCard from "./components/StageCard.jsx";
-import ProgressSummaryCard from "./components/ProgressSummaryCard.jsx";
 import ProfileCard from "./components/ProfileCard.jsx";
+import ProfileRecord from "./components/ProfileRecord.jsx";
+import ProgressBar from "./components/ProgressBar.jsx";
+import ProgressSummaryCard from "./components/ProgressSummaryCard.jsx";
+import Quiz from "./components/Quiz.jsx";
+import QuizLetter from "./components/QuizLetter.jsx";
+import ScoreCard from "./components/ScoreCard.jsx";
+import Slider from "./components/Slider.jsx";
+import StageCard from "./components/StageCard.jsx";
+import Tab from "./components/Tab.jsx";
+import TextButton from "./components/TextButton.jsx";
+import TextInput from "./components/TextInput.jsx";
+import Toggle from "./components/Toggle.jsx";
 
-import heroImg from "./assets/hero.png";
-import ReplayIcon from "./assets/icons/replay.svg?react";
-import ExitIcon from "./assets/icons/exit.svg?react";
-import TrophyIcon from "./assets/icons/trophy.svg?react";
-import ArrowForwardIcon from "./assets/icons/arrow_forward_1.svg?react";
-import CheckIcon from "./assets/icons/check.svg?react";
-import CloseIcon from "./assets/icons/close.svg?react";
-import AddIcon from "./assets/icons/add.svg?react";
-import AccountIcon from "./assets/icons/account.svg?react";
+const sections = [
+    ["controls", "Controls"],
+    ["feedback", "Feedback"],
+    ["game", "Game"],
+    ["records", "Records"]
+];
 
-// Mock datasets for the 5 tabs in Hall of Fame modal (OOP-50)
-const DEFAULT_LEADERBOARD_DATA = {
+const leaderboardData = {
     Overall: [
-        {
-            rank: 1,
-            player: "nguyen",
-            score: 100000,
-            playTime: "10:00",
-            isCurrentPlayer: false
-        },
+        { rank: 1, player: "nguyen", score: 150000, playTime: "10:00" },
         {
             rank: 2,
             player: "nguyen_02",
-            score: 150000,
+            score: 120000,
             playTime: "10:00",
             isCurrentPlayer: true
         },
-        {
-            rank: 3,
-            player: "nguyen_03",
-            score: 120000,
-            playTime: "10:00",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 4,
-            player: "nguyen_04",
-            score: 120000,
-            playTime: "10:00",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 5,
-            player: "nguyen_05",
-            score: 110000,
-            playTime: "09:30",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 6,
-            player: "nguyen_06",
-            score: 95000,
-            playTime: "08:45",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 7,
-            player: "nguyen_07",
-            score: 90000,
-            playTime: "08:20",
-            isCurrentPlayer: false
-        }
+        { rank: 3, player: "nguyen_03", score: 95000, playTime: "08:45" }
     ],
     "Case 1": [
-        {
-            rank: 1,
-            player: "duy_bao",
-            score: 45000,
-            playTime: "02:15",
-            isCurrentPlayer: false
-        },
+        { rank: 1, player: "duy_bao", score: 45000, playTime: "02:15" },
         {
             rank: 2,
             player: "nguyen_02",
             score: 42000,
             playTime: "02:30",
             isCurrentPlayer: true
-        },
-        {
-            rank: 3,
-            player: "van_dai",
-            score: 39000,
-            playTime: "02:45",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 4,
-            player: "tuan_khang",
-            score: 36000,
-            playTime: "03:10",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 5,
-            player: "xuan_tin",
-            score: 31000,
-            playTime: "03:40",
-            isCurrentPlayer: false
         }
     ],
     "Case 2": [
-        {
-            rank: 1,
-            player: "tuan_khang",
-            score: 62000,
-            playTime: "03:05",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 2,
-            player: "van_dai",
-            score: 58000,
-            playTime: "03:22",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 3,
-            player: "duy_bao",
-            score: 54000,
-            playTime: "03:40",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 4,
-            player: "nguyen_02",
-            score: 51000,
-            playTime: "04:00",
-            isCurrentPlayer: true
-        }
+        { rank: 1, player: "tuan_khang", score: 62000, playTime: "03:05" }
     ],
     "Case 3": [
-        {
-            rank: 1,
-            player: "xuan_tin",
-            score: 78000,
-            playTime: "04:10",
-            isCurrentPlayer: false
-        },
-        {
-            rank: 2,
-            player: "nguyen_02",
-            score: 75000,
-            playTime: "04:25",
-            isCurrentPlayer: true
-        },
-        {
-            rank: 3,
-            player: "duy_bao",
-            score: 71000,
-            playTime: "04:50",
-            isCurrentPlayer: false
-        }
+        { rank: 1, player: "xuan_tin", score: 78000, playTime: "04:10" }
     ],
-    "Case 4": [] // Demonstrates required empty state
+    "Case 4": []
 };
 
-const TAB_ITEMS = ["Case 1", "Case 2", "Case 3", "Case 4", "Overall"];
+function Section({ id, number, title, children }) {
+    return (
+        <section
+            id={id}
+            className="scroll-mt-24 border-t-2 border-black py-2xl"
+        >
+            <div className="mb-xl flex flex-wrap items-baseline gap-sm">
+                <span className="font-mono text-sm font-bold text-content-muted">
+                    {number} /
+                </span>
+                <h2 className="text-3xl font-bold uppercase">{title}</h2>
+            </div>
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-2xl">
+                {children}
+            </div>
+        </section>
+    );
+}
 
-// Default campaign stages for the Main Menu (Stage Select)
-const DEFAULT_CAMPAIGN_STAGES = [
-  {
-    id: 1,
-    stageId: "STAGE 1",
-    topic: "School",
-    level: "A1",
-    status: "solved",
-    score: 150,
-  },
-  {
-    id: 2,
-    stageId: "STAGE 2",
-    topic: "Family",
-    level: "A2",
-    status: "solved",
-    score: 250,
-  },
-  {
-    id: 3,
-    stageId: "STAGE 3",
-    topic: "Work",
-    level: "B1",
-    status: "solved",
-    score: 300,
-  },
-  {
-    id: 4,
-    stageId: "STAGE 4",
-    topic: "Travel",
-    level: "B2",
-    status: "solved",
-    score: 300,
-  },
-  {
-    id: 5,
-    stageId: "STAGE 5",
-    topic: "School",
-    level: "C1",
-    status: "solved",
-    score: 450,
-  },
-];
+function Specimen({ title, children }) {
+    return (
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-md lg:grid-cols-[180px_minmax(0,1fr)] lg:gap-xl">
+            <h3 className="font-mono text-sm font-bold uppercase">{title}</h3>
+            <div className="min-w-0">{children}</div>
+        </div>
+    );
+}
 
-// Default initial simulation state for Stage Result (Figma Frame 1: Time's up / Failed)
-const DEFAULT_STAGE_RESULT = {
-  stageId: 1,
-  stageName: "STAGE 1: SCHOOL",
-  solved: 3,
-  totalQuiz: 8,
-  playTime: 80, // 80s -> 1:20
-  score: 150,
-  rank: null,
-  campaignScore: 1450,
-  unlockThreshold: 4,
-  isAllCleared: false,
-};
-
-function formatPlayTime(secondsOrStr) {
-  if (typeof secondsOrStr === "string") return secondsOrStr;
-  if (typeof secondsOrStr === "number") {
-    const mins = Math.floor(secondsOrStr / 60);
-    const secs = secondsOrStr % 60;
-    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
-  }
-  return "0:00";
+function Sample({ label, children }) {
+    return (
+        <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-sm">
+            <span className="font-mono text-xs font-bold uppercase text-content-muted">
+                {label}
+            </span>
+            {children}
+        </div>
+    );
 }
 
 function App() {
-    const [isOpen, setIsOpen] = useState(true);
+    const [toggle, setToggle] = useState(true);
+    const [sliderEnabled, setSliderEnabled] = useState(true);
+    const [sliderValue, setSliderValue] = useState(60);
     const [activeTab, setActiveTab] = useState("Overall");
+    const [records, setRecords] = useState(leaderboardData.Overall);
     const [currentUserId, setCurrentUserId] = useState("nguyen_02");
-    const [records, setRecords] = useState(DEFAULT_LEADERBOARD_DATA["Overall"]);
+    const [modalOpen, setModalOpen] = useState(false);
+    const [quizMode, setQuizMode] = useState("scramble");
+    const [quizAnswer, setQuizAnswer] = useState("");
+    const [quizResult, setQuizResult] = useState("");
+    const [playsRemaining, setPlaysRemaining] = useState(3);
 
-    /**
-     * Flexible function to render leaderboard data dynamically.
-     * Can be invoked from external code/scripts via window.renderLeaderboard.
-     */
     const renderLeaderboard = useCallback((data, userId) => {
-        if (userId !== undefined) {
-            setCurrentUserId(userId);
-        }
+        if (userId !== undefined) setCurrentUserId(userId);
         setRecords(Array.isArray(data) ? [...data] : []);
     }, []);
 
-    /**
-     * Tab switch handler calling onTabChange callback.
-     */
     const handleTabChange = useCallback(
-        (tabName) => {
-            setActiveTab(tabName);
-
-            // Call external callback if registered
-            if (typeof window.onTabChange === "function") {
-                window.onTabChange(tabName);
-            }
-
-            // Load corresponding tab dataset
-            const nextData = DEFAULT_LEADERBOARD_DATA[tabName] || [];
-            renderLeaderboard(nextData);
+        (tab) => {
+            setActiveTab(tab);
+            if (typeof window.onTabChange === "function")
+                window.onTabChange(tab);
+            renderLeaderboard(leaderboardData[tab] || []);
         },
         [renderLeaderboard]
     );
 
-    const handleClose = useCallback(() => {
-        setIsOpen(false);
-        if (typeof window.onClose === "function") {
-            window.onClose();
-        }
+    const closeModal = useCallback(() => {
+        setModalOpen(false);
+        if (typeof window.onClose === "function") window.onClose();
     }, []);
 
-    // Expose global methods for external modules/tests
     useEffect(() => {
         window.renderLeaderboard = renderLeaderboard;
         window.setLeaderboardTab = handleTabChange;
@@ -289,128 +141,604 @@ function App() {
         };
     }, [renderLeaderboard, handleTabChange]);
 
+    const changeQuizMode = (mode) => {
+        setQuizMode(mode);
+        setQuizAnswer("");
+        setQuizResult("");
+        setPlaysRemaining(3);
+    };
+
     return (
-        <main className="flex min-h-screen w-full items-center justify-center bg-surface-canvas p-md font-sans text-content-primary">
-            {/* Re-open button if modal is closed */}
-            {!isOpen && (
-                <Button
-                    label="Open Leaderboard"
-                    variant="primary"
-                    size="default"
-                    onClick={() => setIsOpen(true)}
-                    className="shadow-elevation-200"
-                />
-            )}
-
-            {/* HALL OF FAME Leaderboard Modal */}
-            <Modal
-                isOpen={isOpen}
-                onClose={handleClose}
-                maxWidth="max-w-[752px]"
-                className="w-[752px] min-h-[auto] max-h-[92vh] border-2 border-stroke-default p-xl sm:p-2xl shadow-elevation-200 flex flex-col items-center gap-xl"
-                overlayClassName="bg-black/50 backdrop-blur-20"
-                closeOnBackdropClick={true}
-                closeOnEscape={true}
-            >
-                {/* 1. Header with Title */}
-                <header className="flex w-full items-center justify-center">
-                    <ModalTitle
-                        as="h1"
-                        className="text-center font-sans text-4xl font-bold uppercase tracking-tight text-content-primary"
+        <main className="min-h-screen bg-surface-canvas font-sans text-content-primary">
+            <header className="border-b-2 border-black bg-white">
+                <div className="mx-auto flex max-w-[1440px] flex-wrap items-center justify-between gap-md px-md py-md sm:px-xl">
+                    <a
+                        href="#top"
+                        className="font-mono text-sm font-bold uppercase"
                     >
-                        HALL OF FAME
-                    </ModalTitle>
-                </header>
+                        WordSprint{" "}
+                        <span className="text-content-muted">/ UI library</span>
+                    </a>
+                    <span className="bg-surface-primary-cta px-xs py-2xs font-mono text-xs font-bold uppercase">
+                        Component review
+                    </span>
+                </div>
+            </header>
 
-                {/* 2. Navigation Tabs Bar */}
-                <section className="flex w-full justify-center">
-                    <Navigation
-                        items={TAB_ITEMS}
-                        activeTab={activeTab}
-                        onChange={handleTabChange}
-                        className="w-[652px] max-w-full border-2 border-stroke-default p-1.5 shadow-elevation-200"
-                    />
-                </section>
+            <div id="top" className="mx-auto max-w-[1440px] px-md sm:px-xl">
+                <div className="flex flex-wrap items-end justify-between gap-lg py-2xl">
+                    <div>
+                        <p className="mb-sm font-mono text-xs font-bold uppercase text-content-muted">
+                            WordSprint / Design system
+                        </p>
+                        <h1 className="text-4xl font-bold uppercase sm:text-5xl">
+                            Component index
+                            <span className="text-content-highlight">.</span>
+                        </h1>
+                    </div>
+                    <p className="font-mono text-xs font-bold uppercase">
+                        21 components{" "}
+                        <span className="mx-xs text-content-muted">/</span> 04
+                        categories
+                    </p>
+                </div>
 
-                {/* 3. Leaderboard Table Container */}
-                <section className="flex w-full justify-center">
-                    <div className="w-[600px] max-w-full border border-stroke-default bg-surface-panel flex flex-col">
-                        {/* Header Row */}
-                        <LeaderboardRecord
-                            variant="header"
-                            rank="RANK"
-                            playerName="PLAYER"
-                            score="SCORE"
-                            playTime="PLAY TIME"
-                        />
-
-                        {/* Dynamic Data Rows Body */}
-                        <div
-                            id="leaderboard-table-body"
-                            className="max-h-[336px] overflow-y-auto flex flex-col divide-y divide-stroke-default"
+                <nav
+                    aria-label="Component categories"
+                    className="sticky top-0 z-10 flex flex-wrap gap-xs border-y-2 border-black bg-surface-canvas py-sm"
+                >
+                    {sections.map(([id, label], index) => (
+                        <a
+                            key={id}
+                            href={`#${id}`}
+                            className="border border-black bg-white px-sm py-xs font-mono text-xs font-bold uppercase hover:bg-surface-primary-cta focus-visible:bg-surface-primary-cta"
                         >
-                            {records.length === 0 ? (
-                                <div className="flex h-36 items-center justify-center font-sans text-base font-bold text-content-muted uppercase tracking-wider">
-                                    Chưa có dữ liệu
-                                </div>
-                            ) : (
-                                records.map((item, index) => {
-                                    const rankNum =
-                                        typeof item.rank === "number"
-                                            ? item.rank
-                                            : parseInt(item.rank, 10);
-                                    const isTop1 =
-                                        rankNum === 1 ||
-                                        item.rank === "01" ||
-                                        item.rank === "1" ||
-                                        (index === 0 && item.rank == 1);
-                                    const isYou = Boolean(
-                                        item.isCurrentPlayer === true ||
-                                        (currentUserId &&
-                                            String(item.player).trim() ===
-                                                String(currentUserId).trim())
-                                    );
+                            <span className="mr-xs text-content-muted">
+                                0{index + 1}
+                            </span>
+                            {label}
+                        </a>
+                    ))}
+                </nav>
 
-                                    let variant = "default";
-                                    if (isTop1) variant = "champion";
-                                    if (isYou) variant = "you";
-
-                                    return (
-                                        <LeaderboardRecord
-                                            key={`${item.rank}-${item.player}-${index}`}
+                <Section id="controls" number="01" title="Controls">
+                    <Specimen title="Button">
+                        <div className="grid gap-lg">
+                            <div className="flex flex-wrap items-end gap-lg">
+                                {[
+                                    "primary",
+                                    "secondary",
+                                    "destructive",
+                                    "inverse",
+                                    "disabled"
+                                ].map((variant) => (
+                                    <Sample key={variant} label={variant}>
+                                        <Button
+                                            label="Button"
                                             variant={variant}
-                                            rank={item.rank}
-                                            playerName={item.player}
-                                            score={item.score}
-                                            playTime={item.playTime}
-                                            badgeLabel={
-                                                isTop1
-                                                    ? "CHAMPION"
-                                                    : isYou
-                                                      ? "YOU"
+                                            size="default"
+                                            showTrailingIcon={false}
+                                        />
+                                    </Sample>
+                                ))}
+                            </div>
+                            <div className="flex flex-wrap items-end gap-lg">
+                                {["default", "hover", "pressed"].map(
+                                    (state) => (
+                                        <Sample key={state} label={state}>
+                                            <Button
+                                                label="Button"
+                                                state={state}
+                                                size="default"
+                                                showLeadingIcon={false}
+                                                showTrailingIcon={false}
+                                            />
+                                        </Sample>
+                                    )
+                                )}
+                                {["small", "large"].map((size) => (
+                                    <Sample key={size} label={size}>
+                                        <Button
+                                            label="Button"
+                                            size={size}
+                                            showTrailingIcon={false}
+                                        />
+                                    </Sample>
+                                ))}
+                            </div>
+                        </div>
+                    </Specimen>
+                    <Specimen title="IconButton">
+                        <div className="grid gap-lg">
+                            {["Small", "Extra Small"].map((size) => (
+                                <div
+                                    key={size}
+                                    className="flex flex-wrap gap-lg"
+                                >
+                                    {[
+                                        "Default",
+                                        "Hover",
+                                        "Pressed",
+                                        "Disabled"
+                                    ].map((state) => (
+                                        <Sample
+                                            key={state}
+                                            label={`${size} / ${state}`}
+                                        >
+                                            <IconButton
+                                                size={size}
+                                                state={state}
+                                                ariaLabel={`${size} ${state} icon button`}
+                                            />
+                                        </Sample>
+                                    ))}
+                                </div>
+                            ))}
+                        </div>
+                    </Specimen>
+                    <Specimen title="TextButton">
+                        <div className="flex flex-wrap gap-xl">
+                            <Sample label="Default">
+                                <TextButton label="View details" />
+                            </Sample>
+                            <Sample label="Hover">
+                                <TextButton
+                                    label="View details"
+                                    state="hover"
+                                />
+                            </Sample>
+                        </div>
+                    </Specimen>
+                    <Specimen title="TextInput">
+                        <div className="grid gap-lg md:grid-cols-2">
+                            {["default", "focus", "error", "success"].map(
+                                (state) => (
+                                    <Sample key={state} label={state}>
+                                        <TextInput
+                                            title="Player name"
+                                            placeholder="Enter a name"
+                                            state={state}
+                                            defaultValue={
+                                                state === "default"
+                                                    ? ""
+                                                    : "word_sprinter"
+                                            }
+                                            supportingText={
+                                                state === "error"
+                                                    ? "This name is already taken."
+                                                    : state === "success"
+                                                      ? "This name is available."
                                                       : undefined
                                             }
                                         />
-                                    );
-                                })
+                                    </Sample>
+                                )
+                            )}
+                            {["error", "success"].map((state) => (
+                                <Sample
+                                    key={`compact-${state}`}
+                                    label={`Compact ${state}`}
+                                >
+                                    <TextInput
+                                        state={state}
+                                        defaultValue="word_sprinter"
+                                        showTitle={false}
+                                        showSupportingText={false}
+                                        aria-label={`Compact ${state} player name`}
+                                    />
+                                </Sample>
+                            ))}
+                            <Sample label="Disabled">
+                                <TextInput
+                                    title="Player name"
+                                    defaultValue="word_sprinter"
+                                    disabled
+                                />
+                            </Sample>
+                        </div>
+                    </Specimen>
+                    <Specimen title="Toggle">
+                        <div className="flex flex-wrap gap-xl">
+                            <Sample label="Interactive">
+                                <Toggle
+                                    enabled={toggle}
+                                    onChange={setToggle}
+                                    ariaLabel="Interactive toggle"
+                                />
+                            </Sample>
+                            <Sample label="Off">
+                                <Toggle ariaLabel="Off toggle" />
+                            </Sample>
+                            <Sample label="On">
+                                <Toggle enabled ariaLabel="On toggle" />
+                            </Sample>
+                        </div>
+                    </Specimen>
+                    <Specimen title="Slider">
+                        <div className="grid grid-cols-[minmax(0,1fr)] gap-lg lg:grid-cols-2">
+                            <Sample label={`Interactive / ${sliderValue}`}>
+                                <Slider
+                                    title="Sound"
+                                    enabled={sliderEnabled}
+                                    onToggle={setSliderEnabled}
+                                    value={sliderValue}
+                                    onChange={setSliderValue}
+                                />
+                            </Sample>
+                            <Sample label="Off">
+                                <Slider
+                                    title="Music"
+                                    enabled={false}
+                                    value={35}
+                                />
+                            </Sample>
+                        </div>
+                    </Specimen>
+                    <Specimen title="Tab & Navigation">
+                        <div className="grid gap-lg">
+                            <div
+                                className="flex flex-wrap gap-xs"
+                                role="tablist"
+                                aria-label="Tab states"
+                            >
+                                <Tab label="Default" />
+                                <Tab label="Active" active />
+                                <Tab
+                                    label="Hover"
+                                    className="bg-surface-canvas"
+                                />
+                            </div>
+                            <div className="overflow-x-auto pb-xs">
+                                <Navigation
+                                    items={[
+                                        "Case 1",
+                                        "Case 2",
+                                        "Case 3",
+                                        "Case 4",
+                                        "Overall"
+                                    ]}
+                                    activeTab={activeTab}
+                                    onChange={handleTabChange}
+                                />
+                            </div>
+                        </div>
+                    </Specimen>
+                </Section>
+
+                <Section id="feedback" number="02" title="Feedback">
+                    <Specimen title="Badge">
+                        <div className="flex flex-wrap gap-lg">
+                            {[
+                                "default",
+                                "pink",
+                                "green",
+                                "red",
+                                "black",
+                                "disabled"
+                            ].map((variant) => (
+                                <Sample key={variant} label={variant}>
+                                    <Badge
+                                        variant={variant}
+                                        disabled={variant === "disabled"}
+                                        label={variant}
+                                    />
+                                </Sample>
+                            ))}
+                        </div>
+                    </Specimen>
+                    <Specimen title="InfoPill">
+                        <div className="flex flex-wrap gap-lg">
+                            {[
+                                "default",
+                                "pink",
+                                "green",
+                                "red",
+                                "black",
+                                "disabled"
+                            ].map((variant) => (
+                                <Sample key={variant} label={variant}>
+                                    <InfoPill
+                                        variant={variant}
+                                        disabled={variant === "disabled"}
+                                        label="Level"
+                                        value="A2"
+                                        showTrailingIcon={false}
+                                    />
+                                </Sample>
+                            ))}
+                        </div>
+                    </Specimen>
+                    <Specimen title="ProgressBar">
+                        <div className="grid gap-lg md:grid-cols-3">
+                            <Sample label="Empty">
+                                <ProgressBar
+                                    value={0}
+                                    statusLabel="Not started"
+                                    metricLabel="0 / 12"
+                                />
+                            </Sample>
+                            <Sample label="In progress">
+                                <ProgressBar
+                                    value={6}
+                                    max={12}
+                                    statusLabel="In progress"
+                                    metricLabel="6 / 12"
+                                />
+                            </Sample>
+                            <Sample label="Completed">
+                                <ProgressBar
+                                    value={12}
+                                    max={12}
+                                    statusLabel="Completed"
+                                    metricLabel="12 / 12"
+                                />
+                            </Sample>
+                        </div>
+                    </Specimen>
+                    <Specimen title="Modal & ModalTitle">
+                        <div className="flex flex-wrap items-center gap-lg">
+                            <ModalTitle as="h4" title="Modal title" />
+                            <Button
+                                label="Open modal"
+                                size="default"
+                                showTrailingIcon={false}
+                                onClick={() => setModalOpen(true)}
+                            />
+                        </div>
+                        <Modal
+                            isOpen={modalOpen}
+                            onClose={closeModal}
+                            showCloseButton
+                            header={<ModalTitle title="Ready to play?" />}
+                            footer={
+                                <Button
+                                    label="Close"
+                                    variant="secondary"
+                                    size="default"
+                                    showTrailingIcon={false}
+                                    onClick={closeModal}
+                                />
+                            }
+                        >
+                            <div className="flex h-full items-center justify-center">
+                                <p>Your next word is waiting.</p>
+                            </div>
+                        </Modal>
+                    </Specimen>
+                </Section>
+
+                <Section id="game" number="03" title="Game">
+                    <Specimen title="QuizLetter">
+                        <div className="flex flex-wrap gap-lg">
+                            <Sample label="Empty">
+                                <QuizLetter blank />
+                            </Sample>
+                            <Sample label="Letter">
+                                <QuizLetter letter="A" />
+                            </Sample>
+                        </div>
+                    </Specimen>
+                    <Specimen title="StageCard">
+                        <div className="grid gap-lg md:grid-cols-3">
+                            {["solved", "available", "locked"].map(
+                                (status, index) => (
+                                    <Sample key={status} label={status}>
+                                        <StageCard
+                                            status={status}
+                                            stageId={`Stage 0${index + 1}`}
+                                            topic={
+                                                [
+                                                    "Everyday",
+                                                    "Family",
+                                                    "Travel"
+                                                ][index]
+                                            }
+                                            score={
+                                                status === "solved" ? 1250 : 0
+                                            }
+                                        />
+                                    </Sample>
+                                )
                             )}
                         </div>
-                    </div>
-                </section>
+                    </Specimen>
+                    <Specimen title="ProgressSummaryCard">
+                        <div className="grid gap-lg lg:grid-cols-2">
+                            <Sample label="Available">
+                                <ProgressSummaryCard type="Next stage" />
+                            </Sample>
+                            <Sample label="Completed">
+                                <ProgressSummaryCard type="Campaign complete" />
+                            </Sample>
+                        </div>
+                    </Specimen>
+                    <Specimen title="Quiz">
+                        <div className="grid gap-md">
+                            <div
+                                className="flex flex-wrap gap-xs"
+                                role="tablist"
+                                aria-label="Quiz mode"
+                            >
+                                {["scramble", "fill-blank", "audio"].map(
+                                    (mode) => (
+                                        <Tab
+                                            key={mode}
+                                            label={mode}
+                                            active={quizMode === mode}
+                                            onClick={() => changeQuizMode(mode)}
+                                        />
+                                    )
+                                )}
+                            </div>
+                            <Quiz
+                                mode={quizMode}
+                                answer={quizAnswer}
+                                onChange={(value) => {
+                                    setQuizAnswer(value);
+                                    setQuizResult("");
+                                }}
+                                onSubmit={(value) =>
+                                    setQuizResult(
+                                        value.toLowerCase() === "apple"
+                                            ? "Correct!"
+                                            : "Try again."
+                                    )
+                                }
+                                hasPrevious={false}
+                                hasNext={false}
+                                playsRemaining={playsRemaining}
+                                onPlaySound={() => {
+                                    setPlaysRemaining((remaining) =>
+                                        Math.max(remaining - 1, 0)
+                                    );
+                                    if ("speechSynthesis" in window)
+                                        window.speechSynthesis.speak(
+                                            new SpeechSynthesisUtterance(
+                                                "apple"
+                                            )
+                                        );
+                                }}
+                            />
+                            {quizResult && (
+                                <p
+                                    role="status"
+                                    className="font-mono text-sm font-bold"
+                                >
+                                    {quizResult}
+                                </p>
+                            )}
+                        </div>
+                    </Specimen>
+                </Section>
 
-                {/* 4. Footer with Close Button */}
-                <footer className="flex w-full items-center justify-center pt-xs">
-                    <Button
-                        label="Close"
-                        variant="secondary"
-                        size="default"
-                        leadingIcon={<CloseIcon className="size-3.5" />}
-                        showTrailingIcon={false}
-                        onClick={handleClose}
-                        className="w-[120px] h-[40px] border-2 border-stroke-default shadow-elevation-200 text-sm font-bold"
-                    />
+                <Section id="records" number="04" title="Records">
+                    <Specimen title="ProfileCard & ScoreCard">
+                        <div className="flex flex-wrap gap-lg">
+                            <ProfileCard />
+                            <ScoreCard
+                                onAction={() =>
+                                    document
+                                        .getElementById("leaderboard")
+                                        ?.scrollIntoView()
+                                }
+                            />
+                        </div>
+                    </Specimen>
+                    <Specimen title="Cell">
+                        <div className="flex flex-wrap gap-md">
+                            {[
+                                {
+                                    type: "Text",
+                                    label: "Text",
+                                    showBadge: false
+                                },
+                                {
+                                    type: "Text",
+                                    label: "Text + Badge",
+                                    showBadge: true
+                                },
+                                {
+                                    type: "Numerical",
+                                    label: "Numerical",
+                                    data: "01"
+                                },
+                                {
+                                    type: "Header",
+                                    label: "Header",
+                                    data: "PLAYER"
+                                },
+                                { type: "Rank", label: "Rank", data: "01" },
+                                { type: "Action", label: "Action" }
+                            ].map(({ type, label, showBadge, data }) => (
+                                <Sample key={label} label={label}>
+                                    <Cell
+                                        type={type}
+                                        data={data ?? "Player"}
+                                        showBadge={showBadge}
+                                        badgeLabel="YOU"
+                                        actionLabel="Delete profile"
+                                    />
+                                </Sample>
+                            ))}
+                        </div>
+                    </Specimen>
+                    <Specimen title="ProfileRecord">
+                        <div className="max-w-[600px] overflow-x-auto">
+                            <div className="min-w-[520px]">
+                                <ProfileRecord type="Header" />
+                                <ProfileRecord
+                                    type="Active"
+                                    playerName="nguyen_02"
+                                    progress="7/12"
+                                />
+                                <ProfileRecord
+                                    type="Default"
+                                    playerName="nguyen_03"
+                                />
+                                <ProfileRecord
+                                    type="Default"
+                                    state="Hover"
+                                    playerName="nguyen_03"
+                                />
+                            </div>
+                        </div>
+                    </Specimen>
+                    <Specimen title="LeaderboardRecord">
+                        <div
+                            id="leaderboard"
+                            className="scroll-mt-24 overflow-x-auto pb-xs"
+                        >
+                            <div className="min-w-[560px] max-w-[700px] border border-black bg-white">
+                                <LeaderboardRecord variant="header" />
+                                {records.length === 0 ? (
+                                    <p className="p-xl text-center font-mono text-sm font-bold uppercase text-content-muted">
+                                        No records yet
+                                    </p>
+                                ) : (
+                                    records.map((item, index) => {
+                                        const isYou =
+                                            item.isCurrentPlayer === true ||
+                                            (currentUserId &&
+                                                String(item.player).trim() ===
+                                                    String(
+                                                        currentUserId
+                                                    ).trim());
+                                        const isChampion =
+                                            Number(item.rank) === 1;
+                                        return (
+                                            <LeaderboardRecord
+                                                key={`${item.rank}-${item.player}-${index}`}
+                                                variant={
+                                                    isYou
+                                                        ? "you"
+                                                        : isChampion
+                                                          ? "champion"
+                                                          : "default"
+                                                }
+                                                rank={item.rank}
+                                                playerName={item.player}
+                                                score={item.score}
+                                                playTime={item.playTime}
+                                                badgeLabel={
+                                                    isChampion
+                                                        ? "CHAMPION"
+                                                        : undefined
+                                                }
+                                            />
+                                        );
+                                    })
+                                )}
+                            </div>
+                        </div>
+                    </Specimen>
+                </Section>
+                <footer className="flex flex-wrap justify-between gap-sm border-t-2 border-black py-lg font-mono text-xs font-bold uppercase">
+                    <span>WordSprint / UI library</span>
+                    <a href="#top" className="underline">
+                        Back to top
+                    </a>
                 </footer>
-            </Modal>
+            </div>
         </main>
     );
 }

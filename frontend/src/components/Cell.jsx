@@ -1,116 +1,101 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import React from "react";
+import DeleteIcon from "../assets/icons/delete.svg?react";
 import Badge from "./Badge";
+import IconButton from "./IconButton";
 
-/**
- * Neo‑Brutalism Cell component for tables / lists.
- *
- * Props:
- *   - variant ("bold" | "default" | "badge" | "muted" | "action"): visual style.
- *   - value (string|number): content to display (default "01").
- *   - children (ReactNode): overrides default rendering when provided.
- *   - badgeLabel (string): text for the Badge in the "badge" variant (default "BADGE TITLE").
- *   - badgeVariant (string): Badge variant (default "black").
- *   - badgeProps (object): additional props passed to Badge.
- *   - icon (ReactNode): custom icon for the "action" variant.
- *   - onAction (function): click handler for the action button.
- *   - actionLabel (string): aria‑label for the action button (default "Action").
- *   - disabled (boolean): disables the action button.
- *   - as ("div" | "td"): wrapper element (default "div").
- *   - className (string): optional extra Tailwind classes for the outer wrapper.
- */
+const legacyTypes = {
+    default: "Text",
+    bold: "Header",
+    badge: "Text",
+    muted: "Numerical",
+    action: "Action"
+};
+
 function Cell({
-    variant = "default",
+    type,
+    variant,
+    data,
     value = "01",
     children,
+    showBadge = true,
     badgeLabel = "BADGE TITLE",
     badgeVariant = "black",
     badgeProps = {},
     icon,
     onAction,
-    actionLabel = "Action",
-    disabled = false,
+    actionLabel = "Delete",
     as = "div",
     className
 }) {
-    const isDisabled = disabled;
-
-    // Outer element – div or td
+    const cellType = type ?? legacyTypes[variant] ?? "Header";
+    const displayValue = data ?? children ?? value;
+    const shouldShowBadge =
+        variant === undefined ? showBadge : variant === "badge";
     const Wrapper = as === "td" ? "td" : "div";
 
-    // Content based on variant (or children overrides)
-    const renderContent = () => {
+    const widthClass =
+        {
+            Header: "w-[91px] justify-center",
+            Rank: "w-[91px] justify-center",
+            Action: "w-[91px] justify-center",
+            Numerical: "w-[34px] justify-end",
+            Text: "w-[180px] gap-xs"
+        }[cellType] ?? "w-[91px] justify-center";
+
+    const content = (() => {
         if (children) return children;
-        switch (variant) {
-            case "bold":
-                return (
-                    <span className="font-bold text-content-primary">
-                        {value}
-                    </span>
-                );
-            case "default":
-                return (
-                    <span className="font-normal text-content-primary">
-                        {value}
-                    </span>
-                );
-            case "badge":
-                return (
-                    <React.Fragment>
-                        <span className="text-neutral-700">{value}</span>
-                        <Badge
-                            variant={badgeVariant}
-                            showIcon={true}
-                            className="ml-2.5"
-                            {...badgeProps}
-                        >
+
+        if (cellType === "Action") {
+            return (
+                <IconButton
+                    ariaLabel={actionLabel}
+                    onClick={onAction}
+                    icon={
+                        icon ?? (
+                            <DeleteIcon
+                                className="size-full text-current"
+                                aria-hidden="true"
+                            />
+                        )
+                    }
+                />
+            );
+        }
+
+        if (cellType === "Header") {
+            return <span className="text-heading-sm">{displayValue}</span>;
+        }
+
+        if (cellType === "Text") {
+            return (
+                <>
+                    <span className="text-mono-data">{displayValue}</span>
+                    {shouldShowBadge && (
+                        <Badge variant={badgeVariant} showIcon {...badgeProps}>
                             {badgeLabel}
                         </Badge>
-                    </React.Fragment>
-                );
-            case "muted":
-                return (
-                    <span className="text-xs text-neutral-500">{value}</span>
-                );
-            case "action":
-                return (
-                    <button
-                        type="button"
-                        aria-label={actionLabel}
-                        disabled={isDisabled}
-                        onClick={(e) => {
-                            if (!isDisabled && typeof onAction === "function")
-                                onAction(e);
-                        }}
-                        className={twMerge(
-                            clsx(
-                                "w-7 h-7 bg-surface-panel border border-stroke-default rounded-none shadow-elevation-100",
-                                "inline-flex items-center justify-center text-content-primary",
-                                !isDisabled &&
-                                    "cursor-pointer hover:bg-surface-primary-cta active:translate-x-[1px] active:translate-y-[1px] active:shadow-none transition-all",
-                                isDisabled && "opacity-50 cursor-not-allowed"
-                            )
-                        )}
-                    >
-                        {icon ?? <span aria-hidden="true">✖</span>}
-                    </button>
-                );
-            default:
-                return <span>{value}</span>;
+                    )}
+                </>
+            );
         }
-    };
+
+        return <span className="text-mono-data">{displayValue}</span>;
+    })();
 
     return (
         <Wrapper
             className={twMerge(
                 clsx(
-                    "inline-flex items-center gap-2.5 px-4 py-2.5 min-h-[48px] text-sm font-mono",
+                    "inline-flex h-[var(--primitive-space-48)] shrink-0 items-center px-xs",
+                    widthClass,
+                    cellType === "Numerical" && "text-right",
+                    cellType === "Text" && "overflow-hidden",
                     className
                 )
             )}
         >
-            {renderContent()}
+            {content}
         </Wrapper>
     );
 }

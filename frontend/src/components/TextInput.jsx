@@ -18,7 +18,6 @@ const stateStyles = {
         supportingText: "text-content-danger"
     },
     success: {
-        content: "p-xs",
         feedbackBackground: "bg-surface-success-subtle",
         feedbackColor: "text-content-success",
         supportingText: "text-content-success"
@@ -65,51 +64,36 @@ function TextInput({
     const resolvedState = state === "default" && currentValue ? "focus" : state;
     const FeedbackIcon = feedbackIcons[resolvedState];
     const resolvedStyles = stateStyles[resolvedState] || stateStyles.default;
-    const compactFeedback = !showTitle && !showSupportingText && FeedbackIcon;
 
     return (
         <article
             className={twMerge(
-                clsx(
-                    "shadow-elevation-200 grid min-w-0 w-full",
-                    compactFeedback
-                        ? "grid-cols-[minmax(0,1fr)_auto]"
-                        : "border-2 border-stroke-default bg-surface-panel",
-                    FeedbackIcon
-                        ? "grid-cols-[minmax(0,1fr)_auto]"
-                        : "grid-cols-1"
-                ),
+                "shadow-elevation-200 flex min-w-0 w-full",
                 className
             )}
             data-state={resolvedState}
         >
             <div
                 className={twMerge(
-                    clsx(
-                        "flex min-w-[0px] flex-1 flex-col gap-x-xs gap-y-[6px]",
-                        compactFeedback
-                            ? "border-2 border-stroke-default bg-surface-panel px-md py-[6px]"
-                            : "px-md py-xs",
-                        !compactFeedback && resolvedStyles.content
-                    ),
+                    "flex min-w-0 flex-1 flex-col gap-xs border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel px-md py-xs",
                     contentClassName
                 )}
             >
                 {showTitle && (
                     <label
-                        className="text-body-default-medium m-0 text-content-primary"
+                        className="text-body-default-medium text-content-primary"
                         htmlFor={inputId}
                     >
                         {title}
                     </label>
                 )}
-                <div className="text-body-default flex min-w-[0px] items-start gap-xs text-content-primary">
+                <div className="flex min-w-0 items-start gap-xs text-content-primary">
                     {showLeadingIcon && (
                         <span
                             aria-hidden="true"
                             className="size-icon-sm shrink-0"
                         >
-                            <LeadingIcon className="size-full shrink-0 [&>rect]:hidden" />
+                            <LeadingIcon className="size-full" />
                         </span>
                     )}
                     <input
@@ -121,13 +105,12 @@ function TextInput({
                         }
                         aria-invalid={resolvedState === "error"}
                         autoComplete={autoComplete}
-                        className={twMerge(
-                            clsx(
-                                "text-body-default min-w-[0px] flex-1 border-0 bg-transparent p-[0px] text-content-primary outline-none placeholder:text-content-muted disabled:cursor-not-allowed disabled:opacity-60",
-                                !currentValue &&
-                                    "placeholder:text-content-muted"
+                        className={clsx(
+                            twMerge(
+                                "min-w-0 flex-1 placeholder:text-content-muted focus:border-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+                                inputClassName
                             ),
-                            inputClassName
+                            "text-body-default"
                         )}
                         disabled={disabled}
                         autoFocus={autoFocus}
@@ -150,7 +133,7 @@ function TextInput({
                     <p
                         id={`${inputId}-supporting-text`}
                         className={clsx(
-                            "text-body-sm m-0",
+                            "text-body-sm",
                             resolvedStyles.supportingText
                         )}
                     >
@@ -163,10 +146,7 @@ function TextInput({
                     aria-hidden="true"
                     className={twMerge(
                         clsx(
-                            "shadow-elevation-200 grid aspect-square min-w-0 shrink-0 place-items-center self-stretch",
-                            compactFeedback
-                                ? "border-2 border-stroke-default p-[6px]"
-                                : "border-l-2 border-l-stroke-default p-xs",
+                            "grid aspect-square shrink-0 place-items-center border-[length:var(--border-width-default)] border-l-0 border-stroke-default p-xs",
                             resolvedStyles.feedbackBackground,
                             resolvedStyles.feedbackColor,
                             feedbackClassName
@@ -174,12 +154,7 @@ function TextInput({
                     )}
                 >
                     <span
-                        className={clsx(
-                            compactFeedback
-                                ? "size-full min-h-0 min-w-0"
-                                : "size-[var(--primitive-space-64)]",
-                            "max-h-[var(--primitive-space-64)] max-w-[var(--primitive-space-64)] bg-current"
-                        )}
+                        className="size-full bg-current"
                         style={{
                             maskImage: `url("${FeedbackIcon}")`,
                             maskPosition: "center",

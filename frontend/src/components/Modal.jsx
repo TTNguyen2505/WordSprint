@@ -1,48 +1,59 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
-/**
- * Neo‑Brutalism Modal component.
- * Renders a dimmed backdrop and a centered dialog with sharp corners,
- * a solid 1px black border and a hard bottom‑right offset shadow.
- *
- * Props:
- *   - isOpen (boolean) – controls visibility; when false the component returns null.
- *   - onClose (function) – called when the modal should close (backdrop click, Escape key, close button).
- *   - children (ReactNode) – content rendered inside the dialog box.
- *   - title (string) – optional header title; renders a header bar when provided.
- *   - showCloseButton (boolean) – whether to display a Neo‑Brutalism close button (default false).
- *   - closeOnBackdropClick (boolean) – close when clicking the backdrop (default true).
- *   - closeOnEscape (boolean) – close on Escape key press (default true).
- *   - maxWidth (string) – Tailwind max‑width utility for the dialog (default "max-w-[680px]").
- *   - className (string) – additional classes for the dialog container.
- *   - overlayClassName (string) – additional classes for the backdrop overlay.
- */
 function Modal({
     isOpen = true,
     onClose,
     children,
+    header,
+    body,
+    footer,
     title,
     showCloseButton = false,
     closeOnBackdropClick = true,
     closeOnEscape = true,
-    maxWidth = "max-w-[680px]",
+    maxWidth = "max-w-[752px]",
     className,
     overlayClassName
 }) {
-    // Prevent background scroll while the modal is open
+    const [shouldRender, setShouldRender] = useState(isOpen);
+    const [isClosing, setIsClosing] = useState(false);
+
     useEffect(() => {
         if (isOpen) {
-            const originalOverflow = document.body.style.overflow;
-            document.body.style.overflow = "hidden";
-            return () => {
-                document.body.style.overflow = originalOverflow;
-            };
+            const openTimeoutId = window.setTimeout(() => {
+                setShouldRender(true);
+                setIsClosing(false);
+            }, 0);
+            return () => window.clearTimeout(openTimeoutId);
         }
-    }, [isOpen]);
 
-    // Escape key handling
+        if (!shouldRender) return undefined;
+
+        const closeTimeoutId = window.setTimeout(() => {
+            setIsClosing(true);
+        }, 0);
+        const timeoutId = window.setTimeout(() => {
+            setShouldRender(false);
+            setIsClosing(false);
+        }, 240);
+
+        return () => {
+            window.clearTimeout(closeTimeoutId);
+            window.clearTimeout(timeoutId);
+        };
+    }, [isOpen, shouldRender]);
+
+    useEffect(() => {
+        if (!shouldRender) return undefined;
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, [shouldRender]);
+
     useEffect(() => {
         if (!isOpen || !closeOnEscape) return undefined;
         const handler = (e) => {
@@ -54,7 +65,7 @@ function Modal({
         return () => window.removeEventListener("keydown", handler);
     }, [isOpen, closeOnEscape, onClose]);
 
-    if (!isOpen) return null;
+    if (!shouldRender) return null;
 
     const handleBackdropClick = () => {
         if (closeOnBackdropClick && typeof onClose === "function") {
@@ -68,7 +79,11 @@ function Modal({
         <div
             className={twMerge(
                 clsx(
-                    "fixed inset-0 z-50 flex items-center justify-center p-md sm:p-lg bg-black/50",
+                    "fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-md backdrop-blur-20",
+                    isClosing
+                        ? "animate-[modal-backdrop-exit_var(--duration-deliberate)_var(--ease-snap)_both]"
+                        : "animate-[modal-backdrop-enter_var(--duration-deliberate)_var(--ease-snap)_both]",
+                    "motion-reduce:animate-none",
                     overlayClassName
                 )
             )}
@@ -79,22 +94,22 @@ function Modal({
                 aria-modal="true"
                 className={twMerge(
                     clsx(
-                        "w-full",
+                        "flex w-full flex-col items-center justify-center gap-3xl rounded-none border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel px-2xl py-xl shadow-elevation-200",
+                        isClosing
+                            ? "animate-[modal-exit_var(--duration-deliberate)_var(--ease-release)_both]"
+                            : "animate-[modal-enter_var(--duration-deliberate)_var(--ease-release)_both]",
+                        "motion-reduce:animate-none",
                         maxWidth,
-                        "min-h-[360px] max-h-[90vh] overflow-y-auto",
-                        "bg-surface-panel border border-stroke-default rounded-none",
-                        "shadow-elevation-200",
-                        "p-lg",
                         className
                     )
                 )}
                 onClick={stopPropagation}
             >
-                {/* Optional header */}
-                {(title || showCloseButton) && (
-                    <header className="flex items-center justify-between mb-md">
+                {(header || title || showCloseButton) && (
+                    <header className="flex w-full shrink-0 items-center justify-between">
+                        {header}
                         {title && (
-                            <h2 className="font-bold text-content-primary text-lg">
+                            <h2 className="text-heading-lg text-content-primary">
                                 {title}
                             </h2>
                         )}
@@ -104,12 +119,7 @@ function Modal({
                                 aria-label="Close modal"
                                 onClick={onClose}
                                 className={twMerge(
-                                    clsx(
-                                        "w-7 h-7 bg-surface-panel border border-stroke-default rounded-none",
-                                        "shadow-elevation-200",
-                                        "inline-flex items-center justify-center text-content-primary",
-                                        "cursor-pointer hover:-translate-x-[1px] hover:-translate-y-[1px] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all"
-                                    )
+                                    "inline-flex size-icon-md items-center justify-center rounded-none border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel text-content-primary shadow-elevation-200 transition-[translate,box-shadow] duration-[var(--duration-normal)] ease-snap hover:-translate-x-[var(--primitive-depth-50)] hover:-translate-y-[var(--primitive-depth-50)] active:translate-x-[var(--primitive-depth-100)] active:translate-y-[var(--primitive-depth-100)] active:shadow-elevation-50"
                                 )}
                             >
                                 &times;
@@ -117,8 +127,14 @@ function Modal({
                         )}
                     </header>
                 )}
-                {/* Main content */}
-                {children}
+                {body || (
+                    <div className="w-fit max-w-full shrink-0">{children}</div>
+                )}
+                {footer && (
+                    <footer className="flex w-full shrink-0 items-center justify-center">
+                        {footer}
+                    </footer>
+                )}
             </section>
         </div>
     );
