@@ -36,6 +36,7 @@ The planned **Neo-brutalism** visual style uses bold borders, sharp corners, har
 Qt/QML provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service; the C++ repositories use a local SQLite database. Gameplay does not yet write progress from the frontend.
 
 Seeded words use placeholder image paths under `storage/images/`; the image files are not included yet.
+Files in `storage/` are embedded at build time under `qrc:/storage/`, preserving their subdirectories.
 The WebChannel currently returns the database paths as relative strings, not `qrc:` URLs.
 Audio paths are optional and point to `storage/audio/` when audio is available. On the first launch of
 this version, the application resets an existing unversioned database, deleting its old profiles,
