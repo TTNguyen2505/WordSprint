@@ -12,12 +12,12 @@
 \label{sec:results}
 D?a trên m?c tiêu d? ra trong \ref{sec:objectives} c?a Chuong \ref{chap:introduction}, d? án WordSprint dã hoàn thi?n các tính nang c?t lõi sau:
 \begin{itemize}
-    \item \textbf{Các lo?i câu d? da d?ng}: Scramble, Fill-in-the-Blank và Audio du?c tri?n khai d?y d?, dáp ?ng yêu c?u cung c?p công c? h?c t? v?ng da d?ng cho ngu?i dùng ? m?i trình d? CEFR.
-    \item \textbf{Qu?n lý ngu?i dùng và h? so}: H? tr? da h? so trên cùng máy tính, luu tr? ti?n d?, di?m s? và thành t?u du?i d?ng file JSON, dáp ?ng m?c tiêu "h? tr? ngu?i dùng ? m?i trình d?".
-    \item \textbf{H? th?ng tính di?m và x?p h?ng}: Công th?c di?m \eqref{eq:score} du?c áp d?ng, di?m du?c t?ng h?p và hi?n th? b?ng x?p h?ng n?i b?, th?c hi?n m?c tiêu "dánh giá hi?u qu? h?c t?p".
-    \item \textbf{Ki?n trúc hai l?p rõ ràng}: Backend du?c xây d?ng b?ng C++20/Qt6, Frontend b?ng React?+?Vite?+?Tailwind CSS, tuong tác qua QtWebChannel. Ki?n trúc này mang l?i l?i th? v? hi?u nang (?ng d?ng g?c) và kh? nang m? r?ng (có th? thay th? frontend b?ng b?t k? SPA nào).
-    \item \textbf{Quy trình xây d?ng và tri?n khai t? d?ng}: S? d?ng CMake cho backend, Vite cho frontend, d?ng th?i cung c?p các script build và ch?y debug, dáp ?ng yêu c?u "cài d?t, biên d?ch, kh?i ch?y h? th?ng th?c t?".
-    \item \textbf{Ki?m th? toàn di?n}: Các k?ch b?n ki?m th? ch?c nang và biên dã du?c th?c hi?n và ghi l?i trong B?ng \ref{tab:test_results}, cho th?y t?t c? các ch?c nang chính ho?t d?ng ?n d?nh.
+    \item Các lo?i câu d? da d?ng: Scramble, Fill-in-the-Blank và Audio du?c tri?n khai d?y d?, dáp ?ng yêu c?u cung c?p công c? h?c t? v?ng da d?ng cho ngu?i dùng ? m?i trình d? CEFR.
+    \item Qu?n lý ngu?i dùng và h? so: H? tr? da h? so trên cùng máy tính, luu tr? ti?n d?, di?m s? và thành t?u du?i d?ng file JSON, dáp ?ng m?c tiêu "h? tr? ngu?i dùng ? m?i trình d?".
+    \item H? th?ng tính di?m và x?p h?ng: Công th?c di?m \eqref{eq:score} du?c áp d?ng, di?m du?c t?ng h?p và hi?n th? b?ng x?p h?ng n?i b?, th?c hi?n m?c tiêu "dánh giá hi?u qu? h?c t?p".
+    \item Ki?n trúc hai l?p rõ ràng: Backend du?c xây d?ng b?ng C++20/Qt6, Frontend b?ng React?+?Vite?+?Tailwind CSS, tuong tác qua QtWebChannel. Ki?n trúc này mang l?i l?i th? v? hi?u nang (?ng d?ng g?c) và kh? nang m? r?ng (có th? thay th? frontend b?ng b?t k? SPA nào).
+    \item Quy trình xây d?ng và tri?n khai t? d?ng: S? d?ng CMake cho backend, Vite cho frontend, d?ng th?i cung c?p các script build và ch?y debug, dáp ?ng yêu c?u "cài d?t, biên d?ch, kh?i ch?y h? th?ng th?c t?".
+    \item Ki?m th? toàn di?n: Các k?ch b?n ki?m th? ch?c nang và biên dã du?c th?c hi?n và ghi l?i trong B?ng \ref{tab:test_results}, cho th?y t?t c? các ch?c nang chính ho?t d?ng ?n d?nh.
 \end{itemize}
 
 Nh?ng k?t qu? trên cho th?y WordSprint không ch? dáp ?ng d?y d? các m?c tiêu ch?c nang mà còn th? hi?n uu di?m v?:
@@ -34,25 +34,25 @@ Nh?ng k?t qu? trên cho th?y WordSprint không ch? dáp ?ng d?y d? các m?c tiêu ch?
 \label{sec:limitations}
 M?c dù dã d?t du?c nhi?u k?t qu?, phiên b?n hi?n t?i v?n còn m?t s? h?n ch?:
 \begin{itemize}
-    \item \textbf{Luu tr? d? li?u còn don gi?n}: T?t c? d? li?u (t? v?ng, h? so, di?m) du?c luu du?i d?ng JSON c?c b?, chua có co ch? d?ng b? da thi?t b? ho?c sao luu dám mây.
-    \item \textbf{S? lu?ng puzzle h?n ch?}: Ch? h? tr? ba lo?i puzzle co b?n; chua có các d?ng nâng cao nhu “Word Search”, “Crossword” ho?c “Multiplayer challenge”.
-    \item \textbf{Thi?u h? tr? da ngôn ng?}: Giao di?n và n?i dung hi?n ch? h? tr? ti?ng Anh; chua có co ch? qu?c t? hoá (i18n).
-    \item \textbf{Audio chua t?i uu}: Âm thanh du?c t?i t? file tinh, chua có tính nang di?u ch?nh t?c d? phát hay h? tr? da ngu?n âm thanh.
-    \item \textbf{Giao di?n chua hoàn thi?n}: M?c dù s? d?ng Tailwind CSS, m?t s? thành ph?n UI v?n còn m?u th? nghi?m và chua dáp ?ng d?y d? tiêu chu?n truy c?p (accessibility).
-    \item \textbf{Ki?m th? ph?n m?m chua t? d?ng toàn di?n}: Các test backend hi?n ch? là unit test co b?n; chua có h? th?ng CI/CD d? t? d?ng ch?y toàn b? b? test trên m?i commit.
+    \item Luu tr? d? li?u còn don gi?n: T?t c? d? li?u (t? v?ng, h? so, di?m) du?c luu du?i d?ng JSON c?c b?, chua có co ch? d?ng b? da thi?t b? ho?c sao luu dám mây.
+    \item S? lu?ng puzzle h?n ch?: Ch? h? tr? ba lo?i puzzle co b?n; chua có các d?ng nâng cao nhu “Word Search”, “Crossword” ho?c “Multiplayer challenge”.
+    \item Thi?u h? tr? da ngôn ng?: Giao di?n và n?i dung hi?n ch? h? tr? ti?ng Anh; chua có co ch? qu?c t? hoá (i18n).
+    \item Audio chua t?i uu: Âm thanh du?c t?i t? file tinh, chua có tính nang di?u ch?nh t?c d? phát hay h? tr? da ngu?n âm thanh.
+    \item Giao di?n chua hoàn thi?n: M?c dù s? d?ng Tailwind CSS, m?t s? thành ph?n UI v?n còn m?u th? nghi?m và chua dáp ?ng d?y d? tiêu chu?n truy c?p (accessibility).
+    \item Ki?m th? ph?n m?m chua t? d?ng toàn di?n: Các test backend hi?n ch? là unit test co b?n; chua có h? th?ng CI/CD d? t? d?ng ch?y toàn b? b? test trên m?i commit.
 \end{itemize}
 
 \subsection{Hu?ng phát tri?n trong tuong lai}
 \label{subsec:future_work}
 D?a trên các h?n ch? trên, chúng tôi d? xu?t các công vi?c m? r?ng kh? thi:
 \begin{enumerate}
-    \item \textbf{Tri?n khai backend d? li?u}: Áp d?ng SQLite ho?c m?t server RESTful (Spring/Node) d? luu tr? d? li?u m?t cách có c?u trúc, h? tr? d?ng b? da thi?t b? và sao luu dám mây.
-    \item \textbf{M? r?ng danh m?c puzzle}: Phát tri?n các lo?i trò choi nhu Word Search, Crossword, Quiz-based và ch? d? da ngu?i choi (multiplayer) thông qua WebSocket.
-    \item \textbf{H? tr? da ngôn ng?}: S? d?ng thu vi?n i18n cho React và Qt, cho phép ngu?i dùng ch?n ngôn ng? giao di?n và t? v?ng (ví d? ti?ng Pháp, ti?ng Tây Ban Nha).
-    \item \textbf{C?i thi?n âm thanh}: Tích h?p thu vi?n audio x? lý (Qt Multimedia) d? cho phép ngu?i dùng di?u ch?nh t?c d?, d? l?n và s? d?ng ngu?n âm thanh d?ng.
-    \item \textbf{Nâng cao UI/UX}: Áp d?ng các guideline v? truy c?p (WCAG), t?i uu hoá b? c?c, thêm animation mu?t mà và ch? d? dark mode.
-    \item \textbf{T? d?ng hoá ki?m th? và CI/CD}: Xây d?ng pipeline CI (GitHub Actions) d? ch?y unit test, integration test và end-to-end test (Playwright) trên m?i pull-request, d?ng th?i t?o b?n phát hành t? d?ng.
-    \item \textbf{Tích h?p AI h? tr? h?c}: S? d?ng Gemini API ho?c mô hình ngôn ng? d? g?i ý t? v?ng, t?o câu h?i ng?u nhiên và cung c?p phân tích ti?n d? h?c t?p cho ngu?i dùng.
+    \item Tri?n khai backend d? li?u: Áp d?ng SQLite ho?c m?t server RESTful (Spring/Node) d? luu tr? d? li?u m?t cách có c?u trúc, h? tr? d?ng b? da thi?t b? và sao luu dám mây.
+    \item M? r?ng danh m?c puzzle: Phát tri?n các lo?i trò choi nhu Word Search, Crossword, Quiz-based và ch? d? da ngu?i choi (multiplayer) thông qua WebSocket.
+    \item H? tr? da ngôn ng?: S? d?ng thu vi?n i18n cho React và Qt, cho phép ngu?i dùng ch?n ngôn ng? giao di?n và t? v?ng (ví d? ti?ng Pháp, ti?ng Tây Ban Nha).
+    \item C?i thi?n âm thanh: Tích h?p thu vi?n audio x? lý (Qt Multimedia) d? cho phép ngu?i dùng di?u ch?nh t?c d?, d? l?n và s? d?ng ngu?n âm thanh d?ng.
+    \item Nâng cao UI/UX: Áp d?ng các guideline v? truy c?p (WCAG), t?i uu hoá b? c?c, thêm animation mu?t mà và ch? d? dark mode.
+    \item T? d?ng hoá ki?m th? và CI/CD: Xây d?ng pipeline CI (GitHub Actions) d? ch?y unit test, integration test và end-to-end test (Playwright) trên m?i pull-request, d?ng th?i t?o b?n phát hành t? d?ng.
+    \item Tích h?p AI h? tr? h?c: S? d?ng Gemini API ho?c mô hình ngôn ng? d? g?i ý t? v?ng, t?o câu h?i ng?u nhiên và cung c?p phân tích ti?n d? h?c t?p cho ngu?i dùng.
 \end{enumerate}
 
 Nh?ng hu?ng phát tri?n trên không ch? kh?c ph?c các h?n ch? hi?n t?i mà còn m? r?ng ti?m nang ?ng d?ng WordSprint thành m?t n?n t?ng h?c t?p da d?ng, linh ho?t và có kh? nang m? r?ng quy mô trong tuong lai.
