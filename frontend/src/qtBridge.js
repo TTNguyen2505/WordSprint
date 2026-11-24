@@ -1,5 +1,12 @@
 const bridgeListeners = new Set();
 const signalDisconnectors = [];
+const QT_QUICK_ANIMATION_PREFIX = "WordSprint.QtQuickAnimation:";
+const QT_QUICK_ANIMATION_EVENTS = new Set([
+    "correct",
+    "incorrect",
+    "summary",
+    "hide"
+]);
 
 let bridge = null;
 let connectionPromise = null;
@@ -19,6 +26,12 @@ export class QtBridgeError extends Error {
 
 export function getQtBridgeState() {
     return currentState;
+}
+
+export function requestQtQuickAnimation(event) {
+    if (!QT_QUICK_ANIMATION_EVENTS.has(event)) return;
+
+    console.info(`${QT_QUICK_ANIMATION_PREFIX}${event}`);
 }
 
 function updateState(nextValues) {

@@ -21,10 +21,40 @@ Window {
         url: root.initialUrl
         webChannel: root.webChannel
 
+        onJavaScriptConsoleMessage: function (level, message, lineNumber, sourceID) {
+            const prefix = "WordSprint.QtQuickAnimation:";
+            if (!message.startsWith(prefix)) {
+                console.log(message);
+                return;
+            }
+
+            const event = message.substring(prefix.length);
+            if (event === "hide") {
+                resultFeedback.active = false;
+                return;
+            }
+
+            if (event === "correct" || event === "incorrect" || event === "summary") {
+                resultFeedback.active = false;
+                resultFeedback.animationType = event;
+                resultFeedback.active = true;
+            }
+        }
+
         settings.accelerated2dCanvasEnabled: true
         settings.webGLEnabled: true
         settings.localContentCanAccessRemoteUrls: true
         settings.localContentCanAccessFileUrls: true
         settings.javascriptCanAccessClipboard: true
+    }
+
+    ResultLottieFeedback {
+        id: resultFeedback
+        anchors.centerIn: parent
+        width: 144
+        height: 144
+        z: 1
+        active: false
+        enabled: false
     }
 }

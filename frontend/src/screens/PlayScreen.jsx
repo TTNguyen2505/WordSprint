@@ -8,6 +8,7 @@ import InfoPill from "../components/InfoPill";
 import PipelineItem from "../components/PipelineItem";
 import Quiz from "../components/Quiz";
 import PauseModal from "./PauseModal";
+import { requestQtQuickAnimation } from "../qtBridge.js";
 
 const questionCount = 8;
 
@@ -17,6 +18,7 @@ function PlayScreen({
     topic = "SCHOOL",
     level = "A1",
     time = "10:00",
+    onAnswerSubmit,
     onPreviewResult,
     onReplay,
     onQuit
@@ -37,11 +39,13 @@ function PlayScreen({
     }, [countdown]);
 
     const selectQuestion = (index) => {
+        requestQtQuickAnimation("hide");
         setActiveQuestion(index);
         setMessage("");
     };
 
     const updateAnswer = (answer) => {
+        if (message) requestQtQuickAnimation("hide");
         setAnswers((current) =>
             current.map((value, index) =>
                 index === activeQuestion ? answer : value
@@ -82,7 +86,10 @@ function PlayScreen({
                                         <PauseIcon className="size-full" />
                                     }
                                     showTrailingIcon={false}
-                                    onClick={() => setPaused(true)}
+                                    onClick={() => {
+                                        requestQtQuickAnimation("hide");
+                                        setPaused(true);
+                                    }}
                                 />
                             </header>
                             <section
@@ -174,11 +181,26 @@ function PlayScreen({
                                     className="max-w-none"
                                     answer={answers[activeQuestion]}
                                     onChange={updateAnswer}
-                                    onSubmit={() =>
-                                        setMessage(
-                                            "Answer checking is unavailable in this preview."
-                                        )
-                                    }
+                                    onSubmit={async (answer) => {
+                                        setMessage("");
+                                        try {
+                                            const result = await onAnswerSubmit(answer);
+                                            if (result.status !== "ok") {
+                                                setMessage(
+                                                    result.message ??
+                                                        "Answer checking failed."
+                                                );
+                                                return;
+                                            }
+                                            setMessage(
+                                                result.correct ? "Correct!" : "Incorrect!"
+                                            );
+                                        } catch {
+                                            setMessage(
+                                                "Answer checking is unavailable."
+                                            );
+                                        }
+                                    }}
                                     onPrevious={() =>
                                         selectQuestion(activeQuestion - 1)
                                     }

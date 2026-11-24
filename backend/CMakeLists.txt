@@ -9,6 +9,7 @@ find_package(Qt6 REQUIRED COMPONENTS
     Quick
     WebChannel
     Sql
+    Lottie
 )
 
 find_package(Qt6 OPTIONAL_COMPONENTS
@@ -91,11 +92,24 @@ if(FRONTEND_DIST_FILES)
     )
 endif()
 
+set(LOTTIE_ASSET_DIR "${FRONTEND_DIR}/src/assets/lottie")
+set(LOTTIE_ASSET_FILES
+    "${LOTTIE_ASSET_DIR}/result-correct.json"
+    "${LOTTIE_ASSET_DIR}/result-incorrect.json"
+    "${LOTTIE_ASSET_DIR}/summary-complete.json"
+)
+qt_add_resources(WordSprint "lottie_resources"
+    PREFIX "/lottie"
+    BASE "${LOTTIE_ASSET_DIR}"
+    FILES ${LOTTIE_ASSET_FILES}
+)
+
 qt_add_qml_module(WordSprint
     URI WordSprint
     VERSION 1.0
     QML_FILES
         qml/Main.qml
+        qml/ResultLottieFeedback.qml
 )
 
 set(OPTIONAL_WEBENGINE_LIBS "")
@@ -113,6 +127,7 @@ target_link_libraries(WordSprint PRIVATE
     Qt6::Quick
     Qt6::WebChannel
     Qt6::Sql
+    Qt6::Lottie
     ${OPTIONAL_WEBENGINE_LIBS}
 )
 

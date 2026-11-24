@@ -9,6 +9,8 @@ import MenuScreen from "./screens/MenuScreen";
 import PlayScreen from "./screens/PlayScreen";
 import SelectProfileModal from "./screens/SelectProfileModal";
 import StageResultModal from "./screens/StageResultModal";
+import { useQtBridge } from "./hooks/useQtBridge";
+import { requestQtQuickAnimation } from "./qtBridge.js";
 import sampleStages from "./sampleStages";
 
 const initialProfiles = [
@@ -22,6 +24,7 @@ const initialProfiles = [
 ];
 
 function Application() {
+    const { processAnswer } = useQtBridge();
     const [profiles, setProfiles] = useState(initialProfiles);
     const [activeId, setActiveId] = useState(initialProfiles[0].id);
     const [modal, setModal] = useState(null);
@@ -31,6 +34,17 @@ function Application() {
     const [audioSettings, setAudioSettings] = useState(null);
     const unavailableTitleId = useId();
     const activeProfile = profiles.find((profile) => profile.id === activeId);
+
+    const submitAnswer = async (answer) => {
+        const result = await processAnswer({
+            answer,
+            expected: "QUESTION"
+        });
+        if (result.status === "ok") {
+            requestQtQuickAnimation(result.correct ? "correct" : "incorrect");
+        }
+        return result;
+    };
 
     const createProfile = (name) => {
         const stages = sampleStages.map((stage, index) => ({
@@ -50,6 +64,7 @@ function Application() {
     const unavailable = (feature) => setModal({ unavailable: feature });
 
     const startStage = (stage) => {
+        requestQtQuickAnimation("hide");
         setSelectedStage(stage);
         setStageRun((current) => current + 1);
         setStageResult(null);
@@ -57,6 +72,7 @@ function Application() {
     };
 
     const quitStage = () => {
+        requestQtQuickAnimation("hide");
         setSelectedStage(null);
         setStageResult(null);
         setModal(null);
@@ -78,15 +94,19 @@ function Application() {
                         level={selectedStage.level}
                         onReplay={() => startStage(selectedStage)}
                         onQuit={quitStage}
-                        onPreviewResult={(result) =>
+                        onAnswerSubmit={submitAnswer}
+                        onPreviewResult={(result) => {
+                            requestQtQuickAnimation(
+                                result === "timeUp" ? "hide" : "summary"
+                            );
                             setStageResult(
                                 result === "timeUp"
                                     ? "timeUp"
                                     : nextStage
                                       ? "stageCleared"
                                       : "campaignCleared"
-                            )
-                        }
+                            );
+                        }}
                     />
                 </div>
                 {stageResult && modal !== "leaderboard" && (
@@ -102,7 +122,10 @@ function Application() {
                         onNextStage={() => startStage(nextStage)}
                         onReplay={() => startStage(selectedStage)}
                         onQuit={quitStage}
-                        onLeaderboard={() => setModal("leaderboard")}
+                        onLeaderboard={() => {
+                            requestQtQuickAnimation("hide");
+                            setModal("leaderboard");
+                        }}
                     />
                 )}
                 {modal === "leaderboard" && (
