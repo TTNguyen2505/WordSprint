@@ -294,3 +294,21 @@ export function saveProgress(request) {
 export function loadProgress(request) {
     return invokeBridgeMethod("loadProgress", request);
 }
+
+async function invokeDataMethod(methodName, request = {}) {
+    const response = await invokeBridgeMethod(methodName, request);
+    if (response.status !== "ok") {
+        throw new QtBridgeError(
+            response.message || `BridgeController.${methodName} failed.`
+        );
+    }
+    return response;
+}
+
+export const getProfiles = () => invokeDataMethod("getProfiles");
+export const createProfile = (name) =>
+    invokeDataMethod("createProfile", { name });
+export const updateAudio = (userId, settings) =>
+    invokeDataMethod("updateAudio", { userId, ...settings });
+export const getLeaderboard = (stageId) =>
+    invokeDataMethod("getLeaderboard", { stageId });

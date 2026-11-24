@@ -11,15 +11,25 @@ function CreateUserModal({ isOpen = true, onClose, onCreate }) {
     const formId = useId();
     const [username, setUsername] = useState("");
     const [hasError, setHasError] = useState(false);
+    const [serverError, setServerError] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
 
-    const handleSubmit = (event) => {
+    const handleSubmit = async (event) => {
         event.preventDefault();
         if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
             setHasError(true);
             return;
         }
         setHasError(false);
-        onCreate?.(username);
+        setServerError("");
+        setIsSaving(true);
+        try {
+            await onCreate?.(username);
+        } catch (error) {
+            setServerError(error.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -46,11 +56,13 @@ function CreateUserModal({ isOpen = true, onClose, onCreate }) {
                         onChange={(event) => {
                             setUsername(event.target.value);
                             setHasError(false);
+                            setServerError("");
                         }}
                         state={hasError ? "error" : "default"}
                         maxLength={20}
                         autoComplete="off"
                     />
+                    {serverError && <p role="alert">{serverError}</p>}
                 </form>
             }
             footer={
@@ -68,6 +80,7 @@ function CreateUserModal({ isOpen = true, onClose, onCreate }) {
                         size="default"
                         type="submit"
                         form={formId}
+                        disabled={isSaving}
                         leadingIcon={<AddIcon className="size-full" />}
                         showTrailingIcon={false}
                     />

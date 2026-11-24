@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Button from "./components/Button";
 import Modal from "./components/Modal";
 import ModalTitle from "./components/ModalTitle";
@@ -9,43 +9,25 @@ import MenuScreen from "./screens/MenuScreen";
 import PlayScreen from "./screens/PlayScreen";
 import SelectProfileModal from "./screens/SelectProfileModal";
 import StageResultModal from "./screens/StageResultModal";
-import sampleStages from "./sampleStages";
-
-const initialProfiles = [
-    { id: 1, name: "TTNguyen2505", score: 124850, stages: sampleStages },
-    ...Array.from({ length: 6 }, (_, index) => ({
-        id: index + 2,
-        name: `nguyen_0${index + 2}`,
-        score: 124850,
-        stages: sampleStages
-    }))
-];
+import { useAppSessionStore } from "./viewModels/appSessionStore";
+import { useMenuViewModel } from "./viewModels/menuViewModel";
 
 function Application() {
-    const [profiles, setProfiles] = useState(initialProfiles);
-    const [activeId, setActiveId] = useState(initialProfiles[0].id);
     const [modal, setModal] = useState(null);
     const [selectedStage, setSelectedStage] = useState(null);
     const [stageRun, setStageRun] = useState(0);
     const [stageResult, setStageResult] = useState(null);
-    const [audioSettings, setAudioSettings] = useState(null);
     const unavailableTitleId = useId();
-    const activeProfile = profiles.find((profile) => profile.id === activeId);
+    const activeProfile = useMenuViewModel();
+    const status = useAppSessionStore((state) => state.status);
+    const error = useAppSessionStore((state) => state.error);
+    const loadProfiles = useAppSessionStore((state) => state.loadProfiles);
+    const createProfile = useAppSessionStore((state) => state.createProfile);
+    const updateAudio = useAppSessionStore((state) => state.updateAudio);
 
-    const createProfile = (name) => {
-        const stages = sampleStages.map((stage, index) => ({
-            ...stage,
-            status: index === 0 ? "available" : "locked",
-            score: 0
-        }));
-        const id = Math.max(0, ...profiles.map((profile) => profile.id)) + 1;
-        setProfiles((current) => [...current, { id, name, score: 0, stages }]);
-        setModal("profiles");
-    };
-
-    const deleteProfile = (profile) => {
-        setProfiles((current) => current.filter(({ id }) => id !== profile.id));
-    };
+    useEffect(() => {
+        loadProfiles().catch(() => {});
+    }, [loadProfiles]);
 
     const unavailable = (feature) => setModal({ unavailable: feature });
 
@@ -62,11 +44,53 @@ function Application() {
         setModal(null);
     };
 
-    if (selectedStage) {
-        const stageIndex = activeProfile.stages.findIndex(
-            (stage) => stage.stageId === selectedStage.stageId
+    if (status !== "ready") {
+        return (
+            <main className="flex h-[900px] w-[1200px] flex-col items-center justify-center gap-md bg-surface-canvas">
+                {status === "error" ? (
+                    <>
+                        <p role="alert">{error}</p>
+                        <Button
+                            label="Retry"
+                            showLeadingIcon={false}
+                            showTrailingIcon={false}
+                            onClick={() => loadProfiles().catch(() => {})}
+                        />
+                    </>
+                ) : (
+                    <p role="status">Loading profiles...</p>
+                )}
+            </main>
         );
-        const nextStage = activeProfile.stages[stageIndex + 1];
+    }
+
+    if (!activeProfile) {
+        return (
+            <main className="flex h-[900px] w-[1200px] flex-col items-center justify-center gap-md bg-surface-canvas">
+                <p>No profiles yet. Create one to begin.</p>
+                <Button
+                    label="Create profile"
+                    showLeadingIcon={false}
+                    showTrailingIcon={false}
+                    onClick={() => setModal("create")}
+                />
+                {modal === "create" && (
+                    <CreateUserModal
+                        onClose={() => setModal(null)}
+                        onCreate={async (name) => {
+                            await createProfile(name);
+                            setModal(null);
+                        }}
+                    />
+                )}
+            </main>
+        );
+    }
+
+    if (selectedStage) {
+        const nextStage = activeProfile.stages.find(
+            (stage) => stage.id === selectedStage.previewNextStageId
+        );
 
         return (
             <>
@@ -131,31 +155,27 @@ function Application() {
             )}
             {modal === "settings" && (
                 <GameSettingsModal
-                    initialMusicEnabled={audioSettings?.musicEnabled}
-                    initialMusicVolume={audioSettings?.musicVolume}
-                    initialSoundEnabled={audioSettings?.soundEnabled}
-                    initialSoundVolume={audioSettings?.soundVolume}
-                    onSave={setAudioSettings}
+                    initialMusicEnabled={activeProfile.musicEnabled}
+                    initialMusicVolume={activeProfile.musicVolume}
+                    initialSoundEnabled={activeProfile.soundEnabled}
+                    initialSoundVolume={activeProfile.soundVolume}
+                    onSave={updateAudio}
                     onClose={() => setModal(null)}
                 />
             )}
             {modal === "profiles" && (
                 <SelectProfileModal
-                    profiles={profiles.map((profile) => ({
-                        ...profile,
-                        progress: `${profile.stages.filter((stage) => stage.status === "solved").length}/${profile.stages.length}`
-                    }))}
-                    activeId={activeId}
                     onClose={() => setModal(null)}
                     onAdd={() => setModal("create")}
-                    onSelectProfile={(profile) => setActiveId(profile.id)}
-                    onDeleteProfile={deleteProfile}
                 />
             )}
             {modal === "create" && (
                 <CreateUserModal
                     onClose={() => setModal("profiles")}
-                    onCreate={createProfile}
+                    onCreate={async (name) => {
+                        await createProfile(name);
+                        setModal("profiles");
+                    }}
                 />
             )}
             {typeof modal === "object" && modal !== null && (

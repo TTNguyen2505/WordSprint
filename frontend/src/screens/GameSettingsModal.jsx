@@ -23,6 +23,8 @@ function GameSettingsModal({
         soundVolume: initialSoundVolume
     }));
     const [settings, setSettings] = useState(savedSettings);
+    const [error, setError] = useState("");
+    const [isSaving, setIsSaving] = useState(false);
 
     const updateSetting = (key, value) => {
         setSettings((current) => ({ ...current, [key]: value }));
@@ -33,10 +35,18 @@ function GameSettingsModal({
         onClose?.();
     };
 
-    const handleSave = () => {
-        setSavedSettings(settings);
-        onSave?.(settings);
-        onClose?.();
+    const handleSave = async () => {
+        setError("");
+        setIsSaving(true);
+        try {
+            await onSave?.(settings);
+            setSavedSettings(settings);
+            onClose?.();
+        } catch (saveError) {
+            setError(saveError.message);
+        } finally {
+            setIsSaving(false);
+        }
     };
 
     return (
@@ -53,21 +63,24 @@ function GameSettingsModal({
                 </ModalTitle>
             }
             body={
-                <AudioSettings
-                    {...settings}
-                    onMusicToggle={(value) =>
-                        updateSetting("musicEnabled", value)
-                    }
-                    onMusicVolumeChange={(value) =>
-                        updateSetting("musicVolume", value)
-                    }
-                    onSoundToggle={(value) =>
-                        updateSetting("soundEnabled", value)
-                    }
-                    onSoundVolumeChange={(value) =>
-                        updateSetting("soundVolume", value)
-                    }
-                />
+                <div>
+                    <AudioSettings
+                        {...settings}
+                        onMusicToggle={(value) =>
+                            updateSetting("musicEnabled", value)
+                        }
+                        onMusicVolumeChange={(value) =>
+                            updateSetting("musicVolume", value)
+                        }
+                        onSoundToggle={(value) =>
+                            updateSetting("soundEnabled", value)
+                        }
+                        onSoundVolumeChange={(value) =>
+                            updateSetting("soundVolume", value)
+                        }
+                    />
+                    {error && <p role="alert">{error}</p>}
+                </div>
             }
             footer={
                 <div className="flex gap-2xl">
@@ -85,6 +98,7 @@ function GameSettingsModal({
                         leadingIcon={<SaveIcon className="size-full" />}
                         showTrailingIcon={false}
                         onClick={handleSave}
+                        disabled={isSaving}
                     />
                 </div>
             }

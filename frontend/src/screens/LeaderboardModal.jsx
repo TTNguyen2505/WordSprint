@@ -1,52 +1,47 @@
-import { useId, useState } from "react";
+import { useEffect, useId, useRef } from "react";
+import ArrowBackIcon from "../assets/icons/arrow_back_1.svg?react";
+import ArrowForwardIcon from "../assets/icons/arrow_forward_1.svg?react";
 import CloseIcon from "../assets/icons/close.svg?react";
 import Button from "../components/Button";
+import IconButton from "../components/IconButton";
 import LeaderboardRecord from "../components/LeaderboardRecord";
 import Modal from "../components/Modal";
 import ModalTitle from "../components/ModalTitle";
 import Navigation from "../components/Navigation";
+import { useLeaderboardViewModel } from "../viewModels/leaderboardViewModel";
+import { useMenuViewModel } from "../viewModels/menuViewModel";
 
-const mockLeaderboards = {
-    Overall: [
-        { rank: 1, player: "nguyen", score: 100000, playTime: "10:00" },
-        {
-            rank: 2,
-            player: "nguyen_02",
-            score: 150000,
-            playTime: "10:00",
-            isCurrentPlayer: true
-        },
-        { rank: 3, player: "nguyen_03", score: 120000, playTime: "10:00" },
-        ...Array.from({ length: 7 }, (_, index) => ({
-            rank: index + 4,
-            player: "nguyen_04",
-            score: 120000,
-            playTime: "10:00"
-        }))
-    ],
-    "Case 1": [
-        { rank: 1, player: "duy_bao", score: 45000, playTime: "02:15" },
-        {
-            rank: 2,
-            player: "nguyen_02",
-            score: 42000,
-            playTime: "02:30",
-            isCurrentPlayer: true
-        }
-    ],
-    "Case 2": [
-        { rank: 1, player: "tuan_khang", score: 62000, playTime: "03:05" }
-    ],
-    "Case 3": [
-        { rank: 1, player: "xuan_tin", score: 78000, playTime: "04:10" }
-    ],
-    "Case 4": []
-};
+function formatTime(seconds) {
+    if (seconds == null) return "-";
+    return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 
 function LeaderboardModal({ isOpen = true, onClose }) {
     const titleId = useId();
-    const [activeTab, setActiveTab] = useState("Overall");
-    const records = mockLeaderboards[activeTab];
+    const tabsRef = useRef(null);
+    const profile = useMenuViewModel();
+    const activeTab = useLeaderboardViewModel((state) => state.activeTab);
+    const records = useLeaderboardViewModel((state) => state.records);
+    const status = useLeaderboardViewModel((state) => state.status);
+    const error = useLeaderboardViewModel((state) => state.error);
+    const selectTab = useLeaderboardViewModel((state) => state.selectTab);
+    const stages = [...(profile?.stages ?? [])].sort((a, b) => a.id - b.id);
+    const items = [
+        { label: "Overall", value: "overall" },
+        ...stages.map((stage) => ({ label: stage.stageId, value: stage.id }))
+    ];
+    const activeLabel = items.find((item) => item.value === activeTab)?.label;
+
+    useEffect(() => {
+        if (isOpen) selectTab("overall");
+    }, [isOpen, selectTab]);
+
+    const scrollTabs = (direction) => {
+        tabsRef.current?.scrollBy({
+            left: direction * 240,
+            behavior: "smooth"
+        });
+    };
 
     return (
         <Modal
@@ -63,44 +58,81 @@ function LeaderboardModal({ isOpen = true, onClose }) {
             }
             body={
                 <div className="flex w-[652px] flex-col items-center gap-xl">
-                    <Navigation activeTab={activeTab} onChange={setActiveTab} />
+                    <div className="flex w-full items-center gap-xs">
+                        <IconButton
+                            ariaLabel="Previous leaderboard tabs"
+                            icon={<ArrowBackIcon className="size-full" />}
+                            onClick={() => scrollTabs(-1)}
+                        />
+                        <Navigation
+                            navigationRef={tabsRef}
+                            items={items}
+                            activeTab={activeTab}
+                            onChange={selectTab}
+                            className="min-w-0 flex-1"
+                        />
+                        <IconButton
+                            ariaLabel="Next leaderboard tabs"
+                            icon={<ArrowForwardIcon className="size-full" />}
+                            onClick={() => scrollTabs(1)}
+                        />
+                    </div>
                     <div
                         role="table"
-                        aria-label={`${activeTab} leaderboard`}
+                        aria-label={`${activeLabel} leaderboard`}
                         className="h-[384px] w-max overflow-y-auto"
                     >
                         <LeaderboardRecord
                             type="Header"
                             className="sticky top-0 z-10 h-auto w-max min-w-0"
                         />
-                        {records.map((record) => (
-                            <LeaderboardRecord
-                                key={record.rank}
-                                type={
-                                    record.isCurrentPlayer
-                                        ? "Active"
-                                        : record.rank === 1
-                                          ? "First Record"
-                                          : "Default"
-                                }
-                                rank={record.rank}
-                                playerName={record.player}
-                                score={record.score}
-                                playTime={record.playTime}
-                                className="h-auto w-max min-w-0"
-                            />
-                        ))}
-                        {records.length === 0 && (
-                            <div role="row">
-                                <div
-                                    role="cell"
-                                    className="text-body-default p-md text-center text-content-muted"
-                                >
-                                    No records yet.
-                                </div>
+                        {status === "ready" &&
+                            records.map((record) => (
+                                <LeaderboardRecord
+                                    key={record.id ?? record.userId}
+                                    type={
+                                        record.userId === profile?.id
+                                            ? "Active"
+                                            : record.rank === 1
+                                              ? "First Record"
+                                              : "Default"
+                                    }
+                                    rank={record.rank}
+                                    playerName={record.player}
+                                    score={record.score}
+                                    playTime={formatTime(record.completionTime)}
+                                    className="h-auto w-max min-w-0"
+                                />
+                            ))}
+                        {status === "ready" && records.length === 0 && (
+                            <p
+                                role="status"
+                                className="text-body-default p-md text-center text-content-muted"
+                            >
+                                No records yet.
+                            </p>
+                        )}
+                        {status === "loading" && (
+                            <p role="status" className="p-md text-center">
+                                Loading leaderboard...
+                            </p>
+                        )}
+                        {status === "error" && (
+                            <div role="alert" className="p-md text-center">
+                                <p>{error}</p>
+                                <Button
+                                    label="Retry"
+                                    showLeadingIcon={false}
+                                    showTrailingIcon={false}
+                                    onClick={() => selectTab(activeTab)}
+                                />
                             </div>
                         )}
                     </div>
+                    <p className="text-body-sm text-content-muted">
+                        Top 100 records. Overall scores do not include play
+                        time.
+                    </p>
                 </div>
             }
             footer={
