@@ -125,3 +125,21 @@ if(WIN32)
         COMMENT "Deploying Qt runtime DLLs with windeployqt..."
     )
 endif()
+
+add_executable(DatabasePersistenceTests
+    tests/DatabasePersistenceTests.cpp
+    src/database/DatabaseManager.h
+    src/database/DatabaseManager.cpp
+)
+
+target_link_libraries(DatabasePersistenceTests PRIVATE
+    Qt6::Core
+    Qt6::Sql
+)
+
+add_custom_target(run_database_persistence_tests
+    COMMAND $<TARGET_FILE:DatabasePersistenceTests> "${DATABASE_SCHEMA_FILE}"
+    DEPENDS DatabasePersistenceTests
+    COMMENT "Running database persistence tests..."
+    VERBATIM
+)
