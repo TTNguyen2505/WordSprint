@@ -9,16 +9,18 @@
 #include <QVariantList>
 #include <QVariantMap>
 
-#include "repositories/IVocabularyRepository.h"
+class RecordRepository;
+class StageRepository;
+class UserRepository;
 
 /**
  * @brief BridgeController
  *
  * QObject-derived controller exposed to the React frontend through Qt WebChannel.
  * Implements the communication contract specified in Chapter 2.4 and Chapter 2.5:
- *  - startStage: loads vocabulary through the repository and returns stage data to React.
- *  - completeStage: updates in-memory stage progress and returns a completion summary.
- *  - processAnswer: evaluates an answer and records vocabulary progress through the repository.
+ *  - startStage: loads stage and word data through the repositories and returns it to React.
+ *  - completeStage: persists a stage record and returns a completion summary.
+ *  - processAnswer: evaluates an answer and returns the result to React.
  *  - processMessage: universal dispatcher for JSON actions from the web frontend.
  */
 class BridgeController : public QObject {
@@ -26,7 +28,8 @@ class BridgeController : public QObject {
     Q_PROPERTY(bool isReady READ isReady NOTIFY isReadyChanged)
 
 public:
-    explicit BridgeController(IVocabularyRepository* repository = nullptr, QObject *parent = nullptr);
+    explicit BridgeController(StageRepository *stageRepository = nullptr, RecordRepository *recordRepository = nullptr,
+                              UserRepository *userRepository = nullptr, QObject *parent = nullptr);
     ~BridgeController() override = default;
 
     bool isReady() const { return m_isReady; }
@@ -41,9 +44,13 @@ public slots:
 
     Q_INVOKABLE QString getAllTopics();
     Q_INVOKABLE QString getStagesByTopicId(int topicId);
+    Q_INVOKABLE QString getProfiles(const QString &requestJson);
+    Q_INVOKABLE QString createProfile(const QString &requestJson);
+    Q_INVOKABLE QString updateAudio(const QString &requestJson);
+    Q_INVOKABLE QString getLeaderboard(const QString &requestJson);
 
     /**
-     * @brief Complete a stage and update in-memory progress.
+     * @brief Complete a stage and persist its record.
      * @param requestJson JSON string, e.g. { "userId": 1, "stageId": 1, "score": 90, "completionTime": 42 }
      * @return JSON string response with status, record, updated progress, and next stage info.
      */
@@ -81,19 +88,11 @@ signals:
 
 private:
     bool m_isReady = true;
-    IVocabularyRepository* m_repository = nullptr;
-
-    struct StageProgress {
-        int recordId = 0;
-        int highScore = 0;
-        int bestTime = 0;
-    };
-
-    QHash<QString, StageProgress> m_stageProgress;
+    StageRepository *m_stageRepository = nullptr;
+    RecordRepository *m_recordRepository = nullptr;
+    UserRepository *m_userRepository = nullptr;
     QHash<int, int> m_unlockedStagesByUser;
-    int m_nextRecordId = 1;
 
-    // Safe JSON conversion helpers
     QJsonObject parseJson(const QString &jsonStr) const;
     QString buildResponse(const QVariantMap &obj) const;
     QString buildErrorResponse(const QString &errorMessage) const;

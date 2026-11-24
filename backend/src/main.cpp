@@ -1,14 +1,6 @@
-#include <QCommandLineOption>
-#include <QCommandLineParser>
-#include <QDebug>
-#include <QDir>
-#include <QFileInfo>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QStandardPaths>
 #include <QUrl>
-#include <QWebChannel>
-#include <QStringList>
 
 #include <memory>
 
@@ -17,9 +9,12 @@
 #define HAS_WEBENGINE 1
 #endif
 
-#include "BridgeController.h"
-#include "database/DatabaseManager.h"
-#include "repositories/SqliteVocabularyRepository.h"
+#include "controller/BridgeController.h"
+#include "core/ApplicationSetup.h"
+#include "core/DatabaseManager.h"
+#include "repositories/RecordRepository.h"
+#include "repositories/StageRepository.h"
+#include "repositories/UserRepository.h"
 
 int main(int argc, char *argv[]) {
     qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--ignore-gpu-blocklist "
@@ -32,128 +27,31 @@ int main(int argc, char *argv[]) {
     QtWebEngineQuick::initialize();
 #endif
 
-    // Keep the database objects alive until after QGuiApplication is destroyed.
     std::unique_ptr<DatabaseManager> databaseManager;
-    std::unique_ptr<SqliteVocabularyRepository> vocabularyRepository;
+    std::unique_ptr<StageRepository> stageRepository;
+    std::unique_ptr<RecordRepository> recordRepository;
+    std::unique_ptr<UserRepository> userRepository;
 
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
     app.setOrganizationName(QStringLiteral("WordSprint"));
 
     databaseManager = std::make_unique<DatabaseManager>();
+    ApplicationSetup::initializeDatabase(*databaseManager);
 
-    QString dataDirectory = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    if (dataDirectory.isEmpty()) {
-        dataDirectory = QCoreApplication::applicationDirPath();
-    }
-    if (!QDir().mkpath(dataDirectory)) {
-        qWarning() << "WordSprint: Could not create application data directory:" << dataDirectory;
-    }
+    stageRepository = std::make_unique<StageRepository>(*databaseManager);
+    recordRepository = std::make_unique<RecordRepository>(*databaseManager);
+    userRepository = std::make_unique<UserRepository>(*databaseManager);
 
-    const QString databasePath = QDir(dataDirectory).filePath(QStringLiteral("wordsprint.db"));
-    if (!databaseManager->openDatabase(databasePath.toStdString())) {
-        qWarning() << "WordSprint: Could not open the vocabulary database:"
-                   << QString::fromStdString(databaseManager->lastError());
-    } else {
-        const QString applicationDirectory = QCoreApplication::applicationDirPath();
-        const QStringList databaseDirectories = {
-            QDir(applicationDirectory).filePath(QStringLiteral("database")),
-            QDir(applicationDirectory).filePath(QStringLiteral("../database")),
-            QDir(applicationDirectory).filePath(QStringLiteral("../../backend/database")),
-            QDir::current().filePath(QStringLiteral("backend/database")),
-            QDir::current().filePath(QStringLiteral("database"))
-        };
+    const QUrl initialUrl = ApplicationSetup::frontendUrl(app);
 
-        QString schemaPath;
-        QString seedPath;
-        for (const QString& directory : databaseDirectories) {
-            const QFileInfo schemaInfo(QDir(directory).filePath(QStringLiteral("schema.sql")));
-            const QFileInfo seedInfo(QDir(directory).filePath(QStringLiteral("seed_data.sql")));
-            if (schemaInfo.isFile() && seedInfo.isFile()) {
-                schemaPath = schemaInfo.absoluteFilePath();
-                seedPath = seedInfo.absoluteFilePath();
-                break;
-            }
-        }
+    BridgeController bridgeController(stageRepository.get(), recordRepository.get(), userRepository.get());
 
-        if (schemaPath.isEmpty() || seedPath.isEmpty()) {
-            qWarning() << "WordSprint: schema.sql and seed_data.sql were not found; skipping database initialization.";
-        } else if (databaseManager->connection().tables().isEmpty()) {
-            if (!databaseManager->initializeDatabase(schemaPath.toStdString(), seedPath.toStdString())) {
-                qWarning() << "WordSprint: Could not initialize the vocabulary database:"
-                           << QString::fromStdString(databaseManager->lastError());
-            }
-        } else {
-            qInfo() << "WordSprint: Existing database tables found; skipping schema and seed initialization.";
-        }
-    }
-
-    vocabularyRepository = std::make_unique<SqliteVocabularyRepository>(*databaseManager);
-
-    QCommandLineParser parser;
-    parser.setApplicationDescription(QStringLiteral("WordSprint Desktop Client"));
-    parser.addHelpOption();
-    parser.addVersionOption();
-
-    QCommandLineOption debugOption(QStringList() << QStringLiteral("d") << QStringLiteral("debug"),
-                                   QStringLiteral("Enable debug mode to live preview from Vite dev server."));
-    parser.addOption(debugOption);
-
-    QCommandLineOption urlOption(QStringList() << QStringLiteral("u") << QStringLiteral("url"),
-                                 QStringLiteral("Custom URL to load in WebEngineView."), QStringLiteral("url"));
-    parser.addOption(urlOption);
-
-    parser.process(app);
-
-    bool isDebug = false;
-#ifdef QT_DEBUG
-    isDebug = true;
-#endif
-    if (parser.isSet(debugOption) || qEnvironmentVariableIsSet("VITE_DEV_SERVER_URL")) {
-        isDebug = true;
-    }
-
-    QUrl initialUrl;
-    if (parser.isSet(urlOption)) {
-        initialUrl = QUrl::fromUserInput(parser.value(urlOption));
-    } else if (isDebug) {
-        const QString devUrl = qEnvironmentVariable("VITE_DEV_SERVER_URL", QStringLiteral("http://localhost:5173"));
-        initialUrl = QUrl(devUrl);
-    } else {
-        if (QFileInfo::exists(QStringLiteral(":/dist/index.html"))) {
-            initialUrl = QUrl(QStringLiteral("qrc:///dist/index.html"));
-        } else {
-            const QString distRelative =
-                    QCoreApplication::applicationDirPath() + QStringLiteral("/../frontend/dist/index.html");
-            const QFileInfo distFile(distRelative);
-            if (distFile.exists()) {
-                initialUrl = QUrl::fromLocalFile(distFile.canonicalFilePath());
-            } else {
-                const QFileInfo localDist(QStringLiteral("frontend/dist/index.html"));
-                if (localDist.exists()) {
-                    initialUrl = QUrl::fromLocalFile(localDist.canonicalFilePath());
-                } else {
-                    initialUrl = QUrl(QStringLiteral("http://localhost:5173"));
-                }
-            }
-        }
-    }
-
-    // Set up BridgeController and QWebChannel
-    BridgeController bridgeController(vocabularyRepository.get());
-    QWebChannel webChannel;
-    webChannel.registerObject(QStringLiteral("bridgeController"), &bridgeController);
-    webChannel.registerObject(QStringLiteral("bridge"), &bridgeController);
-    webChannel.registerObject(QStringLiteral("backend"), &bridgeController);
-
-    // Initialise QQmlApplicationEngine with initialProperties (modern Qt, replacing setContextProperty)
     QQmlApplicationEngine engine;
-    engine.setInitialProperties({
-        {QStringLiteral("initialUrl"), initialUrl},
-        {QStringLiteral("webChannel"), QVariant::fromValue(&webChannel)}
-    });
+    engine.setInitialProperties({{QStringLiteral("initialUrl"), initialUrl},
+                                 {QStringLiteral("bridgeController"), QVariant::fromValue(&bridgeController)}});
 
-    const QUrl url(QStringLiteral("qrc:/qt/qml/WordSprint/qml/Main.qml"));
+    const QUrl url(QStringLiteral("qrc:/qt/qml/WordSprint/src/Main.qml"));
     QObject::connect(
             &engine, &QQmlApplicationEngine::objectCreated, &app,
             [url](QObject *obj, const QUrl &objUrl) {

@@ -1,0 +1,76 @@
+PRAGMA foreign_keys = ON;
+
+INSERT OR IGNORE INTO topics (topic_id, topic_name) VALUES
+    (1, 'Daily Communication'),
+    (2, 'Travel & Culture'),
+    (3, 'Technology & IT'),
+    (4, 'Business & Career'),
+    (5, 'Academic & Science');
+
+INSERT OR IGNORE INTO stages (
+    stage_id, topic_id, cefr_level, time_limit, question_count, pass_score
+) VALUES
+    (1, 1, 'A1', 60, 1, 70),
+    (2, 2, 'A1', 60, 1, 70),
+    (3, 3, 'A1', 60, 1, 70),
+    (4, 4, 'A1', 60, 1, 70),
+    (5, 5, 'A1', 60, 1, 70),
+    (6, 1, 'A2', 60, 1, 105),
+    (7, 2, 'A2', 60, 1, 105),
+    (8, 3, 'A2', 60, 1, 105),
+    (9, 4, 'A2', 60, 1, 105),
+    (10, 5, 'A2', 60, 1, 105),
+    (11, 1, 'B1', 60, 1, 160),
+    (12, 2, 'B1', 60, 1, 160),
+    (13, 3, 'B1', 60, 1, 160),
+    (14, 4, 'B1', 60, 1, 160),
+    (15, 5, 'B1', 60, 1, 160),
+    (16, 1, 'B2', 60, 1, 225),
+    (17, 2, 'B2', 60, 1, 225),
+    (18, 3, 'B2', 60, 1, 225),
+    (19, 4, 'B2', 60, 1, 225),
+    (20, 5, 'B2', 60, 1, 225),
+    (21, 1, 'C1', 60, 1, 330),
+    (22, 2, 'C1', 60, 1, 330),
+    (23, 3, 'C1', 60, 1, 330),
+    (24, 4, 'C1', 60, 1, 330),
+    (25, 5, 'C1', 60, 1, 330),
+    (26, 1, 'C2', 60, 1, 385),
+    (27, 2, 'C2', 60, 1, 385),
+    (28, 3, 'C2', 60, 1, 385),
+    (29, 4, 'C2', 60, 1, 385),
+    (30, 5, 'C2', 60, 1, 385);
+
+INSERT OR IGNORE INTO word_pool (
+    word_id, topic_id, cefr_level, target_word, audio_path, hint_image_path
+) VALUES
+    (1, 1, 'A1', 'hello', NULL, 'storage/images/hello.png'),
+    (2, 2, 'A1', 'ticket', NULL, 'storage/images/ticket.png'),
+    (3, 3, 'A1', 'screen', NULL, 'storage/images/screen.png'),
+    (4, 4, 'A1', 'salary', NULL, 'storage/images/salary.png'),
+    (5, 5, 'A1', 'plant', NULL, 'storage/images/plant.png'),
+    (6, 1, 'A2', 'message', NULL, 'storage/images/message.png'),
+    (7, 2, 'A2', 'journey', NULL, 'storage/images/journey.png'),
+    (8, 3, 'A2', 'download', NULL, 'storage/images/download.png'),
+    (9, 4, 'A2', 'meeting', NULL, 'storage/images/meeting.png'),
+    (10, 5, 'A2', 'energy', NULL, 'storage/images/energy.png'),
+    (11, 1, 'B1', 'explain', NULL, 'storage/images/explain.png'),
+    (12, 2, 'B1', 'luggage', NULL, 'storage/images/luggage.png'),
+    (13, 3, 'B1', 'update', NULL, 'storage/images/update.png'),
+    (14, 4, 'B1', 'colleague', NULL, 'storage/images/colleague.png'),
+    (15, 5, 'B1', 'evidence', NULL, 'storage/images/evidence.png'),
+    (16, 1, 'B2', 'negotiate', NULL, 'storage/images/negotiate.png'),
+    (17, 2, 'B2', 'itinerary', NULL, 'storage/images/itinerary.png'),
+    (18, 3, 'B2', 'encrypt', NULL, 'storage/images/encrypt.png'),
+    (19, 4, 'B2', 'revenue', NULL, 'storage/images/revenue.png'),
+    (20, 5, 'B2', 'hypothesis', NULL, 'storage/images/hypothesis.png'),
+    (21, 1, 'C1', 'articulate', NULL, 'storage/images/articulate.png'),
+    (22, 2, 'C1', 'sustainable', NULL, 'storage/images/sustainable.png'),
+    (23, 3, 'C1', 'vulnerability', NULL, 'storage/images/vulnerability.png'),
+    (24, 4, 'C1', 'appraisal', NULL, 'storage/images/appraisal.png'),
+    (25, 5, 'C1', 'empirical', NULL, 'storage/images/empirical.png'),
+    (26, 1, 'C2', 'conciliatory', NULL, 'storage/images/conciliatory.png'),
+    (27, 2, 'C2', 'confluence', NULL, 'storage/images/confluence.png'),
+    (28, 3, 'C2', 'obfuscate', NULL, 'storage/images/obfuscate.png'),
+    (29, 4, 'C2', 'fiduciary', NULL, 'storage/images/fiduciary.png'),
+    (30, 5, 'C2', 'corroborate', NULL, 'storage/images/corroborate.png');
