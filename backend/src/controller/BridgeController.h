@@ -9,16 +9,21 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+#include <memory>
+
 class RecordRepository;
 class StageRepository;
 class UserRepository;
+namespace ReactFrontend_DomainLayer {
+    class GameSession;
+}
 
 /**
  * @brief BridgeController
  *
  * QObject-derived controller exposed to the React frontend through Qt WebChannel.
  * Implements the communication contract specified in Chapter 2.4 and Chapter 2.5:
- *  - startStage: loads stage and word data through the repositories and returns it to React.
+ *  - startStage: checks the user's stage unlock, loads vocabulary, and returns generated questions to React.
  *  - completeStage: persists a stage record and returns a completion summary.
  *  - processAnswer: evaluates an answer and returns the result to React.
  *  - processMessage: universal dispatcher for JSON actions from the web frontend.
@@ -30,15 +35,15 @@ class BridgeController : public QObject {
 public:
     explicit BridgeController(StageRepository *stageRepository = nullptr, RecordRepository *recordRepository = nullptr,
                               UserRepository *userRepository = nullptr, QObject *parent = nullptr);
-    ~BridgeController() override = default;
+    ~BridgeController() override;
 
     bool isReady() const { return m_isReady; }
 
 public slots:
     /**
      * @brief Start a game stage.
-     * @param requestJson JSON string, e.g. { "stageId": 1 }
-     * @return JSON string response containing stage parameters and word items list.
+     * @param requestJson JSON string, e.g. { "stageId": 1, "userId": 1 }
+     * @return JSON string response containing stage parameters and a complete generated question list.
      */
     Q_INVOKABLE QString startStage(const QString &requestJson);
 
@@ -91,6 +96,7 @@ private:
     StageRepository *m_stageRepository = nullptr;
     RecordRepository *m_recordRepository = nullptr;
     UserRepository *m_userRepository = nullptr;
+    std::unique_ptr<ReactFrontend_DomainLayer::GameSession> m_gameSession;
     QHash<int, int> m_unlockedStagesByUser;
 
     QJsonObject parseJson(const QString &jsonStr) const;

@@ -1,5 +1,9 @@
 #include "BridgeController.h"
 
+#include "gameplay/AudioQuestion.h"
+#include "gameplay/FillBlankQuestion.h"
+#include "gameplay/GameSession.h"
+#include "gameplay/ScrambleQuestion.h"
 #include "models/CEFRLevel.h"
 #include "models/StageRecordDTO.h"
 #include "models/StageStatusDTO.h"
@@ -15,12 +19,15 @@
 
 #include <algorithm>
 #include <map>
+#include <exception>
 #include <vector>
 
 BridgeController::BridgeController(StageRepository *stageRepository, RecordRepository *recordRepository,
                                    UserRepository *userRepository, QObject *parent) :
     QObject(parent), m_stageRepository(stageRepository), m_recordRepository(recordRepository),
     m_userRepository(userRepository) {}
+
+BridgeController::~BridgeController() = default;
 
 namespace {
     QVariantMap userToVariant(const User &user) {
@@ -60,15 +67,33 @@ QString BridgeController::buildErrorResponse(const QString &errorMessage) const 
 }
 
 QString BridgeController::startStage(const QString &requestJson) {
+    const auto startError = [this](const QString &code, const QString &message) {
+        QVariantMap response;
+        response[QStringLiteral("status")] = QStringLiteral("error");
+        response[QStringLiteral("code")] = code;
+        response[QStringLiteral("message")] = message;
+        return buildResponse(response);
+    };
+
     if (m_stageRepository == nullptr) {
-        return buildErrorResponse(QStringLiteral("Stage repository is unavailable"));
+        return startError(QStringLiteral("STAGE_REPOSITORY_UNAVAILABLE"),
+                          QStringLiteral("Stage repository is unavailable"));
     }
 
     const QString trimmedRequest = requestJson.trimmed();
     int stageId = 0;
+    int userId = 0;
     if (trimmedRequest.startsWith(QLatin1Char('{'))) {
-        const QJsonObject request = parseJson(trimmedRequest);
-        stageId = request.value(QStringLiteral("stageId")).toInt();
+        const QJsonObject rootRequest = parseJson(trimmedRequest);
+        if (rootRequest.isEmpty()) {
+            return startError(QStringLiteral("INVALID_REQUEST"), QStringLiteral("The start-stage payload is invalid"));
+        }
+        const QJsonObject payload = rootRequest.value(QStringLiteral("payload")).isObject()
+                                            ? rootRequest.value(QStringLiteral("payload")).toObject()
+                                            : rootRequest;
+        stageId = payload.value(QStringLiteral("stageId")).toInt(
+                rootRequest.value(QStringLiteral("stageId")).toInt());
+        userId = payload.value(QStringLiteral("userId")).toInt(rootRequest.value(QStringLiteral("userId")).toInt());
     } else {
         bool ok = false;
         stageId = trimmedRequest.toInt(&ok);
@@ -77,38 +102,109 @@ QString BridgeController::startStage(const QString &requestJson) {
         }
     }
     if (stageId <= 0) {
-        return buildErrorResponse(QStringLiteral("A valid stageId is required"));
+        return startError(QStringLiteral("INVALID_STAGE_ID"), QStringLiteral("A valid stageId is required"));
+    }
+    if (userId <= 0) {
+        return startError(QStringLiteral("USER_ID_REQUIRED"),
+                          QStringLiteral("A valid userId is required to check stage unlock status"));
     }
 
     const std::optional<Stage> stage = m_stageRepository->getStageById(stageId);
     if (!stage.has_value()) {
-        return buildErrorResponse(QStringLiteral("Stage was not found"));
+        return startError(QStringLiteral("STAGE_NOT_FOUND"), QStringLiteral("The requested stage was not found"));
+    }
+
+    const std::optional<std::vector<StageStatusDTO>> stageStatuses =
+            m_stageRepository->getStagesWithUnlockStatus(userId);
+    if (!stageStatuses.has_value()) {
+        return startError(QStringLiteral("USER_PROGRESS_UNAVAILABLE"),
+                          QStringLiteral("Could not load this user's stage unlock status"));
+    }
+    const auto stageStatus = std::find_if(stageStatuses->begin(), stageStatuses->end(),
+                                          [stageId](const StageStatusDTO &status) {
+                                              return status.stage.stage_id == stageId;
+                                          });
+    if (stageStatus == stageStatuses->end()) {
+        return startError(QStringLiteral("STAGE_STATUS_NOT_FOUND"),
+                          QStringLiteral("The requested stage has no unlock status for this user"));
+    }
+    if (!stageStatus->is_unlocked) {
+        return startError(QStringLiteral("STAGE_LOCKED"),
+                          QStringLiteral("This stage is locked; pass any stage at the previous CEFR level first"));
     }
 
     const std::optional<CEFRLevel> level = cefrLevelFromName(stage->cefr_level);
     if (!level.has_value()) {
-        return buildErrorResponse(QStringLiteral("Stage has an unsupported CEFR level"));
+        return startError(QStringLiteral("UNSUPPORTED_CEFR_LEVEL"),
+                          QStringLiteral("The stage has an unsupported CEFR level"));
+    }
+    if (stage->question_count <= 0 || stage->time_limit <= 0) {
+        return startError(QStringLiteral("INVALID_STAGE_CONFIGURATION"),
+                          QStringLiteral("The stage must define a positive question count and time limit"));
     }
 
     const std::vector<WordItem> wordItems =
             m_stageRepository->getRandomWords(stage->topic_id, *level, stage->question_count);
-    if (wordItems.empty()) {
-        return buildErrorResponse(QStringLiteral("No vocabulary is available for this stage"));
+    if (wordItems.size() < static_cast<std::size_t>(stage->question_count)) {
+        return startError(QStringLiteral("INSUFFICIENT_VOCABULARY"),
+                          QStringLiteral("This stage does not have enough words for its configured question count"));
     }
 
     QVariantList words;
-    for (const WordItem &word: wordItems) {
-        QVariantMap item;
-        item[QStringLiteral("word_id")] = word.word_id;
-        item[QStringLiteral("topic_id")] = word.topic_id;
-        item[QStringLiteral("cefr_level")] = QString::fromStdString(word.cefr_level);
-        item[QStringLiteral("target_word")] = QString::fromStdString(word.target_word);
-        item[QStringLiteral("hint_text")] = QString();
-        item[QStringLiteral("image_path")] = QString::fromStdString(word.hint_image_path);
-        item[QStringLiteral("audio_path")] =
-                word.audio_path.has_value() ? QVariant(QString::fromStdString(*word.audio_path)) : QVariant();
-        words.append(item);
+    QVariantList questions;
+    std::unique_ptr<ReactFrontend_DomainLayer::GameSession> newSession;
+    try {
+        newSession = std::make_unique<ReactFrontend_DomainLayer::GameSession>();
+        newSession->startSession(*stage, wordItems);
+        const auto &generatedQuestions = newSession->getQuestions();
+        if (generatedQuestions.size() != static_cast<std::size_t>(stage->question_count)) {
+            return startError(QStringLiteral("QUESTION_COUNT_MISMATCH"),
+                              QStringLiteral("The complete question set could not be initialized"));
+        }
+
+        for (const auto &question: generatedQuestions) {
+            const WordItem &word = question->getWordItem();
+            const auto *scrambleQuestion =
+                    dynamic_cast<const ReactFrontend_DomainLayer::ScrambleQuestion *>(question.get());
+            const auto *fillBlankQuestion =
+                    dynamic_cast<const ReactFrontend_DomainLayer::FillBlankQuestion *>(question.get());
+            const auto *audioQuestion = dynamic_cast<const ReactFrontend_DomainLayer::AudioQuestion *>(question.get());
+
+            QString questionType;
+            if (scrambleQuestion != nullptr) {
+                questionType = QStringLiteral("ScrambleQuestion");
+            } else if (fillBlankQuestion != nullptr) {
+                questionType = QStringLiteral("FillBlankQuestion");
+            } else if (audioQuestion != nullptr) {
+                questionType = QStringLiteral("AudioQuestion");
+            }
+
+            QVariantMap item;
+            item[QStringLiteral("word_id")] = word.word_id;
+            item[QStringLiteral("topic_id")] = word.topic_id;
+            item[QStringLiteral("cefr_level")] = QString::fromStdString(word.cefr_level);
+            item[QStringLiteral("target_word")] = QString::fromStdString(word.target_word);
+            item[QStringLiteral("hint_text")] = QString();
+            item[QStringLiteral("image_path")] = QString::fromStdString(question->getHintImage());
+            item[QStringLiteral("audio_path")] =
+                    word.audio_path.has_value() ? QVariant(QString::fromStdString(*word.audio_path)) : QVariant();
+            item[QStringLiteral("questionType")] = questionType;
+            item[QStringLiteral("prompt")] = QString::fromStdString(question->generatePrompt());
+            if (audioQuestion != nullptr) {
+                item[QStringLiteral("auto_play")] = true;
+                item[QStringLiteral("max_replays")] = audioQuestion->getMaxReplays();
+                item[QStringLiteral("remaining_replays")] = audioQuestion->getRemainingReplays();
+            }
+            words.append(item);
+            questions.append(item);
+        }
+    } catch (const std::exception &error) {
+        qWarning() << "BridgeController::startStage could not generate questions:" << error.what();
+        return startError(QStringLiteral("QUESTION_GENERATION_FAILED"),
+                          QStringLiteral("Could not initialize a complete question set with the available resources"));
     }
+
+    m_gameSession = std::move(newSession);
 
     QVariantMap response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
@@ -116,8 +212,9 @@ QString BridgeController::startStage(const QString &requestJson) {
     response[QStringLiteral("topicId")] = stage->topic_id;
     response[QStringLiteral("cefrLevel")] = QString::fromStdString(stage->cefr_level);
     response[QStringLiteral("timeLimit")] = stage->time_limit;
-    response[QStringLiteral("questionCount")] = words.size();
+    response[QStringLiteral("questionCount")] = questions.size();
     response[QStringLiteral("words")] = words;
+    response[QStringLiteral("questions")] = questions;
 
     emit stageStarted(stage->stage_id);
     return buildResponse(response);
