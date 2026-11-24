@@ -92,6 +92,268 @@ Trong mỗi màn chơi, hệ thống phân phối ngẫu nhiên cân bằng (Bag
     \end{itemize}
 \end{itemize}
 
+\subsection{Sơ đồ Use Case}
+\label{subsec:use_case_diagram}
+Sơ đồ ở Hình~\ref{fig:use_case_diagram} mô tả tác nhân duy nhất là Người chơi tương tác trực tiếp với hệ thống cục bộ WordSprint. Sơ đồ bao quát chín nhóm chức năng đã nêu trong các yêu cầu nghiệp vụ; các quan hệ \texttt{<<include>>} và \texttt{<<extend>>} thể hiện những hành vi dùng chung và hành vi phát sinh theo điều kiện.
+
+\begin{figure}[!ht]
+    \centering
+    \resizebox{\textwidth}{!}{%
+    \begin{tikzpicture}[
+        usecase/.style={ellipse, draw=black, line width=0.8pt, fill=white,
+            align=center, text width=5.5cm, minimum height=1.15cm,
+            inner sep=3pt, font=\small},
+        relation/.style={->, dashed, line width=0.7pt},
+        association/.style={line width=0.6pt}
+    ]
+        % System boundary
+        \draw[line width=0.8pt] (0,-2.65) rectangle (17.4,13.9);
+        \node[anchor=south, font=\bfseries, fill=white, inner sep=2pt] at (8.7,13.9)
+            {Hệ thống WordSprint (cục bộ)};
+
+        % Associations from the single actor to the user-facing use cases
+        \draw[association] (-1.08,7.55) -- (2.7,13.2);
+        \draw[association] (-1.08,7.55) -- (2.7,11.3);
+        \draw[association] (-1.08,7.55) -- (2.7,9.1);
+        \draw[association] (-1.08,7.55) -- (2.7,6.9);
+        \draw[association] (-1.08,7.55) -- (2.7,4.7);
+        \draw[association] (-1.08,7.55) -- (2.7,2.5);
+        \draw[association] (-1.08,7.55) -- (2.7,0.3);
+        \draw[association] (-1.08,7.55) -- (2.7,-1.9);
+
+        % Actor: Player is the only external actor
+        \draw[line width=0.8pt] (-1.55,8.12) circle (0.23);
+        \draw[line width=0.8pt] (-1.55,7.89) -- (-1.55,7.05);
+        \draw[line width=0.8pt] (-1.55,7.62) -- (-1.08,7.55);
+        \draw[line width=0.8pt] (-1.55,7.62) -- (-1.98,7.25);
+        \draw[line width=0.8pt] (-1.55,7.05) -- (-1.95,6.48);
+        \draw[line width=0.8pt] (-1.55,7.05) -- (-1.15,6.48);
+        \node[anchor=east, align=right, font=\small] at (-1.9,8.12)
+            {Người chơi};
+
+        % Nine functional groups
+        \node[usecase] (profile) at (5.5,13.2)
+            {Quản lý hồ sơ người chơi\\Chọn / Tạo hồ sơ};
+        \node[usecase] (start) at (5.5,11.3)
+            {Bắt đầu màn chơi\\Chọn bậc CEFR và chủ đề đã mở khóa};
+        \node[usecase] (puzzle) at (5.5,9.1)
+            {Giải câu đố\\Scramble / Fill-in-the-Blank / Audio};
+        \node[usecase] (submit) at (5.5,6.9)
+            {Nộp đáp án (Submit)};
+        \node[usecase] (navigate) at (5.5,4.7)
+            {Điều hướng màn hình và câu hỏi};
+        \node[usecase] (audio) at (5.5,2.5)
+            {Điều khiển âm thanh\\BGM / SFX};
+        \node[usecase] (progress) at (5.5,0.3)
+            {Cập nhật tiến độ và mở khóa bậc CEFR\\Khi \texttt{score >= pass\_score}};
+        \node[usecase] (leaderboard) at (5.5,-1.9)
+            {Xem bảng xếp hạng\\Per-Stage Top 10 / Overall Top 10};
+
+        % Included and extending use cases
+        \node[usecase] (randomset) at (14.25,11.3)
+            {Sinh bộ câu hỏi ngẫu nhiên};
+        \node[usecase] (pause) at (14.25,10.15)
+            {Tạm dừng / Tiếp tục màn chơi\\(Pause / Resume)};
+        \node[usecase] (replay) at (14.25,8.05)
+            {Nghe lại âm thanh Audio};
+        \node[usecase] (scoring) at (14.25,6.9)
+            {Tính điểm và Streak};
+
+        % Include arrows point to the included use case.
+        \draw[relation] (start.east) -- (randomset.west)
+            node[midway, above, fill=white, inner sep=1pt] {\texttt{<<include>>}};
+        \draw[relation] (submit.east) -- (scoring.west)
+            node[midway, above, fill=white, inner sep=1pt] {\texttt{<<include>>}};
+
+        % Extend arrows point from the optional behavior to the base use case.
+        \draw[relation] (pause.west) -- (puzzle.east)
+            node[midway, above, sloped, fill=white, inner sep=1pt] {\texttt{<<extend>>}};
+        \draw[relation] (replay.west) -- (puzzle.east)
+            node[midway, below, sloped, fill=white, inner sep=1pt] {\texttt{<<extend>>}};
+    \end{tikzpicture}%
+    }
+    \caption{Sơ đồ Use Case tổng quát của WordSprint}
+    \label{fig:use_case_diagram}
+\end{figure}
+
+Trong sơ đồ, \texttt{Tạm dừng / Tiếp tục} mở rộng luồng giải câu đố khi Người chơi chọn tạm dừng; \texttt{Nghe lại âm thanh Audio} chỉ phát sinh khi câu hỏi thuộc chế độ Audio. Quan hệ \texttt{<<include>>} từ \texttt{Bắt đầu màn chơi} tới \texttt{Sinh bộ câu hỏi ngẫu nhiên} và từ \texttt{Nộp đáp án} tới \texttt{Tính điểm và Streak} lần lượt biểu diễn các bước bắt buộc của hai luồng.
+
+\subsection{Bảng đặc tả kịch bản nghiệp vụ}
+\label{subsec:business_use_case_specs}
+Các thông số màn chơi theo bậc CEFR trong Bảng~\ref{tab:cefr_stage_parameters} được lấy từ tài liệu thiết kế cơ chế trò chơi. Bảng~\ref{tab:business_use_case_specs} đặc tả chín kịch bản nghiệp vụ; các trường hợp không được quy định trong tài liệu nguồn được ghi rõ tại luồng thay thế / ngoại lệ.
+
+\begin{table}[!ht]
+    \centering
+    \caption{Thông số màn chơi theo bậc CEFR}
+    \label{tab:cefr_stage_parameters}
+    \begin{tabularx}{\textwidth}{|C{1.5cm}|C{2.5cm}|C{2.6cm}|C{3.0cm}|C{2.5cm}|}
+        \hline
+        \thcell{Bậc CEFR} & \thcell{\code{question\_count}} & \thcell{\code{time\_limit} (giây)} & \thcell{Điểm cơ bản mỗi từ} & \thcell{\code{pass\_score}} \\ \hline
+        A1 & 10 & 90 & 10 & 70 \\ \hline
+        A2 & 10 & 100 & 15 & 105 \\ \hline
+        B1 & 12 & 120 & 20 & 160 \\ \hline
+        B2 & 12 & 135 & 25 & 225 \\ \hline
+        C1 & 15 & 165 & 30 & 330 \\ \hline
+        C2 & 15 & 180 & 35 & 385 \\ \hline
+    \end{tabularx}
+\end{table}
+\FloatBarrier
+
+\begin{xltabular}{\textwidth}{|L{3.3cm}|Y|}
+\caption{Đặc tả kịch bản nghiệp vụ WordSprint}
+\label{tab:business_use_case_specs}
+\\
+\hline
+\thcell{Trường đặc tả} & \thcell{Nội dung} \\
+\hline
+\endfirsthead
+\hline
+\thcell{Trường đặc tả} & \thcell{Nội dung} \\
+\hline
+\endhead
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-01: Quản lý hồ sơ người chơi} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Chọn một hồ sơ đã có hoặc tạo hồ sơ mới; khi chọn / chuyển hồ sơ, nạp tiến độ cá nhân, tùy chọn âm thanh, điểm cao và lịch sử chơi gắn với hồ sơ. \\ \hline
+Tiền điều kiện & Ứng dụng WordSprint đang chạy cục bộ. Với thao tác chọn, hồ sơ cần tồn tại; với thao tác tạo, Người chơi cung cấp username. \\ \hline
+Hậu điều kiện & Hồ sơ được chọn trở thành \code{user\_id} đang hoạt động trong trạng thái cục bộ của ứng dụng; tiến độ và các tùy chọn âm thanh của hồ sơ được nạp. Hồ sơ mới có các chủ đề A1 mở khóa mặc định. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Người chơi chọn hồ sơ có sẵn hoặc nhập username để tạo hồ sơ.
+    \item Với hồ sơ mới, hệ thống kiểm tra username duy nhất theo yêu cầu quản lý hồ sơ hiện có trong Chương 1.
+    \item Hệ thống đặt \code{user\_id} được chọn làm hồ sơ hoạt động và nạp các bậc CEFR đã mở khóa, tùy chọn \code{bgm\_enabled}, \code{sfx\_enabled}, \code{bgm\_volume}, \code{sfx\_volume}, điểm cao cá nhân và lịch sử chơi.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ & Nếu username đã được dùng, yêu cầu tạo hồ sơ không thỏa điều kiện duy nhất nêu trong Chương 1; tài liệu thiết kế cơ chế không quy định nội dung thông báo hoặc bước xử lý tiếp theo. \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-02: Bắt đầu màn chơi} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Chọn một bậc CEFR đã mở khóa và một chủ đề; hệ thống lấy ngẫu nhiên số từ vựng theo \code{question\_count} từ \code{word\_pool} khớp \code{(topic\_id, cefr\_level)} rồi khởi tạo phiên chơi. Thông số từng bậc được nêu tại Bảng~\ref{tab:cefr_stage_parameters}. \\ \hline
+Tiền điều kiện & Có hồ sơ hoạt động; màn thuộc bậc CEFR đã mở khóa; kho từ có đủ số mục khớp điều kiện để tạo bộ câu hỏi theo \code{question\_count}. \\ \hline
+Hậu điều kiện & Phiên chơi được khởi tạo với \code{score = 0}, \code{streak = 0}, \code{time\_remaining = time\_limit}; bộ đếm thời gian bắt đầu chạy. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Người chơi chọn bậc CEFR đã mở khóa và chủ đề / màn tương ứng.
+    \item Hệ thống kiểm tra điều kiện mở khóa và đọc \code{question\_count}, \code{time\_limit}, \code{pass\_score} của màn.
+    \item Hệ thống lấy ngẫu nhiên \code{question\_count} từ trong \code{word\_pool} theo cặp \code{(topic\_id, cefr\_level)}.
+    \item Hệ thống chuẩn bị tập chế độ câu đố theo bag randomization và khởi tạo trạng thái phiên chơi.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ &
+\begin{itemize}[nosep,leftmargin=*]
+    \item Nếu bậc CEFR chưa mở khóa, màn không được khởi tạo theo điều kiện chỉ chọn bậc đã mở khóa; tài liệu nguồn không quy định nội dung thông báo cho yêu cầu không hợp lệ.
+    \item Nếu số từ khớp truy vấn nhỏ hơn \code{question\_count}, không thể tạo bộ câu hỏi đủ số lượng theo đặc tả. Tài liệu không quy định cách bổ sung từ, giảm số câu hoặc thông báo lỗi.
+\end{itemize} \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-03: Thực hiện ba chế độ câu đố} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Thực hiện câu hỏi được phân vào một trong ba chế độ \code{Scramble}, \code{Fill-in-the-Blank} hoặc \code{Audio}, theo bậc CEFR và tài nguyên của từ vựng. \\ \hline
+Tiền điều kiện & Có phiên chơi đang hoạt động, từ vựng được chọn và chế độ câu đố được sinh cho câu hỏi hiện tại. \\ \hline
+Hậu điều kiện & Prompt tương ứng chế độ được hiển thị hoặc phát; trạng thái câu hỏi sẵn sàng để Người chơi nộp đáp án. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Hệ thống tạo danh sách chế độ phân bố cân bằng theo \code{question\_count} rồi xáo trộn danh sách (bag randomization), tránh chuỗi dài liên tiếp cùng loại prompt.
+    \item Với \code{Scramble}, hệ thống xáo chữ cái từng từ trong cụm từ, giữ nguyên khoảng trắng, lặp việc xáo cho đến khi \(\text{shuffled} \ne \text{target\_word}\), rồi hiển thị ảnh gợi ý.
+    \item Với \code{Fill-in-the-Blank}, hệ thống tính \(\text{hidden\_count}=\text{clamp}(\text{round}(L \times r), 1, L-1)\), trong đó \(L\) là số ký tự chữ cái; \(r=0.35\) cho A1--A2, \(r=0.50\) cho B1--B2 và \(r=0.65\) cho C1--C2. Ảnh gợi ý được hiển thị.
+    \item Với \code{Audio}, hệ thống tự phát clip một lần miễn phí khi câu hỏi tải; nếu được phân chế độ này, ảnh gợi ý bị ẩn.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ &
+\begin{itemize}[nosep,leftmargin=*]
+    \item \code{Fill-in-the-Blank}: không ẩn khoảng trắng, dấu gạch nối hoặc dấu nháy đơn; với A1--A2, giữ chỉ số 0 (chữ cái đầu tiên) luôn hiển thị. Tỷ lệ ẩn lần lượt là 35\%, 50\%, 65\% theo các nhóm CEFR nêu trên.
+    \item \code{Audio}: chỉ phân chế độ này cho từ có \code{audio\_path != NULL}; nếu thiếu audio asset, chuyển sang \code{Scramble} hoặc \code{Fill-in-the-Blank}. Số lượt nghe lại thủ công là 3 cho A1--A2, 2 cho B1--B2 và 1 cho C1--C2, ngoài một lượt tự phát miễn phí; khi hết lượt, nút nghe lại bị vô hiệu hóa.
+    \item Quy tắc yêu cầu hiển thị ảnh trong \code{Scramble} và \code{Fill-in-the-Blank}, nhưng tài liệu không quy định cách xử lý khi thiếu \code{hint\_image\_path} hoặc tệp ảnh không truy cập được.
+\end{itemize} \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-04: Nộp đáp án (Submit)} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Gửi đáp án của câu hỏi hiện tại; hệ thống kiểm tra đáp án, cập nhật điểm và streak, rồi chuyển sang câu chưa giải kế tiếp hoặc kết thúc lượt chơi. \\ \hline
+Tiền điều kiện & Phiên chơi đang hoạt động, bộ đếm chưa hết giờ và câu hỏi hiện tại chưa ở trạng thái \code{Solved}. \\ \hline
+Hậu điều kiện & Nếu đúng, câu hỏi được đánh dấu đã giải và điểm / streak được cập nhật; nếu sai, câu trả lời nhận 0 điểm và streak về 0. Khi hoàn thành câu cuối hoặc hết giờ, luồng kết quả chuyển sang UC-08. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Người chơi nhập đáp án và nhấn \code{Submit}.
+    \item Hệ thống kiểm tra đáp án hiện tại.
+    \item Với đáp án đúng, streak được tăng; nếu streak sau cập nhật là \(1 \le k \le 2\), cộng \(B\) điểm; nếu \(k \ge 3\), cộng \(B+2\) điểm. \(B\) là điểm cơ bản mỗi từ theo bậc CEFR trong Bảng~\ref{tab:cefr_stage_parameters}.
+    \item Hệ thống đánh dấu câu hỏi đã giải và tự chuyển đến câu chưa giải tiếp theo.
+    \item Khi hoàn thành câu cuối, bộ đếm dừng và hệ thống chuyển sang UC-08 để ghi nhận kết quả.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ &
+\begin{itemize}[nosep,leftmargin=*]
+    \item Đáp án sai: cộng 0 điểm, đặt \(k=0\); theo yêu cầu nghiệp vụ hiện có, ô nhập chuyển đỏ, phát hiệu ứng rung và chọn sẵn nội dung để nhập lại.
+    \item Bỏ qua câu: tài liệu cơ chế quy định 0 điểm và streak về 0; tài liệu không xác định thao tác giao diện nào được tính là bỏ qua.
+    \item Hết giờ: phiên kết thúc và chuyển sang UC-08 để lưu điểm đã tích lũy.
+\end{itemize} \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-05: Điều hướng chức năng và câu hỏi} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Di chuyển giữa các chức năng và các câu hỏi chưa hoàn thành trong phiên chơi. \\ \hline
+Tiền điều kiện & Phiên chơi đang hoạt động; còn câu hỏi chưa giải để điều hướng tới. \\ \hline
+Hậu điều kiện & Câu hỏi được chọn trở thành câu hỏi hiện tại; bộ đếm vẫn chạy trong khi phiên chưa bị tạm dừng hoặc kết thúc. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Người chơi dùng \code{Next}, \code{Previous} hoặc chọn thẻ câu hỏi trạng thái \code{Queued}.
+    \item Hệ thống chuyển đến câu chưa giải được chọn; các câu \code{Solved} bị bỏ qua và không thể chọn lại.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ & Nếu không còn câu ở trạng thái \code{Queued}, tài liệu không quy định hành vi cho thao tác Next / Previous. Quy tắc streak khi bỏ qua câu được nêu tại UC-04; tài liệu không xác định việc chỉ điều hướng có được tính là bỏ qua hay không, cũng không liệt kê luồng chuyển giữa các màn hình chức năng ngoài màn chơi. \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-06: Tạm dừng và tiếp tục màn chơi (Pause / Resume)} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Tạm dừng phiên chơi và bộ đếm thời gian theo thao tác \code{PAUSE}; tiếp tục đếm từ thời gian còn lại khi Người chơi chọn Resume. \\ \hline
+Tiền điều kiện & Với Pause, phiên đang chạy; với Resume, phiên đang ở trạng thái tạm dừng và chưa kết thúc. \\ \hline
+Hậu điều kiện & Khi tạm dừng, bộ đếm không giảm; khi tiếp tục, bộ đếm tiếp tục từ giá trị \code{time\_remaining} đã giữ lại. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Người chơi nhấn \code{PAUSE}; hệ thống dừng bộ đếm đếm ngược.
+    \item Người chơi chọn Resume; hệ thống tiếp tục bộ đếm từ thời gian còn lại.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ & Chương 1 hiện quy định Pause thủ công bất cứ lúc nào. Tài liệu thiết kế cơ chế chỉ nêu tùy chọn tạm dừng bộ đếm khi clip Audio đang phát; tài liệu đó không đặc tả Pause / Resume thủ công hoặc cách xử lý thao tác sau khi phiên đã kết thúc. \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-07: Điều khiển âm thanh (BGM / SFX / phát lại Audio)} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Điều khiển nhạc nền và hiệu ứng âm thanh theo hồ sơ; nghe lại clip của câu hỏi Audio trong giới hạn lượt theo CEFR. \\ \hline
+Tiền điều kiện & Có hồ sơ hoạt động để nạp các trường âm thanh. Để nghe lại, câu hỏi hiện tại ở chế độ Audio, có audio asset và còn lượt nghe thủ công. \\ \hline
+Hậu điều kiện & Các trạng thái âm thanh đang sử dụng theo hồ sơ; mỗi thao tác nghe lại thủ công làm giảm số lượt còn lại. Các trường cài đặt gắn với \code{user\_id}. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Hệ thống nạp \code{bgm\_enabled}, \code{sfx\_enabled}, \code{bgm\_volume}, \code{sfx\_volume} khi hồ sơ được chọn.
+    \item Người chơi bật / tắt BGM, SFX hoặc điều chỉnh âm lượng theo yêu cầu tùy chỉnh âm thanh hiện có trong Chương 1.
+    \item Trong câu hỏi Audio, Người chơi chọn nút nghe lại; hệ thống phát clip nếu còn lượt trong giới hạn của bậc CEFR.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ & Audio tự phát một lần miễn phí; số lượt nghe lại thủ công là 3 (A1--A2), 2 (B1--B2), 1 (C1--C2). Khi hết lượt, nút nghe lại bị vô hiệu hóa. Chương 1 quy định thanh âm lượng 0--100 và phát thử khi kéo; tài liệu thiết kế cơ chế chỉ liệt kê các trường âm lượng, không quy định khoảng giá trị, phát thử hoặc thời điểm lưu thay đổi. \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-08: Lưu kết quả, cập nhật tiến độ và mở khóa bậc CEFR} \\ \hline
+Tác nhân & Người chơi khởi tạo lượt chơi; việc lưu kết quả và cập nhật tiến độ do hệ thống thực hiện khi lượt chơi kết thúc. \\ \hline
+Mô tả & Ghi một lượt chơi đã kết thúc vào \code{stage\_records}; nếu \code{score >= pass\_score}, mở khóa tất cả chủ đề ở bậc CEFR kế tiếp. \\ \hline
+Tiền điều kiện & Lượt chơi kết thúc do hoàn thành câu hỏi cuối hoặc \code{time\_limit} hết; hồ sơ và màn chơi của lượt chơi được xác định. \\ \hline
+Hậu điều kiện & Bản ghi gồm \code{score}, \code{completion\_time}, \code{played\_at} được lưu gắn với \code{user\_id}. Khi đạt ngưỡng, tất cả chủ đề ở bậc \(N+1\) được mở khóa; A1 mở mặc định cho hồ sơ mới. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Khi hoàn thành câu hỏi cuối, đồng hồ dừng; \code{completion\_time = time\_limit - remaining\_time}.
+    \item Khi thời gian về 0, phiên kết thúc ngay và điểm đã tích lũy được ghi nhận.
+    \item Hệ thống lưu lượt chơi vào \code{stage\_records} với \code{score}, \code{completion\_time} và \code{played\_at}.
+    \item Nếu \code{score >= pass\_score} ở bậc CEFR \(N\), hệ thống mở khóa mọi chủ đề ở bậc \(N+1\); tiến độ được suy ra từ các bản ghi đạt ngưỡng của hồ sơ.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ &
+\begin{itemize}[nosep,leftmargin=*]
+    \item Nếu \code{score < pass\_score}, kết quả vẫn được lưu nhưng không mở khóa bậc tiếp theo.
+    \item Khi timeout, tài liệu quy định lưu điểm đã tích lũy nhưng không nêu công thức / giá trị cụ thể của \code{completion\_time} trong trường hợp này.
+    \item Tài liệu nêu các bậc từ A1 đến C2 nhưng không quy định bậc mở tiếp theo sau khi vượt C2.
+    \item Mục 1 của tài liệu thiết kế gắn việc cập nhật cả hai bảng xếp hạng với điều kiện đạt \code{pass\_score}; mục 6 quy định mọi lượt hoàn thành đủ điều kiện Per-Stage Top 10. UC-09 giữ nguyên quy tắc chi tiết tại mục 6; tài liệu không nói rõ điều kiện cập nhật Overall khi điểm dưới ngưỡng.
+\end{itemize} \\ \hline
+
+\textbf{Mã \& Tên Use Case} & \textbf{UC-09: Xem bảng xếp hạng} \\ \hline
+Tác nhân & Người chơi. \\ \hline
+Mô tả & Xem bảng xếp hạng thành tích theo từng màn (Per-Stage Top 10) hoặc tổng thể (Overall Top 10), truy vấn từ \code{stage\_records}. \\ \hline
+Tiền điều kiện & Có dữ liệu lượt chơi đã lưu để lập thứ hạng; tài liệu không quy định nội dung giao diện khi chưa có bản ghi. \\ \hline
+Hậu điều kiện & Bảng được hiển thị theo thứ tự xếp hạng tương ứng; Per-Stage cho phép một người chơi có nhiều vị trí, Overall giới hạn mỗi người chơi tối đa một vị trí. \\ \hline
+Luồng sự kiện chính &
+\begin{enumerate}[nosep,leftmargin=*]
+    \item Người chơi chọn Per-Stage Top 10 hoặc Overall Top 10.
+    \item Với Per-Stage, mọi lượt chơi hoàn thành đủ điều kiện; sắp xếp theo \code{score DESC, completion\_time ASC, played\_at ASC}.
+    \item Với Overall, chọn một lượt có điểm cao nhất cho mỗi người chơi ở từng màn (xếp lượt theo \code{score DESC, completion\_time ASC}), cộng các điểm tốt nhất và tổng \code{completion\_time}.
+    \item Sắp xếp Overall theo \code{overall\_score DESC}, sau đó \code{total\_time ASC}; hiển thị tối đa 10 vị trí.
+\end{enumerate} \\ \hline
+Luồng thay thế / Ngoại lệ & Nếu hai kết quả trùng các khóa xếp hạng đã nêu, tài liệu không quy định khóa phá hòa tiếp theo cho Overall; trường hợp không có lượt chơi cũng chưa có quy tắc hiển thị riêng. \\ \hline
+\end{xltabular}
+
 \section{Yêu cầu phi chức năng và công nghệ triển khai}
 \label{sec:non_functional_and_tech}
 
@@ -128,8 +390,8 @@ Công cụ vẽ sơ đồ phân tích thiết kế & Draw.io & Xây dựng hệ 
 \label{sec:structure}
 Ngoài phần mở đầu, phần kết luận và phụ lục phân công công việc, nội dung chính của báo cáo được tổ chức thành 4 chương:
 \begin{itemize}
-    \item Chương 1 -- Khảo sát \& Phân tích yêu cầu nghiệp vụ: Trình bày khái quát thực trạng học từ vựng tiếng Anh, bài toán đặt ra, mục tiêu và phạm vi đề tài, phân tích chi tiết các yêu cầu nghiệp vụ của trò chơi cùng các yêu cầu phi chức năng và công nghệ triển khai.
-    \item Chương 2 -- Thiết kế hệ thống \& Biểu đồ UML: Trình bày mô hình hóa chức năng thông qua sơ đồ Use Case kèm bảng đặc tả kịch bản, sơ đồ tuần tự Sequence Diagram cho các luồng nghiệp vụ chính, sơ đồ lớp Class Diagram phân tầng, mô hình cơ sở dữ liệu quan hệ ERD, đặc tả giao tiếp giữa giao diện và tầng xử lý C++ cùng thiết kế luồng trải nghiệm người dùng.
+    \item Chương 1 -- Khảo sát \& Phân tích yêu cầu nghiệp vụ: Trình bày khái quát thực trạng học từ vựng tiếng Anh, bài toán đặt ra, mục tiêu và phạm vi đề tài, phân tích chi tiết các yêu cầu nghiệp vụ, sơ đồ Use Case và bảng đặc tả kịch bản nghiệp vụ của trò chơi, cùng các yêu cầu phi chức năng và công nghệ triển khai.
+    \item Chương 2 -- Thiết kế hệ thống \& Biểu đồ UML: Trình bày sơ đồ tuần tự Sequence Diagram cho các luồng nghiệp vụ chính, sơ đồ lớp Class Diagram phân tầng, mô hình cơ sở dữ liệu quan hệ ERD, đặc tả giao tiếp giữa giao diện và tầng xử lý C++ cùng thiết kế luồng trải nghiệm người dùng.
     \item Chương 3 -- Cài đặt chi tiết \& Kỹ thuật OOP C++: Trình bày kiến trúc tổ chức mã nguồn và minh họa chi tiết việc áp dụng các tính chất của lập trình hướng đối tượng, kỹ thuật nạp chồng toán tử và các mẫu thiết kế vào từng thành phần của trò chơi.
     \item Chương 4 -- Thử nghiệm kiểm thử \& Đánh giá kết quả: Xây dựng bộ kịch bản kiểm thử chức năng bao phủ các tình huống nghiệp vụ và trường hợp biên, đánh giá mức độ hoàn thiện của ứng dụng so với yêu cầu đặt ra và nêu hướng phát triển mở rộng.
 \end{itemize}
