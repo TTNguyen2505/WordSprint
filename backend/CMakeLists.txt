@@ -55,6 +55,8 @@ qt_add_executable(WordSprint
     src/models/Topic.h
     src/models/UserProgress.h
     src/models/Vocabulary.h
+    src/viewmodels/VocabularyViewModel.h
+    src/viewmodels/VocabularyViewModel.cpp
     src/database/DatabaseManager.h
     src/database/DatabaseManager.cpp
     src/repositories/IVocabularyRepository.h
