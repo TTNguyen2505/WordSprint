@@ -35,6 +35,11 @@ The planned **Neo-brutalism** visual style uses bold borders, sharp corners, har
 
 Qt/QML currently provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service or complete profile/progress persistence system yet.
 
+The backend uses a local SQLite database. On the first launch of this version, it resets an existing
+unversioned database, deleting its old profiles, progress, and vocabulary. Later launches retain the
+new data. Seeded words have placeholder image paths under `storage/images/`; the image files are not
+included yet. Audio paths are optional and point to `storage/audio/` when audio is available.
+
 ## Clone the repository
 
 ```powershell
@@ -50,10 +55,13 @@ This project setup targets **Windows x64**.
 | --- | --- | --- |
 | Git | Current version | Clone and update the repository |
 | Visual Studio 2026 | Workload **Desktop development with C++**, including MSVC (latest version) and a Windows SDK | C++ compiler and build tools |
+| Windows SDK | Includes `winsqlite3.h` and `winsqlite3.lib` | SQL script parsing |
 | CMake | 3.22 or newer | Configure and build the desktop application |
 | Qt | Qt 6 for MSVC 2022 64-bit, with **Core**, **Gui**, **Qml**, **Quick**, **WebEngineQuick**, **WebEngineCore**, **Qt Positioning** and **WebChannel** | Desktop shell, QML, and embedded web view |
 | Node.js | 22.12 or newer | Run the Vite frontend and install its tools |
 | pnpm | Current version | Install frontend dependencies and run frontend scripts |
+
+On non-Windows platforms, the backend requires the SQLite3 development library for SQL script parsing.
 
 ### Check the installed tools
 

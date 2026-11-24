@@ -16,6 +16,10 @@ find_package(Qt6 OPTIONAL_COMPONENTS
     WebEngineCore
 )
 
+if(NOT WIN32)
+    find_package(SQLite3 REQUIRED)
+endif()
+
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
@@ -48,31 +52,46 @@ file(GLOB_RECURSE FRONTEND_DIST_FILES
 
 qt_add_executable(WordSprint
     src/main.cpp
-    src/BridgeController.h
-    src/BridgeController.cpp
+    src/controller/BridgeController.h
+    src/controller/BridgeController.cpp
+    src/models/CEFRLevel.h
     src/models/Stage.h
+    src/models/StageStatusDTO.h
     src/models/StageRecord.h
+    src/models/StageRecordDTO.h
     src/models/Topic.h
-    src/models/UserProgress.h
-    src/models/Vocabulary.h
-    src/database/DatabaseManager.h
-    src/database/DatabaseManager.cpp
-    src/repositories/IVocabularyRepository.h
-    src/repositories/SqliteVocabularyRepository.h
-    src/repositories/SqliteVocabularyRepository.cpp
+    src/models/User.h
+    src/models/WordItem.h
+    src/models/OverallRankDTO.h
+    src/core/ApplicationSetup.h
+    src/core/ApplicationSetup.cpp
+    src/core/DatabaseManager.h
+    src/core/DatabaseManager.cpp
+    src/repositories/RecordRepository.h
+    src/repositories/RecordRepository.cpp
+    src/repositories/StageRepository.h
+    src/repositories/StageRepository.cpp
+    src/repositories/UserRepository.h
+    src/repositories/UserRepository.cpp
+    src/repositories/SqliteRepositoryUtils.h
 )
 
-set(DATABASE_SCHEMA_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/schema.sql")
-set(DATABASE_SEED_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/seed_data.sql")
-if(EXISTS "${DATABASE_SCHEMA_FILE}" AND EXISTS "${DATABASE_SEED_FILE}")
+set(DATABASE_SCHEMA_FILE "${CMAKE_CURRENT_SOURCE_DIR}/sql/schema.sql")
+set(DATABASE_APP_DATA_SEED_FILE "${CMAKE_CURRENT_SOURCE_DIR}/sql/seed_app_data.sql")
+set(DATABASE_MOCK_USERS_SEED_FILE "${CMAKE_CURRENT_SOURCE_DIR}/sql/seed_mock_users.sql")
+if(EXISTS "${DATABASE_SCHEMA_FILE}" AND EXISTS "${DATABASE_APP_DATA_SEED_FILE}" AND
+   EXISTS "${DATABASE_MOCK_USERS_SEED_FILE}")
     add_custom_command(TARGET WordSprint POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:WordSprint>/database"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${DATABASE_SCHEMA_FILE}"
                 "$<TARGET_FILE_DIR:WordSprint>/database/schema.sql"
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${DATABASE_SEED_FILE}"
-                "$<TARGET_FILE_DIR:WordSprint>/database/seed_data.sql"
+                "${DATABASE_APP_DATA_SEED_FILE}"
+                "$<TARGET_FILE_DIR:WordSprint>/database/seed_app_data.sql"
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${DATABASE_MOCK_USERS_SEED_FILE}"
+                "$<TARGET_FILE_DIR:WordSprint>/database/seed_mock_users.sql"
         COMMENT "Copying database schema and seed files..."
         VERBATIM
     )
@@ -91,11 +110,13 @@ if(FRONTEND_DIST_FILES)
     )
 endif()
 
+target_include_directories(WordSprint PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+
 qt_add_qml_module(WordSprint
     URI WordSprint
     VERSION 1.0
     QML_FILES
-        qml/Main.qml
+        src/Main.qml
 )
 
 set(OPTIONAL_WEBENGINE_LIBS "")
@@ -117,9 +138,58 @@ target_link_libraries(WordSprint PRIVATE
 )
 
 if(WIN32)
+    target_link_libraries(WordSprint PRIVATE winsqlite3)
+else()
+    target_link_libraries(WordSprint PRIVATE SQLite::SQLite3)
+endif()
+
+if(BUILD_TESTING)
+    add_executable(BridgeViewModelTest
+        tests/BridgeViewModelTest.cpp
+        src/controller/BridgeController.h
+        src/controller/BridgeController.cpp
+        src/core/DatabaseManager.cpp
+        src/repositories/UserRepository.cpp
+        src/repositories/StageRepository.cpp
+        src/repositories/RecordRepository.cpp
+    )
+    target_include_directories(BridgeViewModelTest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+    target_compile_definitions(BridgeViewModelTest PRIVATE WORDSPRINT_SQL_DIR="${CMAKE_CURRENT_SOURCE_DIR}/sql")
+    target_link_libraries(BridgeViewModelTest PRIVATE Qt6::Core Qt6::Sql)
+    if(WIN32)
+        target_link_libraries(BridgeViewModelTest PRIVATE winsqlite3)
+    else()
+        target_link_libraries(BridgeViewModelTest PRIVATE SQLite::SQLite3)
+    endif()
+    add_test(NAME BridgeViewModel COMMAND BridgeViewModelTest)
+    set_tests_properties(BridgeViewModel PROPERTIES
+        ENVIRONMENT "QT_PLUGIN_PATH=${QT6_INSTALL_PREFIX}/plugins"
+        ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
+    )
+
+    add_executable(DatabaseInitializationTest
+        tests/DatabaseInitializationTest.cpp
+        src/core/DatabaseManager.cpp
+    )
+    target_include_directories(DatabaseInitializationTest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
+    target_compile_definitions(DatabaseInitializationTest PRIVATE WORDSPRINT_SQL_DIR="${CMAKE_CURRENT_SOURCE_DIR}/sql")
+    target_link_libraries(DatabaseInitializationTest PRIVATE Qt6::Core Qt6::Sql)
+    if(WIN32)
+        target_link_libraries(DatabaseInitializationTest PRIVATE winsqlite3)
+    else()
+        target_link_libraries(DatabaseInitializationTest PRIVATE SQLite::SQLite3)
+    endif()
+    add_test(NAME DatabaseInitialization COMMAND DatabaseInitializationTest)
+    set_tests_properties(DatabaseInitialization PROPERTIES
+        ENVIRONMENT "QT_PLUGIN_PATH=${QT6_INSTALL_PREFIX}/plugins"
+        ENVIRONMENT_MODIFICATION "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
+    )
+endif()
+
+if(WIN32)
     add_custom_command(TARGET WordSprint POST_BUILD
         COMMAND "${QT6_INSTALL_PREFIX}/bin/windeployqt.exe"
-                --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/qml"
+                --qmldir "${CMAKE_CURRENT_SOURCE_DIR}/src"
                 --include-plugins qsqlite
                 "$<TARGET_FILE:WordSprint>"
         COMMENT "Deploying Qt runtime DLLs with windeployqt..."
