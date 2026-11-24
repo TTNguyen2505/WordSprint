@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Button from "./components/Button";
 import Modal from "./components/Modal";
 import ModalTitle from "./components/ModalTitle";
@@ -9,14 +9,24 @@ import MenuScreen from "./screens/MenuScreen";
 import PlayScreen from "./screens/PlayScreen";
 import SelectProfileModal from "./screens/SelectProfileModal";
 import StageResultModal from "./screens/StageResultModal";
+import { startStage as loadStageQuestions } from "./qtBridge.js";
 import { useAppSessionStore } from "./viewModels/appSessionStore";
 import { useMenuViewModel } from "./viewModels/menuViewModel";
+
+function formatTimeLimit(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${String(minutes).padStart(2, "0")}:${String(remainingSeconds).padStart(2, "0")}`;
+}
 
 function Application() {
     const [modal, setModal] = useState(null);
     const [selectedStage, setSelectedStage] = useState(null);
     const [stageRun, setStageRun] = useState(0);
     const [stageResult, setStageResult] = useState(null);
+    const [stagePayload, setStagePayload] = useState(null);
+    const [stageLoadError, setStageLoadError] = useState(null);
+    const stageLoadRequest = useRef(0);
     const unavailableTitleId = useId();
     const activeProfile = useMenuViewModel();
     const status = useAppSessionStore((state) => state.status);
@@ -31,16 +41,39 @@ function Application() {
 
     const unavailable = (feature) => setModal({ unavailable: feature });
 
-    const startStage = (stage) => {
+    const startStage = async (stage) => {
+        const requestId = ++stageLoadRequest.current;
         setSelectedStage(stage);
         setStageRun((current) => current + 1);
         setStageResult(null);
+        setStagePayload(null);
+        setStageLoadError(null);
         setModal(null);
+
+        try {
+            const response = await loadStageQuestions({ stageId: stage.id });
+            if (response.status !== "ok") {
+                throw new Error(
+                    response.message || "Could not load stage questions."
+                );
+            }
+            if (requestId === stageLoadRequest.current)
+                setStagePayload(response);
+        } catch (loadError) {
+            if (requestId === stageLoadRequest.current) {
+                setStageLoadError(
+                    loadError.message || "Could not load stage questions."
+                );
+            }
+        }
     };
 
     const quitStage = () => {
+        ++stageLoadRequest.current;
         setSelectedStage(null);
         setStageResult(null);
+        setStagePayload(null);
+        setStageLoadError(null);
         setModal(null);
     };
 
@@ -99,7 +132,15 @@ function Application() {
                         key={stageRun}
                         username={activeProfile.name}
                         topic={selectedStage.topic}
-                        level={selectedStage.level}
+                        level={stagePayload?.cefrLevel ?? selectedStage.level}
+                        time={
+                            stagePayload
+                                ? formatTimeLimit(stagePayload.timeLimit)
+                                : "10:00"
+                        }
+                        questions={stagePayload?.words ?? []}
+                        loadingQuestions={!stagePayload && !stageLoadError}
+                        loadError={stageLoadError}
                         onReplay={() => startStage(selectedStage)}
                         onQuit={quitStage}
                         onPreviewResult={(result) =>

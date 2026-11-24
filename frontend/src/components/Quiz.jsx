@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 import thumbnail from "../assets/quiz-question-thumbnail.png";
@@ -21,6 +21,9 @@ function Quiz({
     badgeLabel,
     imageSrc = thumbnail,
     imageAlt = "Quiz clue illustration",
+    prompt,
+    audioSrc,
+    autoPlay = false,
     letters,
     answer,
     onChange,
@@ -33,6 +36,8 @@ function Quiz({
     onPlaySound,
     playsRemaining = 3,
     maxPlays = 3,
+    remainingReplays,
+    maxReplays,
     instruction,
     disabled = false,
     className
@@ -45,7 +50,21 @@ function Quiz({
     const currentBadgeLabel =
         badgeLabel ?? modeLabels[mode] ?? modeLabels.scramble;
     const [internalAnswer, setInternalAnswer] = useState(answer ?? "");
-    const effectiveLetters = letters ?? DEFAULT_LETTERS[mode] ?? [];
+    const audioElement = useRef(null);
+    const autoPlayedAudio = useRef(false);
+    const initialReplays = remainingReplays ?? playsRemaining;
+    const [internalReplaysRemaining, setInternalReplaysRemaining] =
+        useState(initialReplays);
+    const effectiveLetters =
+        letters ??
+        (prompt !== undefined
+            ? Array.from(prompt)
+            : (DEFAULT_LETTERS[mode] ?? []));
+    const effectiveMaxReplays = maxReplays ?? maxPlays;
+    const effectiveReplaysRemaining =
+        remainingReplays !== undefined
+            ? internalReplaysRemaining
+            : playsRemaining;
     const currentInstruction =
         instruction ??
         {
@@ -73,7 +92,42 @@ function Quiz({
     };
 
     const currentAnswer = answer ?? internalAnswer;
-    const isPlayDisabled = disabled || playsRemaining <= 0;
+    const isPlayDisabled =
+        disabled ||
+        effectiveReplaysRemaining <= 0 ||
+        (!audioSrc && typeof onPlaySound !== "function");
+
+    useEffect(() => {
+        if (
+            mode !== "audio" ||
+            !autoPlay ||
+            !audioSrc ||
+            !audioElement.current ||
+            autoPlayedAudio.current
+        ) {
+            return;
+        }
+        autoPlayedAudio.current = true;
+        audioElement.current.currentTime = 0;
+        audioElement.current.play().catch(() => {});
+    }, [mode, audioSrc, autoPlay]);
+
+    const handlePlaySound = () => {
+        if (isPlayDisabled) return;
+        if (audioElement.current && audioSrc) {
+            audioElement.current.currentTime = 0;
+            audioElement.current.play().catch(() => {});
+        }
+        onPlaySound?.();
+        if (
+            remainingReplays !== undefined ||
+            typeof onPlaySound !== "function"
+        ) {
+            setInternalReplaysRemaining((remaining) =>
+                Math.max(remaining - 1, 0)
+            );
+        }
+    };
     return (
         <section
             className={twMerge(
@@ -115,35 +169,58 @@ function Quiz({
                 </nav>
             </header>
 
-            <div className="aspect-[16/9] w-full max-w-[480px] overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
-                <img
-                    src={imageSrc}
-                    alt={imageAlt}
-                    className="size-full object-cover"
-                />
-            </div>
+            {mode !== "audio" && (
+                <div className="aspect-[16/9] w-full max-w-[480px] overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
+                    <img
+                        src={imageSrc}
+                        alt={imageAlt}
+                        className="size-full object-cover"
+                    />
+                </div>
+            )}
 
             {mode === "audio" && (
-                <Button
-                    label={`PLAY SOUND (${playsRemaining}/${maxPlays})`}
-                    variant="primary"
-                    size="large"
-                    leadingIcon={<MusicNoteIcon className="size-full" />}
-                    showTrailingIcon={false}
-                    onClick={onPlaySound}
-                    disabled={isPlayDisabled}
-                />
+                <>
+                    {audioSrc && (
+                        <audio
+                            ref={audioElement}
+                            src={audioSrc}
+                            preload="auto"
+                            aria-hidden="true"
+                        />
+                    )}
+                    <Button
+                        label={`PLAY SOUND (${effectiveReplaysRemaining}/${effectiveMaxReplays})`}
+                        variant="primary"
+                        size="large"
+                        leadingIcon={<MusicNoteIcon className="size-full" />}
+                        showTrailingIcon={false}
+                        onClick={handlePlaySound}
+                        disabled={isPlayDisabled}
+                    />
+                </>
             )}
 
             <div className="flex w-full flex-wrap items-start justify-center gap-sm">
-                {effectiveLetters.map((letter, index) => (
-                    <QuizLetter
-                        key={`${letter}-${index}`}
-                        letter={letter}
-                        blank={String(letter).trim().length === 0}
-                        disabled={disabled}
-                    />
-                ))}
+                {effectiveLetters.map((letter, index) =>
+                    letter === " " ? (
+                        <span
+                            key={`space-${index}`}
+                            className="w-4 shrink-0"
+                            aria-hidden="true"
+                        />
+                    ) : (
+                        <QuizLetter
+                            key={`${letter}-${index}`}
+                            letter={letter}
+                            blank={
+                                letter === "_" ||
+                                String(letter).trim().length === 0
+                            }
+                            disabled={disabled}
+                        />
+                    )
+                )}
             </div>
 
             <form

@@ -17,12 +17,20 @@ function PlayScreen({
     topic = "SCHOOL",
     level = "A1",
     time = "10:00",
+    questions = [],
+    loadingQuestions = false,
+    loadError = null,
     onPreviewResult,
     onReplay,
     onQuit
 }) {
+    const hasGeneratedQuestions =
+        Array.isArray(questions) && questions.length > 0;
+    const currentQuestionCount = hasGeneratedQuestions
+        ? questions.length
+        : questionCount;
     const [activeQuestion, setActiveQuestion] = useState(0);
-    const [answers, setAnswers] = useState(() => Array(questionCount).fill(""));
+    const [answers, setAnswers] = useState({});
     const [paused, setPaused] = useState(false);
     const [message, setMessage] = useState("");
     const [countdown, setCountdown] = useState(3);
@@ -42,11 +50,7 @@ function PlayScreen({
     };
 
     const updateAnswer = (answer) => {
-        setAnswers((current) =>
-            current.map((value, index) =>
-                index === activeQuestion ? answer : value
-            )
-        );
+        setAnswers((current) => ({ ...current, [activeQuestion]: answer }));
         setMessage("");
     };
 
@@ -55,9 +59,31 @@ function PlayScreen({
         setCountdown(3);
     };
 
+    const activeQuestionData = hasGeneratedQuestions
+        ? questions[activeQuestion]
+        : null;
+
     return (
         <>
-            {countdown > 0 ? (
+            {loadingQuestions ? (
+                <main className="flex h-[900px] w-[1200px] items-center justify-center bg-surface-canvas text-content-primary">
+                    <p role="status" className="text-heading-md">
+                        Loading questions…
+                    </p>
+                </main>
+            ) : loadError ? (
+                <main className="flex h-[900px] w-[1200px] flex-col items-center justify-center gap-md bg-surface-canvas text-content-primary">
+                    <p role="alert" className="text-body-default">
+                        {loadError}
+                    </p>
+                    <Button
+                        label="Retry"
+                        showLeadingIcon={false}
+                        showTrailingIcon={false}
+                        onClick={onReplay}
+                    />
+                </main>
+            ) : countdown > 0 ? (
                 <main className="flex h-[900px] w-[1200px] items-center justify-center bg-surface-canvas text-content-primary">
                     <p
                         role="status"
@@ -90,11 +116,11 @@ function PlayScreen({
                                 className="flex min-h-0 flex-1 flex-col gap-lg overflow-y-auto border-x-[length:var(--border-width-heavy)] border-b-[length:var(--border-width-heavy)] border-stroke-default px-md pt-2xl pb-sm"
                             >
                                 <h2 className="text-heading-sm">
-                                    QUESTIONS (0/{questionCount})
+                                    QUESTIONS (0/{currentQuestionCount})
                                 </h2>
                                 <div className="flex flex-col gap-md">
                                     {Array.from(
-                                        { length: questionCount },
+                                        { length: currentQuestionCount },
                                         (_, index) => (
                                             <PipelineItem
                                                 key={index}
@@ -171,8 +197,28 @@ function PlayScreen({
                             </header>
                             <div className="relative w-full">
                                 <Quiz
+                                    key={`${activeQuestion}-${activeQuestionData?.word_id ?? "preview"}`}
                                     className="max-w-none"
-                                    answer={answers[activeQuestion]}
+                                    mode={
+                                        activeQuestionData?.mode ?? "scramble"
+                                    }
+                                    prompt={activeQuestionData?.prompt}
+                                    imageSrc={
+                                        activeQuestionData?.hintImagePath ||
+                                        undefined
+                                    }
+                                    audioSrc={
+                                        activeQuestionData?.audioPath ??
+                                        undefined
+                                    }
+                                    autoPlay={
+                                        activeQuestionData?.autoPlay ?? false
+                                    }
+                                    maxReplays={activeQuestionData?.maxReplays}
+                                    remainingReplays={
+                                        activeQuestionData?.remainingReplays
+                                    }
+                                    answer={answers[activeQuestion] ?? ""}
                                     onChange={updateAnswer}
                                     onSubmit={() =>
                                         setMessage(
@@ -186,7 +232,10 @@ function PlayScreen({
                                         selectQuestion(activeQuestion + 1)
                                     }
                                     hasPrevious={activeQuestion > 0}
-                                    hasNext={activeQuestion < questionCount - 1}
+                                    hasNext={
+                                        activeQuestion <
+                                        currentQuestionCount - 1
+                                    }
                                     disabled={paused}
                                 />
                                 {message && (
@@ -236,7 +285,7 @@ function PlayScreen({
             <PauseModal
                 isOpen={paused && countdown === 0}
                 solved={0}
-                total={questionCount}
+                total={currentQuestionCount}
                 timeLeft={time}
                 score={score}
                 onResume={resume}
