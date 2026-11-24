@@ -99,7 +99,7 @@ function Sample({ label, children }) {
     );
 }
 
-function App() {
+function ComponentsPreview() {
     const [toggle, setToggle] = useState(true);
     const [sliderEnabled, setSliderEnabled] = useState(true);
     const [sliderValue, setSliderValue] = useState(60);
@@ -743,4 +743,4 @@ function App() {
     );
 }
 
-export default App;
+export default ComponentsPreview;

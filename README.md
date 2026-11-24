@@ -2,7 +2,7 @@
 
 WordSprint is a desktop English vocabulary puzzle game. It aims to help learners practice vocabulary, listening, reaction speed, and typing through short, timed challenges.
 
-> **Current status:** The frontend opens on a menu with session-only sample profiles. Stage cards open a mock play screen with pause, resume, replay, and quit navigation, and the leaderboard displays sample data. The play screen includes mock result controls to preview stage-result navigation; they do not score or unlock stages. The menu's game settings modal saves mock audio settings for the current session, but is not connected to audio playback. Answer checking, the gameplay timer, audio playback, and other menu screens are not yet implemented.
+> **Current status:** The menu, profiles, stage progress, and leaderboards load from SQLite through Qt WebChannel. Profile creation and audio settings are saved; profile deletion is disabled. Stage cards open a mock play screen with pause, resume, replay, and quit navigation. Its result controls preview navigation but do not save scores or unlock stages. Answer checking, the gameplay timer, audio playback, and other menu screens are not yet implemented.
 
 ## Product vision
 
@@ -33,12 +33,13 @@ The planned **Neo-brutalism** visual style uses bold borders, sharp corners, har
 - **Frontend state and data tools:** Zustand and TanStack Query.
 - **Build:** CMake builds the desktop application; Vite builds the frontend, which Qt can embed as application resources.
 
-Qt/QML currently provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service or complete profile/progress persistence system yet.
+Qt/QML provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service; the C++ repositories use a local SQLite database. Gameplay does not yet write progress from the frontend.
 
-The backend uses a local SQLite database. On the first launch of this version, it resets an existing
-unversioned database, deleting its old profiles, progress, and vocabulary. Later launches retain the
-new data. Seeded words have placeholder image paths under `storage/images/`; the image files are not
-included yet. Audio paths are optional and point to `storage/audio/` when audio is available.
+Seeded words use placeholder image paths under `storage/images/`; the image files are not included yet.
+The WebChannel currently returns the database paths as relative strings, not `qrc:` URLs.
+Audio paths are optional and point to `storage/audio/` when audio is available. On the first launch of
+this version, the application resets an existing unversioned database, deleting its old profiles,
+progress, and vocabulary. Later launches retain the new data.
 
 ## Clone the repository
 

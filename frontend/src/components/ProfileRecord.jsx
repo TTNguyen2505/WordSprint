@@ -114,7 +114,7 @@ function ProfileRecord({
                     role="columnheader"
                     className="w-[120px] shrink-0 justify-center"
                 />
-            ) : isActive ? (
+            ) : isActive || !onDelete ? (
                 <div
                     role="cell"
                     className="h-[var(--primitive-space-48)] w-[120px] shrink-0"

@@ -1,48 +1,15 @@
-import { useId, useState } from "react";
+import { useId } from "react";
 import AddIcon from "../assets/icons/add.svg?react";
 import CloseIcon from "../assets/icons/close.svg?react";
 import Button from "../components/Button";
 import Modal from "../components/Modal";
 import ModalTitle from "../components/ModalTitle";
 import ProfileRecord from "../components/ProfileRecord";
+import { useProfileViewModel } from "../viewModels/profileViewModel";
 
-const sampleProfiles = [
-    { id: 1, name: "nguyen_02", progress: "7/12" },
-    ...Array.from({ length: 6 }, (_, index) => ({
-        id: index + 2,
-        name: "nguyen_03",
-        progress: "6/12"
-    }))
-];
-
-function SelectProfileModal({
-    isOpen = true,
-    onClose,
-    onAdd,
-    onSelectProfile,
-    onDeleteProfile,
-    profiles: suppliedProfiles,
-    activeId: suppliedActiveId
-}) {
+function SelectProfileModal({ isOpen = true, onClose, onAdd }) {
     const titleId = useId();
-    const [localProfiles, setLocalProfiles] = useState(sampleProfiles);
-    const [localActiveId, setLocalActiveId] = useState(sampleProfiles[0].id);
-    const profiles = suppliedProfiles ?? localProfiles;
-    const activeId = suppliedActiveId ?? localActiveId;
-
-    const selectProfile = (profile) => {
-        if (suppliedActiveId === undefined) setLocalActiveId(profile.id);
-        onSelectProfile?.(profile);
-    };
-
-    const deleteProfile = (profile) => {
-        if (suppliedProfiles === undefined) {
-            setLocalProfiles((current) =>
-                current.filter(({ id }) => id !== profile.id)
-            );
-        }
-        onDeleteProfile?.(profile);
-    };
+    const { profiles, activeId, switchProfile } = useProfileViewModel();
 
     return (
         <Modal
@@ -79,10 +46,8 @@ function SelectProfileModal({
                             onSelect={
                                 profile.id === activeId
                                     ? undefined
-                                    : () => selectProfile(profile)
+                                    : () => switchProfile(profile.id)
                             }
-                            onDelete={() => deleteProfile(profile)}
-                            deleteAriaLabel={`Delete ${profile.name} profile`}
                         />
                     ))}
                 </div>
