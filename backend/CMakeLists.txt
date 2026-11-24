@@ -62,32 +62,37 @@ qt_add_executable(WordSprint
     src/repositories/SqliteVocabularyRepository.cpp
 )
 
-set(DATABASE_SCHEMA_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/schema.sql")
-set(DATABASE_SEED_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/seed_data.sql")
-if(EXISTS "${DATABASE_SCHEMA_FILE}" AND EXISTS "${DATABASE_SEED_FILE}")
-    add_custom_command(TARGET WordSprint POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:WordSprint>/database"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${DATABASE_SCHEMA_FILE}"
-                "$<TARGET_FILE_DIR:WordSprint>/database/schema.sql"
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${DATABASE_SEED_FILE}"
-                "$<TARGET_FILE_DIR:WordSprint>/database/seed_data.sql"
-        COMMENT "Copying database schema and seed files..."
-        VERBATIM
-    )
-endif()
-
 set_target_properties(WordSprint PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
 )
 
-if(FRONTEND_DIST_FILES)
+set(DATABASE_SCHEMA_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/schema.sql")
+set(DATABASE_SEED_FILE "${CMAKE_CURRENT_SOURCE_DIR}/database/seed_data.sql")
+qt_add_resources(WordSprint "database_resources"
+    PREFIX "/db"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/database"
+    FILES
+        "${DATABASE_SCHEMA_FILE}"
+        "${DATABASE_SEED_FILE}"
+    OPTIONS -compress 9
+)
+
+set(FRONTEND_DIST_RESOURCES)
+# The current frontend bundle does not reference this copied public sprite.
+foreach(FRONTEND_DIST_RESOURCE IN LISTS FRONTEND_DIST_FILES)
+    get_filename_component(FRONTEND_DIST_RESOURCE_NAME "${FRONTEND_DIST_RESOURCE}" NAME)
+    if(NOT FRONTEND_DIST_RESOURCE_NAME STREQUAL "icons.svg")
+        list(APPEND FRONTEND_DIST_RESOURCES "${FRONTEND_DIST_RESOURCE}")
+    endif()
+endforeach()
+
+if(FRONTEND_DIST_RESOURCES)
     qt_add_resources(WordSprint "frontend_resources"
         PREFIX "/dist"
         BASE "${FRONTEND_DIST_DIR}"
-        FILES ${FRONTEND_DIST_FILES}
+        FILES ${FRONTEND_DIST_RESOURCES}
+        OPTIONS -compress 9
     )
 endif()
 

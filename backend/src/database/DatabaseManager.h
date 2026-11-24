@@ -18,13 +18,13 @@ public:
     bool openDatabase(const std::string& databasePath);
     void closeDatabase();
     bool isConnected() const;
-    bool initializeDatabase(const std::string& schemaPath, const std::string& seedPath);
+    bool initializeDatabase(const QString& schemaResourcePath, const QString& seedResourcePath);
 
     QSqlDatabase connection() const;
     const std::string& lastError() const noexcept;
 
 private:
-    bool executeSqlFile(const std::string& filePath);
+    bool executeSqlResource(const QString& resourcePath);
     void setLastError(const QString& error);
 
     QString m_connectionName;

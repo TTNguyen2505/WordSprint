@@ -54,38 +54,14 @@ int main(int argc, char *argv[]) {
     if (!databaseManager->openDatabase(databasePath.toStdString())) {
         qWarning() << "WordSprint: Could not open the vocabulary database:"
                    << QString::fromStdString(databaseManager->lastError());
+    } else if (databaseManager->connection().tables().isEmpty()) {
+        if (!databaseManager->initializeDatabase(QStringLiteral(":/db/schema.sql"),
+                                                 QStringLiteral(":/db/seed_data.sql"))) {
+            qWarning() << "WordSprint: Could not initialize the vocabulary database:"
+                       << QString::fromStdString(databaseManager->lastError());
+        }
     } else {
-        const QString applicationDirectory = QCoreApplication::applicationDirPath();
-        const QStringList databaseDirectories = {
-            QDir(applicationDirectory).filePath(QStringLiteral("database")),
-            QDir(applicationDirectory).filePath(QStringLiteral("../database")),
-            QDir(applicationDirectory).filePath(QStringLiteral("../../backend/database")),
-            QDir::current().filePath(QStringLiteral("backend/database")),
-            QDir::current().filePath(QStringLiteral("database"))
-        };
-
-        QString schemaPath;
-        QString seedPath;
-        for (const QString& directory : databaseDirectories) {
-            const QFileInfo schemaInfo(QDir(directory).filePath(QStringLiteral("schema.sql")));
-            const QFileInfo seedInfo(QDir(directory).filePath(QStringLiteral("seed_data.sql")));
-            if (schemaInfo.isFile() && seedInfo.isFile()) {
-                schemaPath = schemaInfo.absoluteFilePath();
-                seedPath = seedInfo.absoluteFilePath();
-                break;
-            }
-        }
-
-        if (schemaPath.isEmpty() || seedPath.isEmpty()) {
-            qWarning() << "WordSprint: schema.sql and seed_data.sql were not found; skipping database initialization.";
-        } else if (databaseManager->connection().tables().isEmpty()) {
-            if (!databaseManager->initializeDatabase(schemaPath.toStdString(), seedPath.toStdString())) {
-                qWarning() << "WordSprint: Could not initialize the vocabulary database:"
-                           << QString::fromStdString(databaseManager->lastError());
-            }
-        } else {
-            qInfo() << "WordSprint: Existing database tables found; skipping schema and seed initialization.";
-        }
+        qInfo() << "WordSprint: Existing database tables found; skipping schema and seed initialization.";
     }
 
     vocabularyRepository = std::make_unique<SqliteVocabularyRepository>(*databaseManager);

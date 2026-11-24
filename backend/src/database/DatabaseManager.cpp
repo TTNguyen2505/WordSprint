@@ -1,11 +1,10 @@
 #include "DatabaseManager.h"
 
+#include <QFile>
 #include <QSqlError>
 #include <QSqlQuery>
 
 #include <atomic>
-#include <fstream>
-#include <iterator>
 #include <vector>
 
 namespace {
@@ -173,7 +172,8 @@ bool DatabaseManager::isConnected() const {
     return m_database.isValid() && m_database.isOpen();
 }
 
-bool DatabaseManager::initializeDatabase(const std::string& schemaPath, const std::string& seedPath) {
+bool DatabaseManager::initializeDatabase(const QString& schemaResourcePath,
+                                         const QString& seedResourcePath) {
     if (!isConnected()) {
         setLastError(QStringLiteral("The database connection is not open."));
         return false;
@@ -184,7 +184,7 @@ bool DatabaseManager::initializeDatabase(const std::string& schemaPath, const st
         return false;
     }
 
-    if (!executeSqlFile(schemaPath) || !executeSqlFile(seedPath)) {
+    if (!executeSqlResource(schemaResourcePath) || !executeSqlResource(seedResourcePath)) {
         m_database.rollback();
         return false;
     }
@@ -207,22 +207,22 @@ const std::string& DatabaseManager::lastError() const noexcept {
     return m_lastError;
 }
 
-bool DatabaseManager::executeSqlFile(const std::string& filePath) {
-    std::ifstream file(filePath, std::ios::binary);
-    if (!file) {
-        setLastError(QStringLiteral("Unable to open SQL file: %1").arg(QString::fromStdString(filePath)));
+bool DatabaseManager::executeSqlResource(const QString& resourcePath) {
+    QFile file(resourcePath);
+    if (!file.open(QIODevice::ReadOnly)) {
+        setLastError(QStringLiteral("Unable to open SQL resource: %1").arg(resourcePath));
         return false;
     }
 
-    std::string script((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    QByteArray script = file.readAll();
     if (script.size() >= 3 &&
         static_cast<unsigned char>(script[0]) == 0xEF &&
         static_cast<unsigned char>(script[1]) == 0xBB &&
         static_cast<unsigned char>(script[2]) == 0xBF) {
-        script.erase(0, 3);
+        script.remove(0, 3);
     }
 
-    const QString sqlScript = QString::fromUtf8(script.data(), static_cast<qsizetype>(script.size()));
+    const QString sqlScript = QString::fromUtf8(script.constData(), script.size());
     for (const QString& statement : splitSqlStatements(sqlScript)) {
         QSqlQuery query(m_database);
         if (!query.exec(statement)) {
