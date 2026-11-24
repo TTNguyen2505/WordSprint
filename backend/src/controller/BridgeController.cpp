@@ -4,17 +4,25 @@
 #include "models/StageRecordDTO.h"
 #include "models/StageStatusDTO.h"
 #include "models/WordItem.h"
+#include "gameplay/AudioQuestion.h"
+#include "gameplay/FillBlankQuestion.h"
+#include "gameplay/ScrambleQuestion.h"
 #include "repositories/RecordRepository.h"
 #include "repositories/StageRepository.h"
 #include "repositories/UserRepository.h"
 
 #include <QDebug>
+#include <QDir>
+#include <QFileInfo>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRegularExpression>
+#include <QUrl>
 
 #include <algorithm>
+#include <array>
 #include <map>
+#include <random>
 #include <vector>
 
 BridgeController::BridgeController(StageRepository *stageRepository, RecordRepository *recordRepository,
@@ -23,6 +31,103 @@ BridgeController::BridgeController(StageRepository *stageRepository, RecordRepos
     m_userRepository(userRepository) {}
 
 namespace {
+    enum class PuzzleMode { Scramble, FillBlank, Audio };
+
+    std::mt19937 &quizRandomEngine() {
+        static thread_local std::mt19937 engine(std::random_device{}());
+        return engine;
+    }
+
+    std::vector<PuzzleMode> makePuzzleModeBag(std::size_t questionCount) {
+        std::vector<PuzzleMode> modeCycle = {PuzzleMode::Scramble, PuzzleMode::FillBlank, PuzzleMode::Audio};
+        std::shuffle(modeCycle.begin(), modeCycle.end(), quizRandomEngine());
+
+        std::array<std::size_t, 3> remaining = {0, 0, 0};
+        const auto modeIndex = [](PuzzleMode mode) {
+            switch (mode) {
+                case PuzzleMode::Scramble:
+                    return std::size_t{0};
+                case PuzzleMode::FillBlank:
+                    return std::size_t{1};
+                case PuzzleMode::Audio:
+                    return std::size_t{2};
+            }
+            return std::size_t{0};
+        };
+        for (std::size_t index = 0; index < questionCount; ++index) {
+            ++remaining[modeIndex(modeCycle[index % modeCycle.size()])];
+        }
+
+        std::vector<PuzzleMode> modes;
+        modes.reserve(questionCount);
+        while (modes.size() < questionCount) {
+            std::vector<PuzzleMode> candidates;
+            std::size_t highestRemaining = 0;
+            for (const PuzzleMode mode: modeCycle) {
+                const std::size_t count = remaining[modeIndex(mode)];
+                const bool wouldCreateLongRun = modes.size() >= 2 && modes.back() == mode &&
+                                                modes[modes.size() - 2] == mode;
+                if (count == 0 || wouldCreateLongRun) {
+                    continue;
+                }
+                if (count > highestRemaining) {
+                    candidates.clear();
+                    highestRemaining = count;
+                }
+                if (count == highestRemaining) {
+                    candidates.push_back(mode);
+                }
+            }
+
+            if (candidates.empty()) {
+                break;
+            }
+            std::uniform_int_distribution<std::size_t> chooseMode(0, candidates.size() - 1);
+            const PuzzleMode nextMode = candidates[chooseMode(quizRandomEngine())];
+            modes.push_back(nextMode);
+            --remaining[modeIndex(nextMode)];
+        }
+        return modes;
+    }
+
+    QString puzzleModeName(PuzzleMode mode) {
+        switch (mode) {
+            case PuzzleMode::Scramble:
+                return QStringLiteral("scramble");
+            case PuzzleMode::FillBlank:
+                return QStringLiteral("fill-blank");
+            case PuzzleMode::Audio:
+                return QStringLiteral("audio");
+        }
+        return QStringLiteral("scramble");
+    }
+
+    QString hintImageSource(const std::string &path) {
+        const QString input = QString::fromStdString(path).trimmed();
+        if (input.isEmpty()) {
+            return {};
+        }
+        if (input.startsWith(QStringLiteral("qrc:/")) || input.startsWith(QStringLiteral("file:"))) {
+            return input;
+        }
+        if (input.startsWith(QStringLiteral(":/"))) {
+            return QStringLiteral("qrc") + input;
+        }
+        if (QDir::isAbsolutePath(input)) {
+            return QUrl::fromLocalFile(QFileInfo(input).absoluteFilePath()).toString(QUrl::FullyEncoded);
+        }
+
+        const QUrl parsed(input);
+        if (!parsed.scheme().isEmpty()) {
+            return input;
+        }
+        const QString normalized = QDir::cleanPath(input);
+        if (normalized.startsWith(QStringLiteral("storage/"))) {
+            return QStringLiteral("qrc:/") + normalized;
+        }
+        return QStringLiteral("qrc:/storage/") + normalized;
+    }
+
     QVariantMap userToVariant(const User &user) {
         return {{QStringLiteral("id"), user.user_id},
                 {QStringLiteral("name"), QString::fromStdString(user.username)},
@@ -97,16 +202,84 @@ QString BridgeController::startStage(const QString &requestJson) {
     }
 
     QVariantList words;
-    for (const WordItem &word: wordItems) {
+    std::vector<PuzzleMode> modes = makePuzzleModeBag(wordItems.size());
+    std::vector<unsigned char> audioAvailable(wordItems.size(), 0);
+    for (std::size_t index = 0; index < wordItems.size(); ++index) {
+        const ReactFrontend_DomainLayer::AudioQuestion audioQuestion(wordItems[index], *level);
+        audioAvailable[index] = audioQuestion.isValid() ? 1 : 0;
+    }
+
+    for (std::size_t index = 0; index < wordItems.size(); ++index) {
+        const WordItem &word = wordItems[index];
+        PuzzleMode mode = modes[index];
+
+        const auto wouldCreateLongRun = [&modes, index](PuzzleMode candidate) {
+            return index >= 2 && modes[index - 1] == candidate && modes[index - 2] == candidate;
+        };
+        if ((mode == PuzzleMode::Audio && audioAvailable[index] == 0) || wouldCreateLongRun(mode)) {
+            std::vector<PuzzleMode> fallbackModes = {PuzzleMode::Scramble, PuzzleMode::FillBlank};
+            if (audioAvailable[index] != 0) {
+                fallbackModes.push_back(PuzzleMode::Audio);
+            }
+            fallbackModes.erase(std::remove_if(fallbackModes.begin(), fallbackModes.end(), wouldCreateLongRun),
+                                fallbackModes.end());
+            if (!fallbackModes.empty()) {
+                std::uniform_int_distribution<std::size_t> chooseMode(0, fallbackModes.size() - 1);
+                mode = fallbackModes[chooseMode(quizRandomEngine())];
+            }
+        }
+        modes[index] = mode;
+
+        std::string prompt;
+        std::string imagePath;
+        std::string audioPath;
+        int maxReplays = 0;
+        int remainingReplays = 0;
+        bool autoPlay = false;
+
+        switch (mode) {
+            case PuzzleMode::Scramble: {
+                ReactFrontend_DomainLayer::ScrambleQuestion question(word);
+                prompt = question.generatePrompt();
+                imagePath = question.hintImagePath();
+                break;
+            }
+            case PuzzleMode::FillBlank: {
+                ReactFrontend_DomainLayer::FillBlankQuestion question(word, *level);
+                prompt = question.generatePrompt();
+                imagePath = question.hintImagePath();
+                break;
+            }
+            case PuzzleMode::Audio: {
+                ReactFrontend_DomainLayer::AudioQuestion question(word, *level);
+                prompt = question.generatePrompt();
+                // AudioQuestion clears the image hint and only keeps a readable audio asset.
+                imagePath = question.hintImagePath();
+                audioPath = question.audioPathValue();
+                maxReplays = question.maxReplaysCount();
+                remainingReplays = question.remainingReplays();
+                autoPlay = question.autoPlay();
+                break;
+            }
+        }
+
         QVariantMap item;
         item[QStringLiteral("word_id")] = word.word_id;
         item[QStringLiteral("topic_id")] = word.topic_id;
         item[QStringLiteral("cefr_level")] = QString::fromStdString(word.cefr_level);
         item[QStringLiteral("target_word")] = QString::fromStdString(word.target_word);
         item[QStringLiteral("hint_text")] = QString();
-        item[QStringLiteral("image_path")] = QString::fromStdString(word.hint_image_path);
-        item[QStringLiteral("audio_path")] =
-                word.audio_path.has_value() ? QVariant(QString::fromStdString(*word.audio_path)) : QVariant();
+        item[QStringLiteral("mode")] = puzzleModeName(mode);
+        item[QStringLiteral("prompt")] = QString::fromStdString(prompt);
+        item[QStringLiteral("image_path")] = QString::fromStdString(imagePath);
+        item[QStringLiteral("hint_image_path")] = QString::fromStdString(imagePath);
+        item[QStringLiteral("hintImagePath")] = hintImageSource(imagePath);
+        const QVariant serializedAudioPath = audioPath.empty() ? QVariant() : QVariant(QString::fromStdString(audioPath));
+        item[QStringLiteral("audio_path")] = serializedAudioPath;
+        item[QStringLiteral("audioPath")] = serializedAudioPath;
+        item[QStringLiteral("maxReplays")] = maxReplays;
+        item[QStringLiteral("remainingReplays")] = remainingReplays;
+        item[QStringLiteral("autoPlay")] = autoPlay;
         words.append(item);
     }
 
