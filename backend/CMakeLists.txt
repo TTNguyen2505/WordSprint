@@ -50,6 +50,13 @@ file(GLOB_RECURSE FRONTEND_DIST_FILES
     "${FRONTEND_DIST_DIR}/*"
 )
 
+get_filename_component(STORAGE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../storage" ABSOLUTE)
+file(GLOB_RECURSE STORAGE_FILES
+    LIST_DIRECTORIES false
+    CONFIGURE_DEPENDS
+    "${STORAGE_DIR}/*"
+)
+
 qt_add_executable(WordSprint
     src/main.cpp
     src/controller/BridgeController.h
@@ -107,6 +114,14 @@ if(FRONTEND_DIST_FILES)
         PREFIX "/dist"
         BASE "${FRONTEND_DIST_DIR}"
         FILES ${FRONTEND_DIST_FILES}
+    )
+endif()
+
+if(STORAGE_FILES)
+    qt_add_resources(WordSprint "storage_resources"
+        PREFIX "/storage"
+        BASE "${STORAGE_DIR}"
+        FILES ${STORAGE_FILES}
     )
 endif()
 
