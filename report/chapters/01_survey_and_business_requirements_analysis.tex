@@ -49,18 +49,18 @@ Hệ thống cho phép nhiều người cùng sử dụng phần mềm trên m�
 \subsection{Nghiệp vụ phân cấp màn chơi và sinh bộ câu hỏi ngẫu nhiên}
 \label{subsec:level_and_question_generation}
 \begin{itemize}
-    \item Phân loại theo chủ đề và trình độ: Kho từ vựng được tổ chức theo các chủ đề gần gũi như Công nghệ, Đời sống, Thiên nhiên,... và phân cấp theo 6 trình độ chuẩn CEFR gồm mức cơ bản (A1, A2), mức trung cấp (B1, B2) và mức nâng cao (C1, C2).
-    \item Mở khóa tuần tự: Các màn chơi được sắp xếp theo lộ trình tăng dần; người chơi phải hoàn thành màn chơi hiện tại mới có thể mở khóa màn chơi tiếp theo.
+    \item Phân loại theo chủ đề và trình độ: Kho từ vựng được tổ chức theo các chủ đề gần gũi như Giao tiếp hằng ngày, Du lịch \& Văn hóa, Công nghệ thông tin,... và phân cấp theo 6 trình độ chuẩn CEFR gồm mức cơ bản (A1, A2), mức trung cấp (B1, B2) và mức nâng cao (C1, C2).
+    \item Mở khóa theo cấp độ CEFR (Tier-based Unlock): Người chơi mới bắt đầu với toàn bộ các chủ đề ở cấp độ A1 được mở khóa mặc định. Khi người chơi vượt qua bất kỳ màn chơi nào thuộc cấp độ $N$ với điểm số đạt ngưỡng chuẩn ($\text{score} \ge \text{pass\_score}$), hệ thống sẽ lập tức mở khóa toàn bộ các chủ đề ở cấp độ kế tiếp $N+1$ (từ A1 đến C2). Người chơi có thể tự do chơi lại bất kỳ màn nào đã mở khóa để cải thiện điểm số và thời gian hoàn thành.
     \item Không trùng lặp khi chơi lại: Mỗi khi người chơi bắt đầu hoặc chơi lại một màn, hệ thống tự động chọn ngẫu nhiên một tập từ vựng mới phù hợp với chủ đề và trình độ của màn đó để duy trì tính thử thách.
 \end{itemize}
 
 \subsection{Nghiệp vụ ba chế độ câu đố}
 \label{subsec:puzzle_modes}
-Trong mỗi màn chơi, hệ thống cung cấp ba dạng thử thách từ vựng đa dạng:
+Trong mỗi màn chơi, hệ thống phân phối ngẫu nhiên cân bằng (Bag Randomization) ba dạng thử thách từ vựng đa dạng nhằm tránh lặp lại cùng một hình thức liên tiếp:
 \begin{itemize}
-    \item Sắp xếp chữ cái (Scramble): Các chữ cái trong từ bị đảo lộn ngẫu nhiên kèm theo hình ảnh gợi ý để người chơi sắp xếp lại thành từ tiếng Anh có nghĩa.
-    \item Điền chữ cái còn thiếu (Fill in the Blank): Một số vị trí chữ cái trong từ bị ẩn đi ngẫu nhiên; người chơi dựa vào phần chữ hiển thị và gợi ý ngữ cảnh để nhập lại từ hoàn chỉnh.
-    \item Nghe phát âm và đoán từ (Audio): Người chơi bấm nút nghe phát âm chuẩn của từ với số lượt nghe bị giới hạn 3 lần, kết hợp gợi ý về số lượng chữ cái để nhập chính xác từ đã nghe.
+    \item Sắp xếp chữ cái (Scramble): Các chữ cái trong từ bị đảo lộn ngẫu nhiên cho đến khi khác từ gốc, giữ nguyên vị trí dấu cách đối với cụm từ, kèm hình ảnh minh họa để người chơi sắp xếp lại thành từ tiếng Anh có nghĩa.
+    \item Điền chữ cái còn thiếu (Fill in the Blank): Tỷ lệ ký tự bị ẩn được tính toán tự động dựa trên cấp độ khó CEFR ($35\%$ cho A1--A2 và luôn cố định hiển thị chữ cái đầu tiên, $50\%$ cho B1--B2, $65\%$ cho C1--C2), kết hợp hình ảnh minh họa để người chơi suy luận và hoàn thiện từ.
+    \item Nghe phát âm và đoán từ (Audio): Hệ thống tự động phát âm chuẩn một lần khi bắt đầu câu hỏi và cho phép nghe lại thủ công với số lượt giới hạn theo cấp độ ($3$ lần cho A1--A2, $2$ lần cho B1--B2, $1$ lần cho C1--C2). Hình ảnh gợi ý được ẩn hoàn toàn để rèn luyện kỹ năng nghe hiểu phản xạ.
 \end{itemize}
 
 \subsection{Nghiệp vụ điều hướng câu hỏi, xác nhận đáp án và bảng nhiệm vụ}
@@ -69,6 +69,8 @@ Trong mỗi màn chơi, hệ thống cung cấp ba dạng thử thách từ vự
     \item Xác nhận đáp án bằng nút Submit: Người chơi nhập từ vựng vào ô nhập liệu và nhấn nút Submit để gửi câu trả lời.
     \item Xử lý khi trả lời đúng: Ô nhập liệu chuyển sang màu xanh lá, phát hiệu ứng âm thanh chúc mừng, cộng điểm vào tổng điểm hiện tại, đánh dấu câu hỏi đã hoàn thành và tự động chuyển sang câu hỏi chưa giải tiếp theo.
     \item Xử lý khi trả lời sai: Ô nhập liệu chuyển sang màu đỏ, phát hiệu ứng rung lắc nhẹ để báo lỗi và tự động chọn sẵn toàn bộ nội dung vừa nhập, cho phép người chơi gõ đè câu trả lời mới và nhấn Submit lại mà không cần xóa từng ký tự.
+    \item Hệ thống tính điểm và chuỗi liên tiếp (Streak Bonus): Điểm cơ bản của mỗi từ vựng tăng dần theo cấp độ CEFR ($10$ đến $35$ điểm). Khi người chơi trả lời đúng liên tiếp từ câu thứ 3 trở đi, mỗi câu trả lời đúng tiếp theo sẽ được cộng thêm $2$ điểm thưởng chuỗi. Trả lời sai sẽ lập tức đưa chuỗi đúng liên tiếp về 0.
+    \item Điều kiện vượt màn: Màn chơi chỉ được công nhận vượt qua khi người chơi đạt tổng điểm lớn hơn hoặc bằng ngưỡng chuẩn $\text{pass\_score}$ (được chuẩn hóa tương đương khoảng $70\%$ điểm cơ bản tối đa của màn).
     \item Bảng nhiệm vụ trong trận đấu: Hiển thị đồng hồ đếm ngược, điểm số hiện tại, số câu hỏi còn lại, nút tạm dừng và danh sách toàn bộ câu hỏi của màn với ba trạng thái trực quan:
     \begin{itemize}
         \item \textit{Queued}: Câu hỏi chưa được giải, hiển thị mặc định và cho phép người chơi chọn để làm trước.
@@ -76,14 +78,18 @@ Trong mỗi màn chơi, hệ thống cung cấp ba dạng thử thách từ vự
         \item \textit{Solved}: Câu hỏi đã giải đúng, hiển thị dấu tích màu xanh lá và bị khóa lại để không thể chọn hay nộp lại.
     \end{itemize}
     \item Điều hướng tự do giữa các câu hỏi: Trong lúc đồng hồ đang chạy, người chơi có thể chuyển đổi qua lại giữa các câu hỏi chưa hoàn thành bằng nút Next, nút Previous hoặc nhấp trực tiếp vào các thẻ ở trạng thái Queued trên bảng nhiệm vụ; thao tác điều hướng tự động bỏ qua các câu đã ở trạng thái Solved.
-    \item Tạm dừng và kết thúc màn chơi: Người chơi có thể nhấn nút PAUSE bất cứ lúc nào để tạm dừng đồng hồ đếm ngược và tiếp tục khi sẵn sàng. Màn chơi kết thúc thắng lợi khi toàn bộ câu hỏi chuyển sang trạng thái Solved, hoặc thất bại khi đồng hồ đếm ngược về không trước lúc giải xong tất cả câu hỏi.
+    \item Tạm dừng và kết thúc màn chơi: Người chơi có thể nhấn nút PAUSE bất cứ lúc nào để tạm dừng đồng hồ đếm ngược và tiếp tục khi sẵn sàng. Màn chơi kết thúc khi toàn bộ câu hỏi chuyển sang trạng thái Solved, hoặc khi đồng hồ đếm ngược về không; hệ thống tự động ghi nhận điểm số tích lũy thực tế và thời gian hoàn thành vào cơ sở dữ liệu.
 \end{itemize}
 
 \subsection{Nghiệp vụ tùy chỉnh âm thanh và bảng xếp hạng}
 \label{subsec:audio_and_leaderboard}
 \begin{itemize}
-    \item Tùy chỉnh âm thanh: Cho phép bật hoặc tắt nhanh và điều chỉnh mức âm lượng độc lập cho nhạc nền và hiệu ứng âm thanh. Khi người chơi kéo thanh điều chỉnh âm lượng, hệ thống phát ngay âm thanh nghe thử để dễ dàng chọn mức phù hợp.
-    \item Bảng xếp hạng: Cung cấp hai chế độ theo dõi thành tích gồm bảng xếp hạng theo từng màn chơi hiển thị những hồ sơ có điểm cao nhất ở mỗi màn và bảng xếp hạng tổng thể dựa trên tổng số màn chơi đã vượt qua và tổng thời gian hoàn thành.
+    \item Tùy chỉnh âm thanh: Cho phép bật hoặc tắt nhanh và điều chỉnh mức âm lượng độc lập cho nhạc nền và hiệu ứng âm thanh từ 0 đến 100. Khi người chơi kéo thanh điều chỉnh âm lượng, hệ thống phát ngay âm thanh nghe thử để dễ dàng chọn mức phù hợp.
+    \item Bảng xếp hạng: Cung cấp hai chế độ theo dõi thành tích:
+    \begin{itemize}
+        \item Bảng xếp hạng từng màn (Per-Stage Top 10): Phong cách Arcade cổ điển, ghi nhận mọi lượt chơi hoàn thành và xếp hạng theo điểm số giảm dần cùng thời gian hoàn thành tăng dần, cho phép người chơi ghi danh nhiều lần nếu đạt kỷ lục cao.
+        \item Bảng xếp hạng tổng thể (Overall Top 10): Mỗi người chơi chỉ xuất hiện tối đa một vị trí, xếp hạng dựa trên tổng điểm các lượt chơi tốt nhất ở từng màn riêng biệt, ngăn chặn hành vi cày điểm liên tục ở các màn cấp độ thấp.
+    \end{itemize}
 \end{itemize}
 
 \section{Yêu cầu phi chức năng và công nghệ triển khai}

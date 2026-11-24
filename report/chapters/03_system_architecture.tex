@@ -56,10 +56,10 @@ WordSprint/
 Vai trò của từng khu vực thư mục trong dự án được phân định cụ thể như sau:
 
 \begin{itemize}
-    \item \textbf{Thư mục backend}: Đóng vai trò lớp vỏ ứng dụng máy tính sử dụng C++ và Qt. Trong đó, thư mục con \code{qml} định nghĩa cửa sổ Qt Quick chứa thành phần Qt WebEngine để hiển thị giao diện web; thư mục con \code{src} chứa mã nguồn C++ khởi tạo ứng dụng, đọc tùy chọn chạy và tổ chức các lớp thực thể, kho lưu trữ cùng cầu nối giao tiếp.
-    \item \textbf{Thư mục frontend}: Chứa toàn bộ mã nguồn giao diện người dùng phát triển bằng React và Vite. Thư mục \code{public} lưu trữ các tài nguyên tĩnh phục vụ ứng dụng web như tệp âm thanh phát âm, nhạc nền; thư mục \code{src} lưu giữ tài nguyên đi cùng mã nguồn (hình ảnh gợi ý, phông chữ, biểu tượng) cùng các thành phần giao diện tái sử dụng; thư mục \code{dist} là kết quả đóng gói giao diện được sinh tự động khi biên dịch.
-    \item \textbf{Thư mục report}: Lưu trữ mã nguồn tài liệu báo cáo học thuật biên soạn bằng LaTeX, tách biệt hoàn toàn với luồng chạy của ứng dụng và phân chia rõ ràng thành phần đầu, nội dung các chương, phần cuối, cấu hình trình bày cùng tài nguyên đồ họa minh họa.
-    \item \textbf{Thư mục \code{.github} và thư mục \code{build}}: Thư mục \code{.github} lưu giữ thiết lập phục vụ cộng tác trên kho mã nguồn, trong khi thư mục \code{build} chỉ chứa các tệp trung gian và sản phẩm biên dịch được CMake và Qt sinh ra tự động.
+    \item Thư mục backend: Đóng vai trò lớp vỏ ứng dụng máy tính sử dụng C++ và Qt. Trong đó, thư mục con \code{qml} định nghĩa cửa sổ Qt Quick chứa thành phần Qt WebEngine để hiển thị giao diện web; thư mục con \code{src} chứa mã nguồn C++ khởi tạo ứng dụng, đọc tùy chọn chạy và tổ chức các lớp thực thể, kho lưu trữ cùng cầu nối giao tiếp.
+    \item Thư mục frontend: Chứa toàn bộ mã nguồn giao diện người dùng phát triển bằng React và Vite. Thư mục \code{public} lưu trữ các tài nguyên tĩnh phục vụ ứng dụng web như tệp âm thanh phát âm, nhạc nền; thư mục \code{src} lưu giữ tài nguyên đi cùng mã nguồn (hình ảnh gợi ý, phông chữ, biểu tượng) cùng các thành phần giao diện tái sử dụng; thư mục \code{dist} là kết quả đóng gói giao diện được sinh tự động khi biên dịch.
+    \item Thư mục report: Lưu trữ mã nguồn tài liệu báo cáo học thuật biên soạn bằng LaTeX, tách biệt hoàn toàn với luồng chạy của ứng dụng và phân chia rõ ràng thành phần đầu, nội dung các chương, phần cuối, cấu hình trình bày cùng tài nguyên đồ họa minh họa.
+    \item Thư mục \code{.github} và thư mục \code{build}: Thư mục \code{.github} lưu giữ thiết lập phục vụ cộng tác trên kho mã nguồn, trong khi thư mục \code{build} chỉ chứa các tệp trung gian và sản phẩm biên dịch được CMake và Qt sinh ra tự động.
 \end{itemize}
 
 \subsection{Cơ chế tích hợp và luồng biên dịch ứng dụng}
@@ -67,17 +67,17 @@ Vai trò của từng khu vực thư mục trong dự án được phân định
 Quá trình phối hợp giữa mô-đun giao diện Vite React, ứng dụng nền C++ Qt 6 và tài liệu báo cáo trong dự án WordSprint được vận hành theo ba luồng làm việc độc lập:
 
 \begin{itemize}
-    \item \textbf{Chế độ phát triển}: Mô-đun giao diện React trên máy chủ phát triển Vite có thể vận hành, kiểm thử và xây dựng độc lập với ứng dụng Qt. Khi chạy tích hợp trên máy tính, ứng dụng Qt Quick khởi tạo cửa sổ Qt WebEngine và nạp trực tiếp giao diện từ máy chủ Vite để phản hồi nhanh các thay đổi trong quá trình lập trình.
-    \item \textbf{Chế độ đóng gói phát hành}: Công cụ Vite biên dịch toàn bộ mã nguồn React, JavaScript cùng tài nguyên đa phương tiện trong thư mục \code{frontend} thành bộ tệp tĩnh tại thư mục \code{dist}. Sau đó, hệ thống cấu hình CMake tiến hành đóng gói thư mục đầu ra này thành tài nguyên nội bộ đi kèm ứng dụng Qt, cho phép thành phần Qt WebEngine nạp giao diện cục bộ mà không phụ thuộc vào máy chủ web bên ngoài.
-    \item \textbf{Biên dịch tài liệu báo cáo}: Toàn bộ mã nguồn báo cáo trong thư mục \code{report} được biên dịch độc lập thông qua hệ thống XeLaTeX để xuất ra tệp tài liệu PDF hoàn chỉnh, hoàn toàn tách biệt khỏi đường chạy và gói cài đặt của phần mềm WordSprint.
+    \item Chế độ phát triển: Mô-đun giao diện React trên máy chủ phát triển Vite có thể vận hành, kiểm thử và xây dựng độc lập với ứng dụng Qt. Khi chạy tích hợp trên máy tính, ứng dụng Qt Quick khởi tạo cửa sổ Qt WebEngine và nạp trực tiếp giao diện từ máy chủ Vite để phản hồi nhanh các thay đổi trong quá trình lập trình.
+    \item Chế độ đóng gói phát hành: Công cụ Vite biên dịch toàn bộ mã nguồn React, JavaScript cùng tài nguyên đa phương tiện trong thư mục \code{frontend} thành bộ tệp tĩnh tại thư mục \code{dist}. Sau đó, hệ thống cấu hình CMake tiến hành đóng gói thư mục đầu ra này thành tài nguyên nội bộ đi kèm ứng dụng Qt, cho phép thành phần Qt WebEngine nạp giao diện cục bộ mà không phụ thuộc vào máy chủ web bên ngoài.
+    \item Biên dịch tài liệu báo cáo: Toàn bộ mã nguồn báo cáo trong thư mục \code{report} được biên dịch độc lập thông qua hệ thống XeLaTeX để xuất ra tệp tài liệu PDF hoàn chỉnh, hoàn toàn tách biệt khỏi đường chạy và gói cài đặt của phần mềm WordSprint.
 \end{itemize}
 
 \section{Kiến trúc tổng thể}
 \label{sec:overall_architecture}
 WordSprint là một ứng dụng desktop được chia thành hai phân hệ chính:
 \begin{itemize}
-    \item \textbf{Backend} – thực hiện bằng C++20 và Qt6 (Qt WebEngine). Backend chịu trách nhiệm khởi tạo cửa sổ Qt, quản lý vòng đời ứng dụng, cung cấp các dịch vụ nghiệp vụ (quản lý điểm, hồ sơ người dùng, giao tiếp với WebChannel) và nhúng giao diện web.
-    \item \textbf{Frontend} – một SPA (Single Page Application) được viết bằng React 19, Vite và Tailwind CSS. Frontend chịu trách nhiệm hiển thị UI, xử lý tương tác người dùng, thực hiện logic trò chơi và gọi các API C++ thông qua QtWebChannel.
+    \item Backend – thực hiện bằng C++20 và Qt6 (Qt WebEngine). Backend chịu trách nhiệm khởi tạo cửa sổ Qt, quản lý vòng đời ứng dụng, cung cấp các dịch vụ nghiệp vụ (quản lý điểm, hồ sơ người dùng, giao tiếp với WebChannel) và nhúng giao diện web.
+    \item Frontend – một SPA (Single Page Application) được viết bằng React 19, Vite và Tailwind CSS. Frontend chịu trách nhiệm hiển thị UI, xử lý tương tác người dùng, thực hiện logic trò chơi và gọi các API C++ thông qua QtWebChannel.
 \end{itemize}
 Kiến trúc được mô tả bằng sơ đồ sau (được thể hiện bằng bảng):
 
@@ -91,67 +91,62 @@ Kiến trúc được mô tả bằng sơ đồ sau (được thể hiện bằn
 \textit{UI (frontend)} & React components, Tailwind CSS, Vite dev server hoặc tài nguyên build tĩnh. \\ \hline
 \textit{Bridge (Qt WebChannel)} & Kết nối JavaScript <-> C++ qua đối tượng đăng ký trong \code{QQmlApplicationEngine}. \\ \hline
 \textit{Backend (C++/Qt)} & Quản lý vòng đời Qt, xử lý nghiệp vụ, lưu trữ dữ liệu, cung cấp API cho frontend. \\ \hline
-\textit{Data (file)} & JSON/YAML files lưu trữ từ vựng, hồ sơ người dùng, lịch sử điểm. \\ \hline
+\textit{Data (database)} & Cơ sở dữ liệu SQLite lưu trữ người dùng, cấu hình âm thanh, từ vựng và lịch sử lượt chơi. \\ \hline
 \end{tabularx}
 \end{table}
 
 \section{Thiết kế hướng đối tượng}
 \label{sec:oop_design}
-Kiến trúc OOP được áp dụng chủ yếu ở phía backend. Các lớp chính được liệt kê dưới đây:
+Kiến trúc OOP được tổ chức chặt chẽ ở tầng xử lý backend C++, bám sát biểu đồ lớp hệ thống (Hình~\ref{fig:class_diagram}) với các thành phần chính:
 
-\subsection{Lớp \texttt{GameEngine}}
-\label{subsec:gameengine}
+\subsection{Lớp điều phối phiên chơi \texttt{GameSession}}
+\label{subsec:gamesession}
 \begin{itemize}
-    \item \textbf{Thuộc tính}: \code{scoreManager}, \code{puzzleFactory}, \code{profileManager}.
-    \item \textbf{Phương thức}: \code{startGame()}, \code{processAnswer(const QString\& answer)}, \code{endGame()}.
-    \item \textbf{Mối quan hệ}: Kết hợp (composition) với \code{ScoreManager}, \code{PuzzleFactory} và \code{UserProfile}.
+    \item Thuộc tính: \code{currentUser} (User), \code{stage} (Stage), \code{questions} (mảng \code{PuzzleQuestion}), \code{currentIndex} (int), \code{score} (int), \code{currentStreak} (int), \code{timeRemaining} (int), \code{isPaused} (bool).
+    \item Phương thức: \code{startSession(WordItem[] words)}, \code{submitAnswer(string input)}, \code{advanceNextQuestion()}, \code{tickTimer()}, \code{pause()}, \code{resume()}, \code{finishSession()}.
+    \item Mối quan hệ: Sở hữu phiên của người dùng (\code{belongs to User}), bao gồm màn chơi (\code{contains Stage}), quản lý tập câu đố (\code{manages PuzzleQuestion}) và sinh ra bản ghi \code{StageRecord} khi kết thúc lượt chơi.
 \end{itemize}
 
-\subsection{Lớp \texttt{ScoreManager}}
-\label{subsec:scoremanager}
+\subsection{Phân cấp câu đố đa hình \texttt{PuzzleQuestion}}
+\label{subsec:puzzlequestion_hierarchy}
 \begin{itemize}
-    \item \textbf{Thuộc tính}: \code{int totalScore}, \code{int correctCount}, \code{double remainingTime}.
-    \item \textbf{Phương thức}: \code{updateScore(int correct, double timeRemaining)}, \code{getScore()}, \code{reset()}.
-    \item \textbf{Công thức tính điểm}: được mô tả trong \eqref{eq:score} (xem phần \ref{subsec:scoremanager}).
-    \item \textbf{Mối quan hệ}: Được sử dụng bởi \code{GameEngine} (dependency).
+    \item Lớp trừu tượng cơ sở \code{PuzzleQuestion}:
+    \begin{itemize}
+        \item Thuộc tính bảo vệ: \code{wordItem} (WordItem), \code{status} (QuestionStatus), \code{hintImage} (string).
+        \item Phương thức thuần ảo: \code{generatePrompt()* string}, \code{checkAnswer(string input)* bool}.
+        \item Phương thức cụ thể: \code{markSolved() void}.
+    \end{itemize}
+    \item Lớp dẫn xuất \code{ScrambleQuestion}: Bổ sung mảng ký tự xáo trộn \code{scrambledLetters}; hiện thực hóa thuật toán đảo ký tự trong \code{generatePrompt()} và so khớp chuỗi trong \code{checkAnswer()}.
+    \item Lớp dẫn xuất \code{FillBlankQuestion}: Bổ sung chuỗi mẫu che \code{maskedPattern} và danh sách chỉ mục ẩn \code{hiddenIndices}; tự động tính tỷ lệ ký tự ẩn theo cấp độ CEFR và kiểm tra đáp án điền từ.
+    \item Lớp dẫn xuất \code{AudioQuestion}: Quản lý đường dẫn âm thanh \code{audioPath}, số lượt nghe tối đa \code{maxReplays} và số lượt còn lại \code{remainingReplays}; cung cấp phương thức \code{playAudio()} và so khớp từ nghe được.
 \end{itemize}
 
-\subsection{Lớp \texttt{BasePuzzle} (abstract)}
-\label{subsec:basepuzzle}
+\subsection{Các thực thể miền và kiểu liệt kê}
+\label{subsec:domain_entities}
 \begin{itemize}
-    \item \textbf{Thuộc tính}: \code{QString question}, \code{QString answer}.
-    \item \textbf{Phương thức ảo}: \code{bool checkAnswer(const QString\&)}.
-    \item \textbf{Kế thừa}: Các lớp \code{ScramblePuzzle}, \code{FillInPuzzle}, \code{AudioPuzzle} kế thừa từ đây và ghi đè \code{checkAnswer}.
-\end{itemize}
-
-\subsection{Lớp \texttt{PuzzleFactory}}
-\label{subsec:puzzlefactory}
-\begin{itemize}
-    \item \textbf{Phương thức}: \code{std::unique\_ptr<BasePuzzle> createPuzzle(PuzzleType type)}.
-    \item \textbf{Mô hình thiết kế}: Factory Method – tạo các đối tượng puzzle mà không phụ thuộc vào lớp cụ thể.
-\end{itemize}
-
-\subsection{Lớp \texttt{UserProfile}}
-\label{subsec:userprofile}
-\begin{itemize}
-    \item \textbf{Thuộc tính}: \code{QString userName}, \code{QVector<PuzzleResult> history}.
-    \item \textbf{Phương thức}: \code{load()}, \code{save()}, \code{addResult(const PuzzleResult\&)}.
-    \item \textbf{Lưu trữ}: Dữ liệu được ghi/đọc dưới dạng JSON trong thư mục \code{data/profiles}.
+    \item Lớp \code{User}: Quản lý thông tin hồ sơ (\code{userId}, \code{username}, \code{createdAt}) và đóng gói các tùy chọn âm lượng (\code{bgmEnabled}, \code{sfxEnabled}, \code{bgmVolume}, \code{sfxVolume}) cùng phương thức cập nhật \code{updateAudioPreferences}.
+    \item Lớp \code{Stage}: Định nghĩa cấu hình màn chơi (\code{stageId}, \code{topicId}, \code{cefrLevel}, \code{timeLimit}, \code{questionCount}, \code{passScore}) cùng phương thức nghiệp vụ \code{isPassed(int score)} để kiểm tra điều kiện vượt màn.
+    \item Lớp \code{WordItem}: Thực thể lưu trữ từ vựng tiếng Anh gốc (\code{targetWord}), phân loại chủ đề và độ khó, kết hợp tài nguyên đa phương tiện (\code{audioPath}, \code{hintImagePath}).
+    \item Lớp \code{StageRecord}: Thực thể lưu trữ kết quả hoàn thành (\code{recordId}, \code{userId}, \code{stageId}, \code{score}, \code{completionTime}, \code{playedAt}) phục vụ thống kê và bảng xếp hạng.
+    \item Lớp \code{Topic}: Thực thể chủ đề từ vựng (\code{topicId}, \code{topicName}).
+    \item Kiểu liệt kê \code{CEFRLevel}: Định nghĩa 6 bậc trình độ chuẩn châu Âu (\code{A1}, \code{A2}, \code{B1}, \code{B2}, \code{C1}, \code{C2}).
+    \item Kiểu liệt kê \code{QuestionStatus}: Quản lý vòng đời trạng thái của từng câu hỏi trong trận đấu (\code{QUEUED}, \code{CURRENT}, \code{SOLVED}).
 \end{itemize}
 
 \section{Luồng xử lý nghiệp vụ và giao thức giao tiếp}
 \label{sec:workflow}
-Quy trình thực thi một vòng chơi được mô tả theo các bước sau (sơ đồ tuần tự):
+Quy trình thực thi một lượt chơi được vận hành đồng bộ giữa giao diện React và đối tượng điều phối backend \code{GameSession} theo trình tự:
 
 \begin{enumerate}
-    \item Ứng dụng khởi động, lớp \code{QQmlApplicationEngine} tải \code{Main.qml} và đặt \code{initialUrl} tới URL Vite dev server (hoặc file tĩnh).
-    \item Frontend (React) nhận URL và khởi tạo giao diện trò chơi. Khi người dùng nhấn nút "Bắt đầu", JavaScript gọi phương thức C++ \code{GameEngine.startGame()} qua WebChannel.
-    \item \code{GameEngine} sử dụng \code{PuzzleFactory} tạo một \code{BasePuzzle} ngẫu nhiên và truyền câu hỏi tới frontend qua một đối tượng WebChannel (phương thức \code{emitQuestion}).
-    \item Người dùng nhập đáp án, React gửi đáp án lại cho C++ qua \code{GameEngine.processAnswer(answer)}.
-    \item \code{BasePuzzle.checkAnswer()} trả về kết quả đúng/sai; \code{ScoreManager.updateScore()} tính điểm dựa trên công thức \eqref{eq:score} và cập nhật thời gian còn lại.
-    \item Kết quả (điểm hiện tại, thời gian) được trả về cho frontend để cập nhật UI.
-    \item Khi hết thời gian hoặc người dùng kết thúc, \code{GameEngine.endGame()} lưu kết quả vào \code{UserProfile.save()} (JSON) và gửi thông báo "GameOver" tới frontend.
-    \item Frontend hiển thị bảng xếp hạng nội bộ bằng cách đọc tập tin \code{data/scores.json} (cũng được cập nhật bởi backend).
+    \item Khởi tạo ứng dụng: Lớp \code{QQmlApplicationEngine} nạp \code{Main.qml}, nhúng cửa sổ trình duyệt WebEngine và kết nối cầu nối \code{QtWebChannel} giữa C++ và JavaScript.
+    \item Khởi tạo phiên chơi: Khi người chơi chọn màn chơi trên giao diện, thông điệp khởi tạo được truyền qua WebChannel kích hoạt \code{GameSession.startSession(user, stage)}. Đối tượng \code{GameSession} truy vấn từ vựng từ \code{StageRepository}, thực hiện giải thuật \code{assignShuffledQuizTypes} và khởi tạo danh sách câu đố đa hình \code{PuzzleQuestion} (Scramble, Fill-in-the-Blank, Audio).
+    \item Nạp câu đố và đếm thời gian: Phương thức \code{generatePrompt()} sinh dữ liệu hiển thị (từ xáo trộn, mẫu che hoặc tệp âm thanh) chuyển về giao diện React; \code{GameSession} khởi tạo trạng thái và kích hoạt đồng hồ đếm ngược.
+    \item Xử lý câu trả lời: Người chơi nhập từ và nhấn Submit; giao diện gửi chuỗi đáp án tới \code{GameSession.submitAnswer(input)}. Phương thức ảo \code{checkAnswer(input)} trên câu đố hiện tại được kích hoạt:
+    \begin{itemize}
+        \item Nếu sai: \code{GameSession} gọi \code{resetStreak()} đưa chuỗi đúng về 0 và thông báo lỗi hiển thị viền đỏ rung lắc trên giao diện.
+        \item Nếu đúng: \code{GameSession} gọi \code{markSolved()} chuyển trạng thái sang \code{SOLVED}, gọi \code{incrementStreak()} tăng chuỗi thưởng và gọi \code{addScore} tích lũy điểm số.
+    \end{itemize}
+    \item Điều hướng và kết thúc phiên: Nếu còn câu chưa giải, \code{GameSession} gọi \code{advanceNextQuestion()} chuyển sang câu tiếp theo. Khi toàn bộ câu hỏi đã hoàn thành hoặc hết giờ đếm ngược, \code{GameSession.finishSession()} đóng gói dữ liệu tạo \code{StageRecord}, gọi \code{RecordRepository.save(record)} để lưu vào SQLite, đối chiếu \code{Stage.isPassed(score)} và gửi kết quả tổng kết về giao diện hiển thị hộp thoại chiến thắng.
 \end{enumerate}
 
 \subsection{Định dạng dữ liệu trao đổi}
@@ -182,10 +177,12 @@ Giao tiếp giữa frontend và backend dựa trên JSON truyền qua QtWebChann
 
 \section{Lưu trữ dữ liệu}
 \label{sec:data_storage}
+Toàn bộ dữ liệu của WordSprint được quản lý bền vững thông qua hệ quản trị cơ sở dữ liệu nhúng SQLite 3 và mẫu thiết kế Repository (\code{DatabaseManager}, \code{SqliteVocabularyRepository}) gồm năm bảng quan hệ:
 \begin{itemize}
-    \item \textbf{Từ vựng}: Được lưu trong tệp JSON \code{data/vocabulary.json}. Mỗi mục bao gồm \code{id}, \code{word}, \code{definition}, \code{hintImage} và \code{audioFile}.
-    \item \textbf{Kết quả chơi}: Được ghi trong \code{data/scores.json} (mảng các đối tượng \code{ScoreRecord} chứa \code{userId}, \code{score}, \code{timestamp}).
-    \item \textbf{Hồ sơ người dùng}: Tệp JSON riêng trong \code{data/profiles/<userName>.json} lưu lịch sử puzzle, mức độ hoàn thành và thành tích.
+    \item Hồ sơ và cấu hình người dùng (\code{users}): Lưu trữ định danh người chơi, thời gian khởi tạo và tích hợp trực tiếp các thiết lập âm lượng cá nhân hóa (\code{bgm\_enabled}, \code{sfx\_enabled}, \code{bgm\_volume}, \code{sfx\_volume}).
+    \item Chủ đề và cấu hình màn chơi (\code{topics}, \code{stages}): Phân cấp màn chơi theo chuẩn CEFR (từ A1 đến C2) với ràng buộc duy nhất phức hợp \code{(topic\_id, cefr\_level)}, quy định số câu hỏi, thời gian đếm ngược và điểm chuẩn vượt màn \code{pass\_score}.
+    \item Kho từ vựng (\code{word\_pool}): Lưu trữ từ vựng tiếng Anh gốc theo chủ đề và cấp độ khó, kết hợp đường dẫn tệp âm thanh phát âm (\code{audio\_path}) và hình ảnh minh họa gợi ý (\code{hint\_image\_path}).
+    \item Lịch sử lượt chơi và bảng xếp hạng (\code{stage\_records}): Nguồn dữ liệu duy nhất (Single Source of Truth) lưu trữ kết quả của mọi lượt chơi, làm căn cứ tổng hợp kỷ lục cá nhân, tiến độ mở khóa cấp độ CEFR kế tiếp và phân định thứ hạng trên bảng xếp hạng Top 10.
 \end{itemize}
 
 \section{Kết luận}

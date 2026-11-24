@@ -12,12 +12,12 @@
 \label{sec:build_environment}
 Dự án WordSprint được phát triển trên hệ điều hành Windows x64 với các công cụ sau:
 \begin{itemize}
-    \item \textbf{Compiler}: MSVC (đi kèm Visual Studio 2022) với chuẩn C++20.
-    \item \textbf{CMake}: phiên bản ≥ 3.22 để cấu hình dự án và quản lý phụ thuộc Qt.
-    \item \textbf{Qt}: Qt 6.11.3 (MSVC 2022 64‑bit) – các module Core, Gui, Qml, Quick, WebEngineQuick, WebChannel.
-    \item \textbf{Node.js}: phiên bản 22.x và \textbf{pnpm} để quản lý phụ thuộc frontend.
-    \item \textbf{Vite}: công cụ xây dựng nhanh cho React 19.
-    \item \textbf{Tailwind CSS 4}: cho việc tạo kiểu UI.
+    \item Compiler: MSVC (đi kèm Visual Studio 2022) với chuẩn C++20.
+    \item CMake: phiên bản ≥ 3.22 để cấu hình dự án và quản lý phụ thuộc Qt.
+    \item Qt: Qt 6.11.3 (MSVC 2022 64‑bit) – các module Core, Gui, Qml, Quick, WebEngineQuick, WebChannel.
+    \item Node.js: phiên bản 22.x và pnpm để quản lý phụ thuộc frontend.
+    \item Vite: công cụ xây dựng nhanh cho React 19.
+    \item Tailwind CSS 4: cho việc tạo kiểu UI.
 \end{itemize}
 
 \subsection{Cấu hình CMake (tập tin \texttt{CMakeLists.txt})}
@@ -185,14 +185,14 @@ Kiểm thử được thực hiện theo hai cấp: unit test cho backend (có t
 \subsection{Kịch bản kiểm thử chức năng}
 \label{subsec:test_cases}
 \begin{itemize}
-    \item \textbf{TC01 – Khởi động ứng dụng}:\\
+    \item TC01 – Khởi động ứng dụng:\\
     Kiểm tra \code{WordSprint.exe} chạy, WebEngineView tải URL đúng (dev hoặc tĩnh).
-    \item \textbf{TC02 – Bắt đầu trò chơi}: Người dùng nhấn nút "Start", frontend gửi \code{startGame}. Backend trả về puzzle đầu tiên và thời gian giới hạn.
-    \item \textbf{TC03 – Kiểm tra đáp án đúng}: Nhập đáp án đúng, backend trả về \code{correct=true} và cập nhật điểm theo \eqref{eq:score}.
-    \item \textbf{TC04 – Kiểm tra đáp án sai}: Nhập đáp án sai, backend trả về \code{correct=false}, điểm không thay đổi, thời gian giảm.
-    \item \textbf{TC05 – Hết thời gian}: Khi đồng hồ đếm ngược tới 0, backend gửi \code{gameOver} và lưu hồ sơ.
-    \item \textbf{TC06 – Lưu và tải hồ sơ}: Kiểm tra việc ghi/đọc file JSON trong \code{data/profiles}.
-    \item \textbf{TC07 – Xây dựng release}: Chạy bản release, xác nhận frontend được tải từ \code{frontend/dist}.
+    \item TC02 – Bắt đầu trò chơi: Người dùng nhấn nút "Start", frontend gửi \code{startGame}. Backend trả về puzzle đầu tiên và thời gian giới hạn.
+    \item TC03 – Kiểm tra đáp án đúng: Nhập đáp án đúng, backend trả về \code{correct=true} và cập nhật điểm theo \eqref{eq:score}.
+    \item TC04 – Kiểm tra đáp án sai: Nhập đáp án sai, backend trả về \code{correct=false}, điểm không thay đổi, thời gian giảm.
+    \item TC05 – Hết thời gian: Khi đồng hồ đếm ngược tới 0, backend gửi \code{gameOver} và lưu hồ sơ.
+    \item TC06 – Lưu và tải hồ sơ: Kiểm tra việc ghi/đọc file JSON trong \code{data/profiles}.
+    \item TC07 – Xây dựng release: Chạy bản release, xác nhận frontend được tải từ \code{frontend/dist}.
 \end{itemize}
 
 \subsection{Kết quả kiểm thử thực tế}
