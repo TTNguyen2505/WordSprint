@@ -61,6 +61,16 @@ qt_add_executable(WordSprint
     src/main.cpp
     src/controller/BridgeController.h
     src/controller/BridgeController.cpp
+    src/gameplay/PuzzleQuestion.h
+    src/gameplay/PuzzleQuestion.cpp
+    src/gameplay/ScrambleQuestion.h
+    src/gameplay/ScrambleQuestion.cpp
+    src/gameplay/FillBlankQuestion.h
+    src/gameplay/FillBlankQuestion.cpp
+    src/gameplay/AudioQuestion.h
+    src/gameplay/AudioQuestion.cpp
+    src/gameplay/GameSession.h
+    src/gameplay/GameSession.cpp
     src/models/CEFRLevel.h
     src/models/Stage.h
     src/models/StageStatusDTO.h
@@ -163,6 +173,16 @@ if(BUILD_TESTING)
         tests/BridgeViewModelTest.cpp
         src/controller/BridgeController.h
         src/controller/BridgeController.cpp
+        src/gameplay/PuzzleQuestion.h
+        src/gameplay/PuzzleQuestion.cpp
+        src/gameplay/ScrambleQuestion.h
+        src/gameplay/ScrambleQuestion.cpp
+        src/gameplay/FillBlankQuestion.h
+        src/gameplay/FillBlankQuestion.cpp
+        src/gameplay/AudioQuestion.h
+        src/gameplay/AudioQuestion.cpp
+        src/gameplay/GameSession.h
+        src/gameplay/GameSession.cpp
         src/core/DatabaseManager.cpp
         src/repositories/UserRepository.cpp
         src/repositories/StageRepository.cpp
