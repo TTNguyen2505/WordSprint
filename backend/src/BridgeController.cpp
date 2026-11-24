@@ -1,7 +1,6 @@
 #include "BridgeController.h"
 
 #include <QDebug>
-#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStringList>
@@ -10,8 +9,11 @@
 #include <optional>
 #include <vector>
 
-BridgeController::BridgeController(IVocabularyRepository* repository, QObject *parent)
-    : QObject(parent), m_repository(repository) {}
+namespace {
+
+QString optionalStringValue(const std::optional<std::string>& value) {
+    return value.has_value() ? QString::fromStdString(*value) : QString();
+}
 
 }  // namespace
 
@@ -47,8 +49,9 @@ QString BridgeController::buildErrorResponse(const QString &errorMessage) const 
 QString BridgeController::startStage(const QString &requestJson) {
     int stageId = 1;
     QJsonObject req;
-    if (!requestJson.trimmed().isEmpty()) {
-        req = parseJson(requestJson);
+    const QString trimmedRequest = requestJson.trimmed();
+    if (!trimmedRequest.isEmpty()) {
+        req = parseJson(trimmedRequest);
         if (!req.isEmpty() && req.contains(QStringLiteral("stageId"))) {
             stageId = req.value(QStringLiteral("stageId")).toInt(1);
         } else {
@@ -71,29 +74,15 @@ QString BridgeController::startStage(const QString &requestJson) {
         topicId = req.value(QStringLiteral("topicId")).toInt(topicId);
     }
 
-    QJsonArray wordsArray;
-    if (m_repository != nullptr) {
-        std::vector<Vocabulary> vocabularies = m_repository->getRandomVocabularies(
-            questionCount, topicId, cefrLevel.toStdString());
-        if (vocabularies.empty()) {
-            vocabularies = m_repository->getRandomVocabularies(questionCount);
-        }
-
-        for (const Vocabulary& vocabulary : vocabularies) {
-            QJsonObject item;
-            item[QStringLiteral("word_id")] = vocabulary.id;
-            item[QStringLiteral("topic_id")] = vocabulary.topicId;
-            item[QStringLiteral("cefr_level")] = QString::fromStdString(vocabulary.cefrLevel);
-            item[QStringLiteral("target_word")] = QString::fromStdString(vocabulary.word);
-            item[QStringLiteral("hint_text")] = QString();
-            item[QStringLiteral("image_path")] = QString();
-            item[QStringLiteral("audio_path")] = QString();
-            wordsArray.append(item);
-        }
+    if (m_repository == nullptr) {
+        return buildErrorResponse(QStringLiteral("Repository is unavailable"));
     }
 
-    const std::vector<Vocabulary> vocabularies = m_repository->getRandomVocabularies(
-        stage->question_count, stage->topic_id, stage->cefr_level);
+    std::vector<Vocabulary> vocabularies = m_repository->getRandomVocabularies(
+        questionCount, topicId, cefrLevel.toStdString());
+    if (vocabularies.empty()) {
+        vocabularies = m_repository->getRandomVocabularies(questionCount);
+    }
     if (vocabularies.empty()) {
         return buildErrorResponse(QStringLiteral("No vocabulary is available for this stage"));
     }
@@ -113,15 +102,40 @@ QString BridgeController::startStage(const QString &requestJson) {
 
     QVariantMap response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
-    response[QStringLiteral("stageId")] = stage->stage_id;
-    response[QStringLiteral("topicId")] = stage->topic_id;
-    response[QStringLiteral("cefrLevel")] = QString::fromStdString(stage->cefr_level);
-    response[QStringLiteral("timeLimit")] = stage->time_limit;
+    response[QStringLiteral("stageId")] = stageId;
+    response[QStringLiteral("topicId")] = topicId;
+    response[QStringLiteral("cefrLevel")] = cefrLevel;
+    response[QStringLiteral("timeLimit")] = timeLimit;
     response[QStringLiteral("questionCount")] = words.size();
     response[QStringLiteral("words")] = words;
 
-    emit stageStarted(stage->stage_id);
+    emit stageStarted(stageId);
     return buildResponse(response);
+}
+
+QString BridgeController::getAllTopics() {
+    if (m_repository == nullptr) {
+        return buildErrorResponse(QStringLiteral("Repository is unavailable"));
+    }
+
+    QVariantList topics;
+    for (const Topic& topic : m_repository->getAllTopics()) {
+        QVariantMap item;
+        item[QStringLiteral("id")] = topic.id;
+        item[QStringLiteral("name")] = QString::fromStdString(topic.name);
+        item[QStringLiteral("description")] = QString::fromStdString(topic.description);
+        topics.append(item);
+    }
+
+    QVariantMap response;
+    response[QStringLiteral("status")] = QStringLiteral("ok");
+    response[QStringLiteral("topics")] = topics;
+    return buildResponse(response);
+}
+
+QString BridgeController::getStagesByTopicId(int topicId) {
+    Q_UNUSED(topicId);
+    return buildErrorResponse(QStringLiteral("Stage lookup is unavailable in IVocabularyRepository"));
 }
 
 QString BridgeController::completeStage(const QString &requestJson) {
@@ -157,11 +171,11 @@ QString BridgeController::completeStage(const QString &requestJson) {
     m_unlockedStagesByUser.insert(
         userId, std::max(m_unlockedStagesByUser.value(userId, 1), nextStageId));
 
-    QJsonObject response;
+    QVariantMap response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
-    response[QStringLiteral("recordId")] = *recordId;
-    response[QStringLiteral("highScore")] = progress.high_score;
-    response[QStringLiteral("bestTime")] = progress.best_time.value_or(completionTime);
+    response[QStringLiteral("recordId")] = recordId;
+    response[QStringLiteral("highScore")] = highScore;
+    response[QStringLiteral("bestTime")] = bestTime;
     response[QStringLiteral("nextStageUnlocked")] = nextStageUnlocked;
     response[QStringLiteral("nextStageId")] = nextStageId;
 
@@ -170,27 +184,67 @@ QString BridgeController::completeStage(const QString &requestJson) {
 }
 
 QString BridgeController::processAnswer(const QString &requestJson) {
+    // TODO(OOP-34): Delegate scoring to GameSession & BasePuzzle (ScramblePuzzle, FillInPuzzle, AudioPuzzle) once merged to main
+    const auto buildAnswerResponse = [this](
+        bool isValid,
+        bool isCorrect,
+        int score,
+        const QString& correctAnswer,
+        const QString& message,
+        const QString& explanation,
+        double timeRemaining) {
+        QVariantMap response;
+        response[QStringLiteral("status")] = isValid ? QStringLiteral("ok") : QStringLiteral("error");
+        response[QStringLiteral("correct")] = isCorrect;
+        response[QStringLiteral("score")] = score;
+        response[QStringLiteral("correctAnswer")] = correctAnswer;
+        response[QStringLiteral("message")] = message;
+        response[QStringLiteral("explanation")] = explanation;
+        response[QStringLiteral("timeRemaining")] = timeRemaining;
+        return buildResponse(response);
+    };
+
+    constexpr double defaultTimeRemaining = 60.0;
+    const QString invalidRequestMessage = QStringLiteral("Invalid JSON payload for processAnswer");
+    const QString invalidRequestExplanation = QStringLiteral(
+        "Provide a JSON object with non-empty string fields 'answer' and 'expected'.");
+    if (requestJson.trimmed().isEmpty()) {
+        return buildAnswerResponse(
+            false, false, 0, QString(), invalidRequestMessage, invalidRequestExplanation, defaultTimeRemaining);
+    }
+
     const QJsonObject req = parseJson(requestJson);
     if (req.isEmpty()) {
-        return buildErrorResponse(QStringLiteral("Invalid JSON payload for processAnswer"));
+        return buildAnswerResponse(
+            false, false, 0, QString(), invalidRequestMessage, invalidRequestExplanation, defaultTimeRemaining);
     }
 
     QJsonObject payload = req;
-    const bool hasNestedPayload = req.contains(QStringLiteral("payload"))
-        && req.value(QStringLiteral("payload")).isObject();
+    const bool hasNestedPayload = req.contains(QStringLiteral("payload"));
+    if (hasNestedPayload && !req.value(QStringLiteral("payload")).isObject()) {
+        return buildAnswerResponse(
+            false, false, 0, QString(), invalidRequestMessage, invalidRequestExplanation, defaultTimeRemaining);
+    }
     if (hasNestedPayload) {
         payload = req.value(QStringLiteral("payload")).toObject();
     }
 
-    const QString answer = payload.value(QStringLiteral("answer")).toString().trimmed();
-    const QString expected = payload.value(QStringLiteral("expected")).toString().trimmed();
-
-    bool isCorrect = false;
-    if (!expected.isEmpty()) {
-        isCorrect = (answer.compare(expected, Qt::CaseInsensitive) == 0);
-    } else {
-        isCorrect = !answer.isEmpty();
+    const QJsonValue answerValue = payload.value(QStringLiteral("answer"));
+    const QJsonValue expectedValue = payload.value(QStringLiteral("expected"));
+    if (!answerValue.isString() || !expectedValue.isString()) {
+        return buildAnswerResponse(
+            false, false, 0, QString(), invalidRequestMessage, invalidRequestExplanation, defaultTimeRemaining);
     }
+
+    const QString answer = answerValue.toString().trimmed();
+    const QString expected = expectedValue.toString().trimmed();
+    if (answer.isEmpty() || expected.isEmpty()) {
+        return buildAnswerResponse(
+            false, false, 0, expected, invalidRequestMessage, invalidRequestExplanation, defaultTimeRemaining);
+    }
+
+    const bool isCorrect = answer.compare(expected, Qt::CaseInsensitive) == 0;
+    const double timeRemaining = payload.value(QStringLiteral("timeRemaining")).toDouble(defaultTimeRemaining);
 
     const auto vocabIdFrom = [](const QJsonObject& object) {
         const QStringList idKeys = {QStringLiteral("vocabId"), QStringLiteral("wordId"), QStringLiteral("id")};
@@ -210,12 +264,12 @@ QString BridgeController::processAnswer(const QString &requestJson) {
         m_repository->updateLearningProgress(vocabId, isCorrect);
     }
 
-    QJsonObject response;
-    response[QStringLiteral("status")] = QStringLiteral("ok");
-    response[QStringLiteral("correct")] = isCorrect;
-    response[QStringLiteral("score")] = isCorrect ? 100 : 0;
-    response[QStringLiteral("timeRemaining")] = payload.value(QStringLiteral("timeRemaining")).toDouble(60.0);
-    return buildResponse(response);
+    const QString message = isCorrect ? QStringLiteral("Correct answer") : QStringLiteral("Incorrect answer");
+    const QString explanation = isCorrect
+        ? QStringLiteral("The submitted answer matches the expected answer.")
+        : QStringLiteral("The correct answer is '%1'.").arg(expected);
+    return buildAnswerResponse(
+        true, isCorrect, isCorrect ? 100 : 0, expected, message, explanation, timeRemaining);
 }
 
 QString BridgeController::processMessage(const QString &requestJson) {
@@ -258,7 +312,7 @@ QString BridgeController::saveProgress(const QString &requestJson) {
         }
     }
 
-    QJsonObject response;
+    QVariantMap response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
     response[QStringLiteral("message")] = QStringLiteral("Progress saved successfully");
     return buildResponse(response);
@@ -267,7 +321,7 @@ QString BridgeController::saveProgress(const QString &requestJson) {
 QString BridgeController::loadProgress(const QString &requestJson) {
     const QJsonObject req = parseJson(requestJson);
     const int userId = req.value(QStringLiteral("userId")).toInt(1);
-    QJsonObject response;
+    QVariantMap response;
     response[QStringLiteral("status")] = QStringLiteral("ok");
     response[QStringLiteral("stagesUnlocked")] = m_unlockedStagesByUser.value(userId, 1);
     return buildResponse(response);
