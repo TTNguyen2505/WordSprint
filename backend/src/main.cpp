@@ -1,4 +1,5 @@
 #include <QGuiApplication>
+#include <QIcon>
 #include <QQmlApplicationEngine>
 #include <QUrl>
 
@@ -35,6 +36,7 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     app.setApplicationName(QStringLiteral("WordSprint"));
     app.setOrganizationName(QStringLiteral("WordSprint"));
+    app.setWindowIcon(QIcon(QStringLiteral(":/app_logo.ico")));
 
     databaseManager = std::make_unique<DatabaseManager>();
     ApplicationSetup::initializeDatabase(*databaseManager);

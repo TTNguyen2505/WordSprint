@@ -9,11 +9,12 @@ import ModalTitle from "../components/ModalTitle";
 function GameSettingsModal({
     isOpen = true,
     initialMusicEnabled = true,
-    initialMusicVolume = 75,
-    initialSoundEnabled = false,
-    initialSoundVolume = 75,
+    initialMusicVolume = 100,
+    initialSoundEnabled = true,
+    initialSoundVolume = 100,
     onClose,
-    onSave
+    onSave,
+    onPreviewSettings
 }) {
     const titleId = useId();
     const [savedSettings, setSavedSettings] = useState(() => ({
@@ -27,11 +28,16 @@ function GameSettingsModal({
     const [isSaving, setIsSaving] = useState(false);
 
     const updateSetting = (key, value) => {
-        setSettings((current) => ({ ...current, [key]: value }));
+        setSettings((current) => {
+            const nextSettings = { ...current, [key]: value };
+            onPreviewSettings?.(nextSettings);
+            return nextSettings;
+        });
     };
 
     const handleClose = () => {
         setSettings(savedSettings);
+        onPreviewSettings?.(savedSettings);
         onClose?.();
     };
 

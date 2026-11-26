@@ -13,16 +13,6 @@ class RecordRepository;
 class StageRepository;
 class UserRepository;
 
-/**
- * @brief BridgeController
- *
- * QObject-derived controller exposed to the React frontend through Qt WebChannel.
- * Implements the communication contract specified in Chapter 2.4 and Chapter 2.5:
- *  - startStage: loads stage and word data through the repositories and returns it to React.
- *  - completeStage: persists a stage record and returns a completion summary.
- *  - processAnswer: evaluates an answer and returns the result to React.
- *  - processMessage: universal dispatcher for JSON actions from the web frontend.
- */
 class BridgeController : public QObject {
     Q_OBJECT
     Q_PROPERTY(bool isReady READ isReady NOTIFY isReadyChanged)
@@ -35,11 +25,6 @@ public:
     bool isReady() const { return m_isReady; }
 
 public slots:
-    /**
-     * @brief Start a game stage.
-     * @param requestJson JSON string, e.g. { "stageId": 1 }
-     * @return JSON string response containing stage parameters and word items list.
-     */
     Q_INVOKABLE QString startStage(const QString &requestJson);
 
     Q_INVOKABLE QString getAllTopics();
@@ -49,35 +34,14 @@ public slots:
     Q_INVOKABLE QString updateAudio(const QString &requestJson);
     Q_INVOKABLE QString getLeaderboard(const QString &requestJson);
 
-    /**
-     * @brief Complete a stage and persist its record.
-     * @param requestJson JSON string, e.g. { "userId": 1, "stageId": 1, "score": 90, "completionTime": 42 }
-     * @return JSON string response with status, record, updated progress, and next stage info.
-     */
     Q_INVOKABLE QString completeStage(const QString &requestJson);
 
-    /**
-     * @brief Process an answer submitted by the frontend.
-     * @param requestJson JSON string matching Chapter 3.4/4.2.3 data contract.
-     * @return JSON string response with evaluation status and score.
-     */
     Q_INVOKABLE QString processAnswer(const QString &requestJson);
 
-    /**
-     * @brief Universal message processor for messages sent via window.qt.webChannel.
-     * @param requestJson JSON payload with "action" and "payload" fields.
-     * @return JSON string response.
-     */
     Q_INVOKABLE QString processMessage(const QString &requestJson);
 
-    /**
-     * @brief Save user progress state in memory.
-     */
     Q_INVOKABLE QString saveProgress(const QString &requestJson);
 
-    /**
-     * @brief Load user progress state.
-     */
     Q_INVOKABLE QString loadProgress(const QString &requestJson);
 
 signals:

@@ -1,16 +1,6 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
 
-/**
- * Neo‑Brutalism ModalTitle component.
- *
- * Props:
- *   - title (string) – fallback heading text, default "TITLE".
- *   - children (ReactNode) – content takes precedence over `title`.
- *   - as (string) – HTML tag to render (h1 | h2 | h3 | h4 | div), default "h2".
- *   - id (string) – optional id for aria‑labelling.
- *   - className (string) – optional extra Tailwind classes.
- */
 function ModalTitle({ title = "TITLE", children, as = "h2", id, className }) {
     const Content = children ?? title;
     const Tag = as;

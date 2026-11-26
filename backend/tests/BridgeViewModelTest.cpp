@@ -23,7 +23,7 @@ namespace {
     }
 
     QJsonObject parse(const QString &json) { return QJsonDocument::fromJson(json.toUtf8()).object(); }
-}
+} // namespace
 
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
@@ -31,7 +31,8 @@ int main(int argc, char **argv) {
     require(db.openDatabase(":memory:"), "Could not open in-memory database");
     const std::string sqlDir = WORDSPRINT_SQL_DIR;
     require(db.initializeDatabase(sqlDir + "/schema.sql", sqlDir + "/seed_app_data.sql",
-                                  sqlDir + "/seed_mock_users.sql"), "Could not initialize test database");
+                                  sqlDir + "/seed_mock_users.sql"),
+            "Could not initialize test database");
     StageRepository stages(db);
     RecordRepository records(db);
     UserRepository users(db);
@@ -46,12 +47,13 @@ int main(int argc, char **argv) {
     require(first.value("progress") == "4/30", "Passing progress is incorrect");
     const QJsonArray stageRows = first.value("stages").toArray();
     require(stageRows.size() == 30, "Stage list is incomplete");
-    const std::vector<int> expectedIds = {1, 2, 6, 7, 3, 4, 5, 8, 9, 10, 11, 12, 13, 14, 15,
+    const std::vector<int> expectedIds = {1,  2,  6,  7,  3,  4,  5,  8,  9,  10, 11, 12, 13, 14, 15,
                                           16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30};
     for (qsizetype i = 0; i < stageRows.size(); ++i) {
         const QJsonObject stage = stageRows[i].toObject();
-        const QString expectedStatus = i < 4 ? QStringLiteral("solved") :
-                                       i < 15 ? QStringLiteral("available") : QStringLiteral("locked");
+        const QString expectedStatus = i < 4    ? QStringLiteral("solved")
+                                       : i < 15 ? QStringLiteral("available")
+                                                : QStringLiteral("locked");
         require(stage.value("id").toInt() == expectedIds[static_cast<std::size_t>(i)],
                 "Stages are not ordered by status, level, and ID");
         require(stage.value("status").toString() == expectedStatus, "Stage status is incorrect");
@@ -75,13 +77,13 @@ int main(int argc, char **argv) {
     auto progress = stages.getStagesWithUnlockStatus(7);
     require(progress.has_value(), "Could not load progress after failed attempt");
     for (const StageStatusDTO &stage: *progress) {
-        require(stage.is_unlocked == (stage.stage.cefr_level == "A1"),
-                "Failed attempt must not unlock another tier");
+        require(stage.is_unlocked == (stage.stage.cefr_level == "A1"), "Failed attempt must not unlock another tier");
     }
-    const QJsonObject a1Completion = parse(bridge.completeStage(
-            "{\"userId\":7,\"stageId\":3,\"score\":70,\"completionTime\":1}"));
+    const QJsonObject a1Completion =
+            parse(bridge.completeStage("{\"userId\":7,\"stageId\":3,\"score\":70,\"completionTime\":1}"));
     require(a1Completion.value("status") == "ok" && a1Completion.value("nextStageUnlocked").toBool() &&
-            a1Completion.value("nextStageId").toInt() == 8, "Passing A1 did not report the next tier as unlocked");
+                    a1Completion.value("nextStageId").toInt() == 8,
+            "Passing A1 did not report the next tier as unlocked");
     require(records.insertRecord(7, 8, 104, 1).has_value(), "Could not insert failed A2 attempt");
     progress = stages.getStagesWithUnlockStatus(7);
     require(progress.has_value(), "Could not load progress after passing A1");
@@ -89,10 +91,11 @@ int main(int argc, char **argv) {
         require(stage.is_unlocked == (stage.stage.cefr_level == "A1" || stage.stage.cefr_level == "A2"),
                 "Passing one A1 stage must unlock every A2 topic, but a failed A2 must not unlock B1");
     }
-    const QJsonObject a2Completion = parse(bridge.completeStage(
-            "{\"userId\":7,\"stageId\":8,\"score\":105,\"completionTime\":1}"));
+    const QJsonObject a2Completion =
+            parse(bridge.completeStage("{\"userId\":7,\"stageId\":8,\"score\":105,\"completionTime\":1}"));
     require(a2Completion.value("status") == "ok" && a2Completion.value("nextStageUnlocked").toBool() &&
-            a2Completion.value("nextStageId").toInt() == 13, "Passing A2 did not report the next tier as unlocked");
+                    a2Completion.value("nextStageId").toInt() == 13,
+            "Passing A2 did not report the next tier as unlocked");
     progress = stages.getStagesWithUnlockStatus(7);
     require(progress.has_value(), "Could not load progress after passing A2");
     for (const StageStatusDTO &stage: *progress) {
@@ -116,25 +119,27 @@ int main(int argc, char **argv) {
         }
     }
     require(records.insertRecord(1, 21, 330, 1).has_value(), "Could not insert out-of-order stage record");
-    const QJsonArray reordered = parse(bridge.getProfiles("{}")).value("profiles").toArray()[0].toObject()
-                                         .value("stages").toArray();
-    require(reordered[4].toObject().value("id").toInt() == 21 &&
-            reordered[4].toObject().value("status") == "solved",
+    const QJsonArray reordered =
+            parse(bridge.getProfiles("{}")).value("profiles").toArray()[0].toObject().value("stages").toArray();
+    require(reordered[4].toObject().value("id").toInt() == 21 && reordered[4].toObject().value("status") == "solved",
             "Passed stage must be sorted as solved even if its predecessor is not passed");
 
     const QJsonObject leaderboard = parse(bridge.getLeaderboard("{\"stageId\":1}"));
     const QJsonArray rankings = leaderboard.value("records").toArray();
     require(rankings.size() >= 2 && rankings[0].toObject().value("player") == "Alex" &&
-            rankings[0].toObject().value("completionTime").toInt() == 25, "Stage rankings are incorrect");
+                    rankings[0].toObject().value("completionTime").toInt() == 25,
+            "Stage rankings are incorrect");
     const QJsonObject overall = parse(bridge.getLeaderboard("{\"stageId\":null}"));
-    require(overall.value("status") == "ok" && overall.value("records").toArray()[0].toObject()
-                    .value("completionTime").isNull(), "Overall leaderboard is incorrect");
+    require(overall.value("status") == "ok" &&
+                    overall.value("records").toArray()[0].toObject().value("completionTime").isNull(),
+            "Overall leaderboard is incorrect");
     require(parse(bridge.getLeaderboard("{}")).value("status") == "error", "Invalid leaderboard accepted");
     require(parse(bridge.createProfile("{\"name\":\"New_user\"}")).value("status") == "ok", "Creation failed");
     require(parse(bridge.createProfile("{\"name\":\"New_user\"}")).value("status") == "error",
             "Duplicate user accepted");
     require(parse(bridge.updateAudio("{\"userId\":1,\"musicEnabled\":false,\"soundEnabled\":true,"
-                                    "\"musicVolume\":42,\"soundVolume\":80}")).value("status") == "ok",
+                                     "\"musicVolume\":42,\"soundVolume\":80}"))
+                            .value("status") == "ok",
             "Audio save failed");
     const QJsonObject updated = parse(bridge.getProfiles("{}")).value("profiles").toArray()[0].toObject();
     require(!updated.value("musicEnabled").toBool() && updated.value("musicVolume").toInt() == 42,
