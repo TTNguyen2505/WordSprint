@@ -11,12 +11,11 @@ import ProfileCard from "../components/ProfileCard";
 import ProgressBar from "../components/ProgressBar";
 import ScoreCard from "../components/ScoreCard";
 import StageCard from "../components/StageCard";
-import sampleStages from "../sampleStages";
 
 function MenuScreen({
     username = "TTNguyen2505",
     score = 124850,
-    stages = sampleStages,
+    stages,
     onSwitchProfile,
     onLeaderboard,
     onPlay,

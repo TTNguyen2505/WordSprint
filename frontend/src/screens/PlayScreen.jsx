@@ -17,6 +17,12 @@ function PlayScreen({
     topic = "SCHOOL",
     level = "A1",
     time = "10:00",
+    initialMusicEnabled = true,
+    initialMusicVolume = 100,
+    initialSoundEnabled = true,
+    initialSoundVolume = 100,
+    onAudioSettingsChange,
+    onSaveAudioSettings,
     onPreviewResult,
     onReplay,
     onQuit
@@ -239,6 +245,12 @@ function PlayScreen({
                 total={questionCount}
                 timeLeft={time}
                 score={score}
+                initialMusicEnabled={initialMusicEnabled}
+                initialMusicVolume={initialMusicVolume}
+                initialSoundEnabled={initialSoundEnabled}
+                initialSoundVolume={initialSoundVolume}
+                onAudioSettingsChange={onAudioSettingsChange}
+                onSaveSettings={onSaveAudioSettings}
                 onResume={resume}
                 onReplay={onReplay}
                 onQuit={onQuit}

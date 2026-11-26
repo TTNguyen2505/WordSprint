@@ -9,6 +9,7 @@ import MenuScreen from "./screens/MenuScreen";
 import PlayScreen from "./screens/PlayScreen";
 import SelectProfileModal from "./screens/SelectProfileModal";
 import StageResultModal from "./screens/StageResultModal";
+import { useAppAudio } from "./hooks/useAppAudio";
 import { useAppSessionStore } from "./viewModels/appSessionStore";
 import { useMenuViewModel } from "./viewModels/menuViewModel";
 
@@ -24,6 +25,16 @@ function Application() {
     const loadProfiles = useAppSessionStore((state) => state.loadProfiles);
     const createProfile = useAppSessionStore((state) => state.createProfile);
     const updateAudio = useAppSessionStore((state) => state.updateAudio);
+    const appAudio = useAppAudio(
+        activeProfile
+            ? {
+                  musicEnabled: activeProfile.musicEnabled,
+                  musicVolume: activeProfile.musicVolume,
+                  soundEnabled: activeProfile.soundEnabled,
+                  soundVolume: activeProfile.soundVolume
+              }
+            : undefined
+    );
 
     useEffect(() => {
         loadProfiles().catch(() => {});
@@ -100,6 +111,12 @@ function Application() {
                         username={activeProfile.name}
                         topic={selectedStage.topic}
                         level={selectedStage.level}
+                        initialMusicEnabled={activeProfile.musicEnabled}
+                        initialMusicVolume={activeProfile.musicVolume}
+                        initialSoundEnabled={activeProfile.soundEnabled}
+                        initialSoundVolume={activeProfile.soundVolume}
+                        onAudioSettingsChange={appAudio.applySettings}
+                        onSaveAudioSettings={updateAudio}
                         onReplay={() => startStage(selectedStage)}
                         onQuit={quitStage}
                         onPreviewResult={(result) =>
@@ -160,6 +177,7 @@ function Application() {
                     initialSoundEnabled={activeProfile.soundEnabled}
                     initialSoundVolume={activeProfile.soundVolume}
                     onSave={updateAudio}
+                    onPreviewSettings={appAudio.applySettings}
                     onClose={() => setModal(null)}
                 />
             )}

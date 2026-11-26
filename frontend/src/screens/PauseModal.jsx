@@ -15,13 +15,15 @@ function PauseModal({
     timeLeft = "8:00",
     score = 450,
     initialMusicEnabled = true,
-    initialMusicVolume = 75,
-    initialSoundEnabled = false,
-    initialSoundVolume = 75,
+    initialMusicVolume = 100,
+    initialSoundEnabled = true,
+    initialSoundVolume = 100,
     onMusicToggle,
     onMusicVolumeChange,
     onSoundToggle,
     onSoundVolumeChange,
+    onAudioSettingsChange,
+    onSaveSettings,
     onResume,
     onReplay,
     onQuit
@@ -31,11 +33,36 @@ function PauseModal({
     const [musicVolume, setMusicVolume] = useState(initialMusicVolume);
     const [soundEnabled, setSoundEnabled] = useState(initialSoundEnabled);
     const [soundVolume, setSoundVolume] = useState(initialSoundVolume);
+    const previewSettings = (nextSettings) => {
+        onAudioSettingsChange?.(nextSettings);
+    };
+    const saveSettings = () => {
+        Promise.resolve(
+            onSaveSettings?.({
+                musicEnabled,
+                musicVolume,
+                soundEnabled,
+                soundVolume
+            })
+        ).catch(() => {});
+    };
+    const handleResume = () => {
+        saveSettings();
+        onResume?.();
+    };
+    const handleReplay = () => {
+        saveSettings();
+        onReplay?.();
+    };
+    const handleQuit = () => {
+        saveSettings();
+        onQuit?.();
+    };
 
     return (
         <Modal
             isOpen={isOpen}
-            onClose={onResume}
+            onClose={handleResume}
             aria-labelledby={titleId}
             header={
                 <ModalTitle
@@ -75,18 +102,42 @@ function PauseModal({
                         onMusicToggle={(enabled) => {
                             setMusicEnabled(enabled);
                             onMusicToggle?.(enabled);
+                            previewSettings({
+                                musicEnabled: enabled,
+                                musicVolume,
+                                soundEnabled,
+                                soundVolume
+                            });
                         }}
                         onMusicVolumeChange={(value) => {
                             setMusicVolume(value);
                             onMusicVolumeChange?.(value);
+                            previewSettings({
+                                musicEnabled,
+                                musicVolume: value,
+                                soundEnabled,
+                                soundVolume
+                            });
                         }}
                         onSoundToggle={(enabled) => {
                             setSoundEnabled(enabled);
                             onSoundToggle?.(enabled);
+                            previewSettings({
+                                musicEnabled,
+                                musicVolume,
+                                soundEnabled: enabled,
+                                soundVolume
+                            });
                         }}
                         onSoundVolumeChange={(value) => {
                             setSoundVolume(value);
                             onSoundVolumeChange?.(value);
+                            previewSettings({
+                                musicEnabled,
+                                musicVolume,
+                                soundEnabled,
+                                soundVolume: value
+                            });
                         }}
                     />
                 </div>
@@ -99,7 +150,7 @@ function PauseModal({
                         className="w-full"
                         leadingIcon={<PlayIcon className="size-full" />}
                         showTrailingIcon={false}
-                        onClick={onResume}
+                        onClick={handleResume}
                     />
                     <div className="flex gap-lg">
                         <Button
@@ -109,7 +160,7 @@ function PauseModal({
                             className="flex-1"
                             leadingIcon={<ReplayIcon className="size-full" />}
                             showTrailingIcon={false}
-                            onClick={onReplay}
+                            onClick={handleReplay}
                         />
                         <Button
                             label="QUIT TO MENU"
@@ -118,7 +169,7 @@ function PauseModal({
                             className="flex-1"
                             leadingIcon={<ExitIcon className="size-full" />}
                             showTrailingIcon={false}
-                            onClick={onQuit}
+                            onClick={handleQuit}
                         />
                     </div>
                 </div>

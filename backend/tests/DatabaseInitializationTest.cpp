@@ -32,7 +32,7 @@ namespace {
         }
         return query.value(0).toInt();
     }
-}
+} // namespace
 
 int main(int argc, char **argv) {
     QCoreApplication app(argc, argv);
@@ -59,10 +59,8 @@ int main(int argc, char **argv) {
     require(database.initializeDatabase(schema, appSeed, mockSeed), "Database initialization failed");
     require(scalar(database, QStringLiteral("SELECT COUNT(*) FROM sqlite_master WHERE name = 'legacy_data'")) == 0,
             "Initialization did not remove the legacy schema");
-    require(scalar(database, QStringLiteral("SELECT COUNT(*) FROM users")) > 0,
-            "Mock users were not seeded");
-    require(scalar(database, QStringLiteral("SELECT COUNT(*) FROM stages")) > 0,
-            "Stages were not seeded");
+    require(scalar(database, QStringLiteral("SELECT COUNT(*) FROM users")) > 0, "Mock users were not seeded");
+    require(scalar(database, QStringLiteral("SELECT COUNT(*) FROM stages")) > 0, "Stages were not seeded");
     require(scalar(database, QStringLiteral("PRAGMA user_version")) == 1, "Database version was not set");
     require(scalar(database, QStringLiteral("PRAGMA foreign_keys")) == 1, "Foreign keys are disabled");
 

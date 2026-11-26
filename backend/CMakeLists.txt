@@ -57,8 +57,14 @@ file(GLOB_RECURSE STORAGE_FILES
     "${STORAGE_DIR}/*"
 )
 
+set(WINDOWS_ICON_RESOURCE "")
+if(WIN32)
+    set(WINDOWS_ICON_RESOURCE "${CMAKE_CURRENT_SOURCE_DIR}/app_logo.rc")
+endif()
+
 qt_add_executable(WordSprint
     src/main.cpp
+    ${WINDOWS_ICON_RESOURCE}
     src/controller/BridgeController.h
     src/controller/BridgeController.cpp
     src/models/CEFRLevel.h
@@ -81,6 +87,15 @@ qt_add_executable(WordSprint
     src/repositories/UserRepository.h
     src/repositories/UserRepository.cpp
     src/repositories/SqliteRepositoryUtils.h
+)
+
+set_source_files_properties("${CMAKE_CURRENT_SOURCE_DIR}/app_logo.ico"
+    PROPERTIES QT_RESOURCE_ALIAS "app_logo.ico"
+)
+
+qt_add_resources(WordSprint "app_logo_resource"
+    PREFIX "/"
+    FILES "${CMAKE_CURRENT_SOURCE_DIR}/app_logo.ico"
 )
 
 set(DATABASE_SCHEMA_FILE "${CMAKE_CURRENT_SOURCE_DIR}/sql/schema.sql")

@@ -19,7 +19,7 @@
 namespace {
     std::atomic<unsigned long long> nextConnectionId{0};
     constexpr int databaseVersion = 1;
-}
+} // namespace
 
 DatabaseManager::DatabaseManager() {
     const auto connectionId = nextConnectionId.fetch_add(1);
@@ -87,7 +87,7 @@ bool DatabaseManager::initializeDatabase(const std::string &schemaPath, const st
         if (!query.exec(QStringLiteral("PRAGMA foreign_keys = ON")) ||
             !query.exec(QStringLiteral("PRAGMA foreign_keys")) || !query.next() || !query.value(0).toBool()) {
             const QString error = query.lastError().isValid() ? query.lastError().text()
-                                                             : QStringLiteral("Could not enable foreign keys.");
+                                                              : QStringLiteral("Could not enable foreign keys.");
             const QString previous = QString::fromStdString(m_lastError);
             setLastError(previous.isEmpty() ? error : previous + QStringLiteral("; ") + error);
             return false;
