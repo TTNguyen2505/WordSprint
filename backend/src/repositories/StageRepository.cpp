@@ -153,6 +153,88 @@ std::optional<std::vector<StageStatusDTO>> StageRepository::getStagesWithUnlockS
     return results;
 }
 
+std::optional<std::vector<StageMapItem>> StageRepository::getStageMapForUser(int userId) {
+    if (userId <= 0) {
+        qWarning() << "StageRepository::getStageMapForUser received an invalid user id.";
+        return std::nullopt;
+    }
+
+    const QSqlDatabase database = m_databaseManager.connection();
+    if (!SqliteRepositoryUtils::databaseAvailable(database, "StageRepository", "getStageMapForUser")) {
+        return std::nullopt;
+    }
+
+    QSqlQuery userQuery(database);
+    if (!userQuery.prepare(QStringLiteral("SELECT 1 FROM users WHERE user_id = ?"))) {
+        SqliteRepositoryUtils::warnQueryFailure("StageRepository", "getStageMapForUser.user.prepare", userQuery);
+        return std::nullopt;
+    }
+    userQuery.addBindValue(userId);
+    if (!userQuery.exec()) {
+        SqliteRepositoryUtils::warnQueryFailure("StageRepository", "getStageMapForUser.user", userQuery);
+        return std::nullopt;
+    }
+    if (!userQuery.next()) {
+        qWarning() << "StageRepository::getStageMapForUser found no user with id" << userId;
+        return std::nullopt;
+    }
+
+    QSqlQuery query(database);
+    if (!query.prepare(QStringLiteral(
+                "WITH ranked_records AS ("
+                " SELECT r.stage_id, r.score, r.completion_time,"
+                "        ROW_NUMBER() OVER (PARTITION BY r.stage_id"
+                "          ORDER BY r.score DESC, r.completion_time ASC, r.played_at ASC, r.record_id ASC) AS attempt_rank"
+                " FROM stage_records r WHERE r.user_id = ?"
+                "), best_records AS ("
+                " SELECT stage_id, score AS best_score, completion_time AS best_time"
+                " FROM ranked_records WHERE attempt_rank = 1"
+                "), passed_levels AS ("
+                " SELECT DISTINCT s.cefr_level"
+                " FROM stages s JOIN best_records b ON b.stage_id = s.stage_id"
+                " WHERE b.best_score >= s.pass_score"
+                ")"
+                " SELECT s.stage_id, s.topic_id, t.topic_name, s.cefr_level, s.question_count, s.time_limit,"
+                "        s.pass_score,"
+                "        CASE WHEN s.cefr_level = 'A1' OR previous_pass.cefr_level IS NOT NULL THEN 1 ELSE 0 END,"
+                "        CASE WHEN b.best_score IS NOT NULL AND b.best_score >= s.pass_score THEN 1 ELSE 0 END,"
+                "        b.best_score, b.best_time"
+                " FROM topics t JOIN stages s ON s.topic_id = t.topic_id"
+                " LEFT JOIN best_records b ON b.stage_id = s.stage_id"
+                " LEFT JOIN passed_levels previous_pass ON previous_pass.cefr_level ="
+                "   CASE s.cefr_level WHEN 'A2' THEN 'A1' WHEN 'B1' THEN 'A2' WHEN 'B2' THEN 'B1'"
+                "   WHEN 'C1' THEN 'B2' WHEN 'C2' THEN 'C1' END"
+                " ORDER BY t.topic_id,"
+                "   CASE s.cefr_level WHEN 'A1' THEN 1 WHEN 'A2' THEN 2 WHEN 'B1' THEN 3"
+                "   WHEN 'B2' THEN 4 WHEN 'C1' THEN 5 WHEN 'C2' THEN 6 END, s.stage_id"))) {
+        SqliteRepositoryUtils::warnQueryFailure("StageRepository", "getStageMapForUser.prepare", query);
+        return std::nullopt;
+    }
+    query.addBindValue(userId);
+    if (!query.exec()) {
+        SqliteRepositoryUtils::warnQueryFailure("StageRepository", "getStageMapForUser", query);
+        return std::nullopt;
+    }
+
+    std::vector<StageMapItem> items;
+    while (query.next()) {
+        StageMapItem item;
+        item.stage_id = query.value(0).toInt();
+        item.topic_id = query.value(1).toInt();
+        item.topic_name = query.value(2).toString().toStdString();
+        item.cefr_level = SqliteRepositoryUtils::stringColumn(query, 3);
+        item.question_count = query.value(4).toInt();
+        item.time_limit = query.value(5).toInt();
+        item.pass_score = query.value(6).toInt();
+        item.is_unlocked = query.value(7).toBool();
+        item.is_passed = query.value(8).toBool();
+        item.best_score = query.value(9).toInt();
+        item.best_time = query.value(10).toInt();
+        items.push_back(std::move(item));
+    }
+    return items;
+}
+
 std::vector<WordItem> StageRepository::getRandomWords(int topicId, CEFRLevel level, int limit) {
     std::vector<WordItem> words;
     if (topicId <= 0 || limit <= 0) {

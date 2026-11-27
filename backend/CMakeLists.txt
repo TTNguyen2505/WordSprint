@@ -69,6 +69,7 @@ qt_add_executable(WordSprint
     src/controller/BridgeController.cpp
     src/models/CEFRLevel.h
     src/models/Stage.h
+    src/models/StageMapItem.h
     src/models/StageStatusDTO.h
     src/models/StageRecord.h
     src/models/StageRecordDTO.h

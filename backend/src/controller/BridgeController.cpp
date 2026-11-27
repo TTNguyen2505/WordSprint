@@ -1,8 +1,10 @@
 #include "BridgeController.h"
 
 #include "models/CEFRLevel.h"
+#include "models/StageMapItem.h"
 #include "models/StageRecordDTO.h"
 #include "models/StageStatusDTO.h"
+#include "models/Topic.h"
 #include "models/WordItem.h"
 #include "repositories/RecordRepository.h"
 #include "repositories/StageRepository.h"
@@ -30,6 +32,41 @@ namespace {
                 {QStringLiteral("soundEnabled"), user.sfx_enabled},
                 {QStringLiteral("musicVolume"), user.bgm_volume},
                 {QStringLiteral("soundVolume"), user.sfx_volume}};
+    }
+
+    QVariantMap stageMapToVariant(int userId, const std::vector<Topic> &topics,
+                                  const std::vector<StageMapItem> &stageItems) {
+        std::map<int, QVariantList> stagesByTopic;
+        for (const StageMapItem &stage: stageItems) {
+            stagesByTopic[stage.topic_id].append(
+                    QVariantMap{{QStringLiteral("stageId"), stage.stage_id},
+                                {QStringLiteral("topicId"), stage.topic_id},
+                                {QStringLiteral("topicName"), QString::fromStdString(stage.topic_name)},
+                                {QStringLiteral("cefrLevel"), QString::fromStdString(stage.cefr_level)},
+                                {QStringLiteral("questionCount"), stage.question_count},
+                                {QStringLiteral("timeLimit"), stage.time_limit},
+                                {QStringLiteral("passScore"), stage.pass_score},
+                                {QStringLiteral("isUnlocked"), stage.is_unlocked},
+                                {QStringLiteral("isPassed"), stage.is_passed},
+                                {QStringLiteral("bestScore"), stage.best_score},
+                                {QStringLiteral("bestTime"), stage.best_time}});
+        }
+
+        QVariantList topicList;
+        for (const Topic &topic: topics) {
+            QVariantMap topicItem;
+            topicItem[QStringLiteral("topicId")] = topic.id;
+            topicItem[QStringLiteral("topicName")] = QString::fromStdString(topic.name);
+            topicItem[QStringLiteral("stages")] = stagesByTopic[topic.id];
+            topicList.append(topicItem);
+        }
+
+        const QVariantList cefrLevels = {QStringLiteral("A1"), QStringLiteral("A2"), QStringLiteral("B1"),
+                                         QStringLiteral("B2"), QStringLiteral("C1"), QStringLiteral("C2")};
+        return {{QStringLiteral("status"), QStringLiteral("ok")},
+                {QStringLiteral("userId"), userId},
+                {QStringLiteral("cefrLevels"), cefrLevels},
+                {QStringLiteral("topics"), topicList}};
     }
 } // namespace
 
@@ -64,20 +101,32 @@ QString BridgeController::startStage(const QString &requestJson) {
         return buildErrorResponse(QStringLiteral("Stage repository is unavailable"));
     }
 
-    const QString trimmedRequest = requestJson.trimmed();
-    int stageId = 0;
-    if (trimmedRequest.startsWith(QLatin1Char('{'))) {
-        const QJsonObject request = parseJson(trimmedRequest);
-        stageId = request.value(QStringLiteral("stageId")).toInt();
-    } else {
-        bool ok = false;
-        stageId = trimmedRequest.toInt(&ok);
-        if (!ok) {
-            stageId = 0;
-        }
+    const QJsonObject request = parseJson(requestJson);
+    if (request.isEmpty()) {
+        return buildErrorResponse(QStringLiteral("Invalid JSON payload for startStage"));
     }
-    if (stageId <= 0) {
-        return buildErrorResponse(QStringLiteral("A valid stageId is required"));
+    const QJsonObject payload = request.contains(QStringLiteral("payload")) &&
+                                                request.value(QStringLiteral("payload")).isObject()
+                                        ? request.value(QStringLiteral("payload")).toObject()
+                                        : request;
+    const int userId = payload.value(QStringLiteral("userId")).toInt();
+    const int stageId = payload.value(QStringLiteral("stageId")).toInt();
+    if (userId <= 0 || stageId <= 0) {
+        return buildErrorResponse(QStringLiteral("A valid userId and stageId are required"));
+    }
+
+    const auto stageMap = m_stageRepository->getStageMapForUser(userId);
+    if (!stageMap.has_value()) {
+        return buildErrorResponse(QStringLiteral("Could not load stage map for user"));
+    }
+    const auto selectedStage = std::find_if(stageMap->begin(), stageMap->end(), [stageId](const StageMapItem &item) {
+        return item.stage_id == stageId;
+    });
+    if (selectedStage == stageMap->end()) {
+        return buildErrorResponse(QStringLiteral("Stage was not found"));
+    }
+    if (!selectedStage->is_unlocked) {
+        return buildErrorResponse(QStringLiteral("Stage is locked and cannot be started"));
     }
 
     const std::optional<Stage> stage = m_stageRepository->getStageById(stageId);
@@ -123,6 +172,32 @@ QString BridgeController::startStage(const QString &requestJson) {
     return buildResponse(response);
 }
 
+QString BridgeController::getStageMap(const QString &requestJson) {
+    if (m_stageRepository == nullptr) {
+        return buildErrorResponse(QStringLiteral("Stage repository is unavailable"));
+    }
+
+    const QJsonObject request = parseJson(requestJson);
+    if (request.isEmpty()) {
+        return buildErrorResponse(QStringLiteral("Invalid JSON payload for getStageMap"));
+    }
+    const QJsonObject payload = request.contains(QStringLiteral("payload")) &&
+                                                request.value(QStringLiteral("payload")).isObject()
+                                        ? request.value(QStringLiteral("payload")).toObject()
+                                        : request;
+    const int userId = payload.value(QStringLiteral("userId")).toInt();
+    if (userId <= 0) {
+        return buildErrorResponse(QStringLiteral("A valid userId is required"));
+    }
+
+    const auto topics = m_stageRepository->getAllTopics();
+    const auto stageItems = m_stageRepository->getStageMapForUser(userId);
+    if (!topics.has_value() || !stageItems.has_value()) {
+        return buildErrorResponse(QStringLiteral("Could not load stage map"));
+    }
+    return buildResponse(stageMapToVariant(userId, *topics, *stageItems));
+}
+
 QString BridgeController::completeStage(const QString &requestJson) {
     const QJsonObject req = parseJson(requestJson);
     if (req.isEmpty()) {
@@ -145,6 +220,21 @@ QString BridgeController::completeStage(const QString &requestJson) {
         return buildErrorResponse(QStringLiteral("Stage was not found"));
     }
 
+    const auto unlockedStages = m_stageRepository->getStageMapForUser(userId);
+    if (!unlockedStages.has_value()) {
+        return buildErrorResponse(QStringLiteral("Could not load stage map for user"));
+    }
+    const auto completedStage =
+            std::find_if(unlockedStages->begin(), unlockedStages->end(), [stageId](const StageMapItem &item) {
+                return item.stage_id == stageId;
+            });
+    if (completedStage == unlockedStages->end()) {
+        return buildErrorResponse(QStringLiteral("Stage was not found"));
+    }
+    if (!completedStage->is_unlocked) {
+        return buildErrorResponse(QStringLiteral("Stage is locked and cannot be completed"));
+    }
+
     const std::optional<StageRecord> insertedRecord =
             m_recordRepository->insertRecord(userId, stageId, score, completionTime);
     if (!insertedRecord.has_value()) {
@@ -160,6 +250,11 @@ QString BridgeController::completeStage(const QString &requestJson) {
     const auto stages = m_stageRepository->getStagesWithUnlockStatus(userId);
     if (!stages.has_value()) {
         return buildErrorResponse(QStringLiteral("Record saved, but stage progress could not be loaded"));
+    }
+    const auto topics = m_stageRepository->getAllTopics();
+    const auto stageMap = m_stageRepository->getStageMapForUser(userId);
+    if (!topics.has_value() || !stageMap.has_value()) {
+        return buildErrorResponse(QStringLiteral("Record saved, but the stage map could not be refreshed"));
     }
     const std::vector<CEFRLevel> cefrLevels = {CEFRLevel::A1, CEFRLevel::A2, CEFRLevel::B1,
                                                CEFRLevel::B2, CEFRLevel::C1, CEFRLevel::C2};
@@ -186,8 +281,10 @@ QString BridgeController::completeStage(const QString &requestJson) {
     response[QStringLiteral("bestTime")] = bestRecord->completion_time;
     response[QStringLiteral("nextStageUnlocked")] = nextStageUnlocked;
     response[QStringLiteral("nextStageId")] = nextStageId;
+    response[QStringLiteral("stageMap")] = stageMapToVariant(userId, *topics, *stageMap);
 
     emit stageCompleted(stageId, score);
+    emit stageMapChanged(userId);
     return buildResponse(response);
 }
 
@@ -422,8 +519,14 @@ QString BridgeController::processMessage(const QString &requestJson) {
     if (action == QStringLiteral("startStage") || action == QStringLiteral("startGame")) {
         return startStage(requestJson);
     }
+    if (action == QStringLiteral("selectStage")) {
+        return startStage(requestJson);
+    }
     if (action == QStringLiteral("completeStage") || action == QStringLiteral("endGame")) {
         return completeStage(requestJson);
+    }
+    if (action == QStringLiteral("getStageMap")) {
+        return getStageMap(requestJson);
     }
     if (action == QStringLiteral("processAnswer")) {
         return processAnswer(requestJson);
