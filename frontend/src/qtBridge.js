@@ -100,6 +100,14 @@ function attachSignals() {
             },
             "isReadyChanged"
         );
+        // Listen for stage map changes to keep the frontend synchronized
+        connectSignal(
+            bridge.stageMapChanged,
+            (userId) => {
+                publishEvent({ type: "stageMapChanged", userId });
+            },
+            "stageMapChanged"
+        );
     } catch (error) {
         disconnectSignals();
         throw error;
