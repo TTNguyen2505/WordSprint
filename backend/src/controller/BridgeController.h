@@ -25,10 +25,16 @@ public:
     bool isReady() const { return m_isReady; }
 
 public slots:
+    /**
+     * @brief Start a game stage.
+     * @param requestJson JSON string, e.g. { "stageId": 1 }
+     * @return JSON string response containing stage parameters and word items list.
+     */
     Q_INVOKABLE QString startStage(const QString &requestJson);
 
     Q_INVOKABLE QString getAllTopics();
     Q_INVOKABLE QString getStagesByTopicId(int topicId);
+    Q_INVOKABLE QString getStageMap(const QString &requestJson);
     Q_INVOKABLE QString getProfiles(const QString &requestJson);
     Q_INVOKABLE QString createProfile(const QString &requestJson);
     Q_INVOKABLE QString updateAudio(const QString &requestJson);
@@ -48,6 +54,7 @@ signals:
     void isReadyChanged(bool isReady);
     void stageStarted(int stageId);
     void stageCompleted(int stageId, int score);
+    void stageMapChanged(int userId);
     void jsonMessage(const QString &payload);
 
 private:
