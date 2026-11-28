@@ -120,6 +120,30 @@ if(EXISTS "${DATABASE_SCHEMA_FILE}" AND EXISTS "${DATABASE_APP_DATA_SEED_FILE}" 
     )
 endif()
 
+if(WIN32)
+    option(WORDSPRINT_RESET_DATABASE_ON_BUILD
+           "Delete the current user's WordSprint database whenever the application is built" ON)
+    if(WORDSPRINT_RESET_DATABASE_ON_BUILD)
+        if(NOT EXISTS "${DATABASE_SCHEMA_FILE}" OR NOT EXISTS "${DATABASE_APP_DATA_SEED_FILE}" OR
+           NOT EXISTS "${DATABASE_MOCK_USERS_SEED_FILE}")
+            message(FATAL_ERROR "Cannot reset the database without all schema and seed files.")
+        endif()
+        cmake_policy(PUSH)
+        cmake_policy(SET CMP0112 NEW)
+        add_custom_target(reset_wordsprint_database
+            COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:WordSprint>/database"
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${DATABASE_SCHEMA_FILE}" "${DATABASE_APP_DATA_SEED_FILE}"
+                    "${DATABASE_MOCK_USERS_SEED_FILE}" "$<TARGET_FILE_DIR:WordSprint>/database"
+            COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ResetDatabase.cmake"
+            COMMENT "Resetting the current user's WordSprint database (profiles and progress will be deleted)..."
+            VERBATIM
+        )
+        cmake_policy(POP)
+        add_dependencies(WordSprint reset_wordsprint_database)
+    endif()
+endif()
+
 set_target_properties(WordSprint PROPERTIES
     WIN32_EXECUTABLE TRUE
     MACOSX_BUNDLE TRUE
@@ -175,6 +199,15 @@ else()
 endif()
 
 if(BUILD_TESTING)
+    if(WIN32)
+        add_test(NAME ResetDatabase
+            COMMAND ${CMAKE_COMMAND}
+                    "-DRESET_SCRIPT=${CMAKE_CURRENT_SOURCE_DIR}/cmake/ResetDatabase.cmake"
+                    "-DTEST_ROOT=${CMAKE_CURRENT_BINARY_DIR}/reset-database-test"
+                    -P "${CMAKE_CURRENT_SOURCE_DIR}/tests/ResetDatabaseTest.cmake"
+        )
+    endif()
+
     add_executable(BridgeViewModelTest
         tests/BridgeViewModelTest.cpp
         src/controller/BridgeController.h

@@ -45,13 +45,19 @@ The backend validates audio paths against embedded `qrc:/storage/audio/` resourc
 the embedded pronunciation and are assigned only to words with an available audio resource.
 On the first launch of this version, the application resets an
 existing unversioned database, deleting its old profiles, progress, and vocabulary. Later launches
-retain the new data.
+without a build retain the new data.
+
+On Windows, every build of the `WordSprint` target deletes the current user's database, including
+profiles and progress, and copies the latest seeds. Close WordSprint before building. The database is
+deleted before compilation even if the build later fails; the next launch creates it from the copied
+seeds. To preserve data, configure with `-DWORDSPRINT_RESET_DATABASE_ON_BUILD=OFF`. On other platforms,
+builds do not reset the database.
 
 To generate missing audio and update the seed paths, install `edge-tts` and run
 `py scripts\generate_word_audio.py`. To generate missing images, install `Pillow`, set
 `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then run `py scripts\generate_word_images.py`.
 Image generation uses Cloudflare Workers AI and may incur charges. Both scripts reuse existing files;
-rebuild the app to embed new resources. Seed changes do not update existing databases.
+rebuild the app to embed new resources. Seed changes do not update existing databases unless reset.
 
 ## Clone the repository
 
