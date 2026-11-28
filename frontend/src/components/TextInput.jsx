@@ -69,7 +69,7 @@ function TextInput({
     return (
         <article
             className={twMerge(
-                "shadow-elevation-200 flex min-w-0 w-full",
+                "shadow-elevation-200 grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto]",
                 className
             )}
             data-state={resolvedState}
@@ -109,7 +109,7 @@ function TextInput({
                         autoComplete={autoComplete}
                         className={clsx(
                             twMerge(
-                                "min-w-0 flex-1 placeholder:text-content-muted focus:border-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60",
+                                "min-w-0 flex-1 overflow-x-auto placeholder:text-content-muted focus:border-0 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
                                 inputClassName
                             ),
                             "text-body-default"
@@ -134,8 +134,25 @@ function TextInput({
                 {showSupportingText && (
                     <p
                         id={`${inputId}-supporting-text`}
+                        tabIndex={0}
+                        onKeyDown={(event) => {
+                            const text = event.currentTarget;
+                            if (text.scrollWidth <= text.clientWidth) return;
+                            if (event.key === "ArrowLeft") {
+                                text.scrollLeft -= 40;
+                            } else if (event.key === "ArrowRight") {
+                                text.scrollLeft += 40;
+                            } else if (event.key === "Home") {
+                                text.scrollLeft = 0;
+                            } else if (event.key === "End") {
+                                text.scrollLeft = text.scrollWidth;
+                            } else {
+                                return;
+                            }
+                            event.preventDefault();
+                        }}
                         className={clsx(
-                            "text-body-sm",
+                            "text-body-sm min-w-0 overflow-x-auto border-0 whitespace-nowrap focus-visible:underline focus-visible:outline-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
                             resolvedStyles.supportingText
                         )}
                     >
@@ -148,7 +165,7 @@ function TextInput({
                     aria-hidden="true"
                     className={twMerge(
                         clsx(
-                            "grid aspect-square shrink-0 place-items-center border-[length:var(--border-width-default)] border-l-0 border-stroke-default p-xs",
+                            "grid aspect-square box-border shrink-0 place-items-center border-[length:var(--border-width-default)] border-l-0 border-stroke-default p-xs",
                             resolvedStyles.feedbackBackground,
                             resolvedStyles.feedbackColor,
                             feedbackClassName
@@ -156,7 +173,7 @@ function TextInput({
                     )}
                 >
                     <span
-                        className="size-full bg-current"
+                        className="aspect-square h-full bg-current"
                         style={{
                             maskImage: `url("${FeedbackIcon}")`,
                             maskPosition: "center",

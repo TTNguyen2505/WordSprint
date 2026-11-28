@@ -10,6 +10,9 @@ Shared CSS tokens and typography utilities are defined in [`src/index.css`](src/
 
 Reusable UI components are in [`src/components/`](src/components/), including buttons, badges, tabs, inputs, modals, cards, and quiz elements. Keep component styles bound to the shared tokens when their existing values match exactly; retain one-off values that do not have a corresponding token.
 
+TextInput keeps long input and supporting text horizontally scrollable without visible scrollbars.
+Focused supporting text can be scrolled with the arrow, Home, and End keys.
+
 ## Requirements
 
 - Node.js 22.12 or newer.
