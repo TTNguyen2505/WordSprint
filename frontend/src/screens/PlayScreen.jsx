@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import ClockIcon from "../assets/icons/clock.svg?react";
 import PauseIcon from "../assets/icons/pause.svg?react";
 import TopicIcon from "../assets/icons/topic.svg?react";
+import { getAudioReplayLimit } from "../audioQuestion.js";
 import Badge from "../components/Badge";
 import Button from "../components/Button";
 import InfoPill from "../components/InfoPill";
@@ -9,9 +10,8 @@ import PipelineItem from "../components/PipelineItem";
 import Quiz from "../components/Quiz";
 import PauseModal from "./PauseModal";
 
-const questionCount = 8;
-
 function PlayScreen({
+    questions = [],
     username = "Player_1",
     score = 0,
     topic = "SCHOOL",
@@ -27,11 +27,13 @@ function PlayScreen({
     onReplay,
     onQuit
 }) {
+    const questionCount = questions.length;
     const [activeQuestion, setActiveQuestion] = useState(0);
     const [answers, setAnswers] = useState(() => Array(questionCount).fill(""));
     const [paused, setPaused] = useState(false);
     const [message, setMessage] = useState("");
     const [countdown, setCountdown] = useState(3);
+    const currentQuestion = questions[activeQuestion];
 
     useEffect(() => {
         if (countdown === 0) return undefined;
@@ -177,7 +179,18 @@ function PlayScreen({
                             </header>
                             <div className="relative w-full">
                                 <Quiz
+                                    key={`${activeQuestion}:${currentQuestion?.word_id ?? ""}`}
                                     className="max-w-none"
+                                    mode={currentQuestion?.mode ?? "scramble"}
+                                    audioQuestionId={`${activeQuestion}:${currentQuestion?.word_id ?? ""}`}
+                                    audioText={currentQuestion?.target_word}
+                                    audioFallbackUrl={
+                                        currentQuestion?.audioFallbackUrl
+                                    }
+                                    audioFallbackStatus={
+                                        currentQuestion?.audioFallbackStatus
+                                    }
+                                    maxPlays={getAudioReplayLimit(level)}
                                     answer={answers[activeQuestion]}
                                     onChange={updateAnswer}
                                     onSubmit={() =>

@@ -8,6 +8,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSqlQuery>
 
 #include <algorithm>
 #include <cstdlib>
@@ -73,6 +74,45 @@ int main(int argc, char **argv) {
         require(stage.value("status").toString() == (i < 5 ? "available" : "locked"),
                 "Stage progress leaked between profiles");
     }
+    const int newPlayerId = rows[6].toObject().value("id").toInt();
+    const QJsonObject startedStage =
+            parse(bridge.startStage(QStringLiteral("{\"userId\":%1,\"stageId\":1}").arg(newPlayerId)));
+    require(startedStage.value("status") == "ok", "Could not start an unlocked stage");
+    const QJsonArray startedWords = startedStage.value("words").toArray();
+    require(startedWords.size() == 1 && startedWords[0].toObject().value("target_word") == "hello",
+            "Stage start did not return its vocabulary");
+    require(startedWords[0].toObject().value("audioFallbackStatus") == "missing" &&
+                    startedWords[0].toObject().value("audioFallbackUrl").toString().isEmpty(),
+            "Missing audio fallback was not reported");
+
+    QSqlQuery setMissingAudioResource(db.connection());
+    require(setMissingAudioResource.exec(QStringLiteral("UPDATE word_pool SET audio_path = "
+                                                         "'storage/audio/hello.wav' WHERE word_id = 1")),
+            "Could not set a missing audio resource path");
+    const QJsonObject missingAudioStage =
+            parse(bridge.startStage(QStringLiteral("{\"userId\":%1,\"stageId\":1}").arg(newPlayerId)));
+    require(missingAudioStage.value("words").toArray()[0].toObject().value("audioFallbackStatus") ==
+                    "not_found",
+            "Missing Qt audio resources were not reported");
+
+    QSqlQuery setInvalidAudioPath(db.connection());
+    require(setInvalidAudioPath.exec(QStringLiteral("UPDATE word_pool SET audio_path = '../audio/hello.mp3' "
+                                                    "WHERE word_id = 1")),
+            "Could not set an invalid audio resource path");
+    const QJsonObject invalidAudioStage =
+            parse(bridge.startStage(QStringLiteral("{\"userId\":%1,\"stageId\":1}").arg(newPlayerId)));
+    require(invalidAudioStage.value("words").toArray()[0].toObject().value("audioFallbackStatus") ==
+                    "invalid_path",
+            "Invalid audio resource paths were not rejected");
+
+    QSqlQuery clearTargetWord(db.connection());
+    require(clearTargetWord.exec(QStringLiteral("UPDATE word_pool SET target_word = '  ' WHERE word_id = 1")),
+            "Could not clear a target word for validation");
+    const QJsonObject stageWithoutWords =
+            parse(bridge.startStage(QStringLiteral("{\"userId\":%1,\"stageId\":1}").arg(newPlayerId)));
+    require(stageWithoutWords.value("status") == "error",
+            "A stage with fewer valid words than its question count was accepted");
+
     require(records.insertRecord(7, 3, 69, 1).has_value(), "Could not insert failed A1 attempt");
     auto progress = stages.getStagesWithUnlockStatus(7);
     require(progress.has_value(), "Could not load progress after failed attempt");

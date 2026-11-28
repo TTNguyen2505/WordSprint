@@ -2,7 +2,7 @@
 
 WordSprint is a desktop English vocabulary puzzle game. It aims to help learners practice vocabulary, listening, reaction speed, and typing through short, timed challenges.
 
-> **Current status:** The menu, profiles, stage progress, and leaderboards load from SQLite through Qt WebChannel. Profile creation and audio settings are saved; profile deletion is disabled. Stage cards open a mock play screen with pause, resume, replay, and quit navigation. Its result controls preview navigation but do not save scores or unlock stages. Answer checking, the gameplay timer, audio playback, and other menu screens are not yet implemented.
+> **Current status:** The menu, profiles, stage progress, and leaderboards load from SQLite through Qt WebChannel. Profile creation and audio settings are saved; profile deletion is disabled. Stage cards load stage questions through Qt WebChannel. Audio questions use browser speech synthesis with an embedded audio resource as a fallback, hide the hint image, and allow CEFR-based manual replays. Gameplay answer checking, the timer, saved results, and other menu screens are not yet implemented.
 
 ## Product vision
 
@@ -37,10 +37,16 @@ Qt/QML provide the desktop shell and display the React frontend in a `WebEngineV
 
 Seeded words use placeholder image paths under `storage/images/`; the image files are not included yet.
 Files in `storage/` are embedded at build time under `qrc:/storage/`, preserving their subdirectories.
-The WebChannel currently returns the database paths as relative strings, not `qrc:` URLs.
-Audio paths are optional and point to `storage/audio/` when audio is available. On the first launch of
-this version, the application resets an existing unversioned database, deleting its old profiles,
-progress, and vocabulary. Later launches retain the new data.
+The WebChannel returns non-audio database paths as relative strings. For stage questions, it validates
+optional audio files and returns an embedded `qrc:/storage/audio/...` URL only when the resource exists.
+The current seed data has no audio resources (`audio_path` is `NULL`), so pronunciation currently
+depends on browser speech synthesis; fallback playback requires adding matching files and database paths.
+Audio paths are optional and point to `storage/audio/` when a pronunciation resource is available.
+The backend validates fallback audio paths against embedded `qrc:/storage/audio/` resources and sends
+the resolved URL to React. Audio questions use browser speech synthesis first; they try the resource
+only when speech synthesis fails. On the first launch of this version, the application resets an
+existing unversioned database, deleting its old profiles, progress, and vocabulary. Later launches
+retain the new data.
 
 ## Clone the repository
 

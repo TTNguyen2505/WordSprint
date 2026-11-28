@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Button from "./components/Button";
 import Modal from "./components/Modal";
 import ModalTitle from "./components/ModalTitle";
@@ -12,12 +12,17 @@ import StageResultModal from "./screens/StageResultModal";
 import { useAppAudio } from "./hooks/useAppAudio";
 import { useAppSessionStore } from "./viewModels/appSessionStore";
 import { useMenuViewModel } from "./viewModels/menuViewModel";
+import { buildStageQuestions } from "./audioQuestion.js";
+import { startStage as requestStartStage } from "./qtBridge.js";
 
 function Application() {
     const [modal, setModal] = useState(null);
     const [selectedStage, setSelectedStage] = useState(null);
+    const [stageData, setStageData] = useState(null);
+    const [stageError, setStageError] = useState("");
     const [stageRun, setStageRun] = useState(0);
     const [stageResult, setStageResult] = useState(null);
+    const stageRequestId = useRef(0);
     const unavailableTitleId = useId();
     const activeProfile = useMenuViewModel();
     const status = useAppSessionStore((state) => state.status);
@@ -42,15 +47,36 @@ function Application() {
 
     const unavailable = (feature) => setModal({ unavailable: feature });
 
-    const startStage = (stage) => {
+    const startStage = async (stage) => {
+        const requestId = ++stageRequestId.current;
         setSelectedStage(stage);
+        setStageData(null);
+        setStageError("");
         setStageRun((current) => current + 1);
         setStageResult(null);
         setModal(null);
+
+        try {
+            const response = await requestStartStage({
+                userId: activeProfile.id,
+                stageId: stage.id
+            });
+            const questions = buildStageQuestions(response.words ?? []);
+            if (requestId === stageRequestId.current) {
+                setStageData({ ...response, questions });
+            }
+        } catch (error) {
+            if (requestId === stageRequestId.current) {
+                setStageError(error.message);
+            }
+        }
     };
 
     const quitStage = () => {
+        stageRequestId.current += 1;
         setSelectedStage(null);
+        setStageData(null);
+        setStageError("");
         setStageResult(null);
         setModal(null);
     };
@@ -99,6 +125,28 @@ function Application() {
     }
 
     if (selectedStage) {
+        if (stageError) {
+            return (
+                <main className="flex h-[900px] w-[1200px] flex-col items-center justify-center gap-md bg-surface-canvas">
+                    <p role="alert">{stageError}</p>
+                    <Button
+                        label="Back to stages"
+                        showLeadingIcon={false}
+                        showTrailingIcon={false}
+                        onClick={quitStage}
+                    />
+                </main>
+            );
+        }
+
+        if (!stageData) {
+            return (
+                <main className="flex h-[900px] w-[1200px] items-center justify-center bg-surface-canvas">
+                    <p role="status">Loading stage questions...</p>
+                </main>
+            );
+        }
+
         const nextStage = activeProfile.stages.find(
             (stage) => stage.id === selectedStage.previewNextStageId
         );
@@ -108,9 +156,10 @@ function Application() {
                 <div inert={Boolean(stageResult)}>
                     <PlayScreen
                         key={stageRun}
+                        questions={stageData.questions}
                         username={activeProfile.name}
                         topic={selectedStage.topic}
-                        level={selectedStage.level}
+                        level={stageData.cefrLevel}
                         initialMusicEnabled={activeProfile.musicEnabled}
                         initialMusicVolume={activeProfile.musicVolume}
                         initialSoundEnabled={activeProfile.soundEnabled}

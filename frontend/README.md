@@ -2,7 +2,7 @@
 
 This directory contains WordSprint's React frontend. It can be installed, run, checked, and built independently of the Qt desktop application. The same frontend is also used by the root project, where Qt WebEngine displays it inside the desktop shell.
 
-> **Current status:** The menu, profiles, audio settings, and leaderboards load through the Qt backend and require the desktop application. Profile creation and audio settings persist in SQLite; profile deletion is disabled. Gameplay remains a preview and does not save results.
+> **Current status:** The menu, profiles, audio settings, leaderboards, and stage questions load through the Qt backend and require the desktop application. Profile creation and audio settings persist in SQLite; profile deletion is disabled. Audio questions use browser speech synthesis with an embedded Qt audio resource as a fallback, hide the hint image, and allow CEFR-based manual replays. Gameplay still does not check answers or save results.
 
 ## Design system
 

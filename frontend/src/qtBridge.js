@@ -280,7 +280,7 @@ async function invokeBridgeMethod(methodName, request = {}) {
 }
 
 export function startStage(request) {
-    return invokeBridgeMethod("startStage", request);
+    return invokeDataMethod("startStage", request);
 }
 
 export function completeStage(request) {
