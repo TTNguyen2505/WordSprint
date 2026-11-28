@@ -1,5 +1,7 @@
 import { createStore } from "zustand/vanilla";
-import * as bridge from "../qtBridge.js";
+import { completeStage, startStage } from "../services/qtBridge.js";
+
+const defaultApi = { startStage, completeStage };
 
 const levels = {
     A1: { points: 10, hidden: 0.35, plays: 3 },
@@ -112,11 +114,6 @@ function makeQuestions(words, level, random) {
     });
 }
 
-export function formatTime(seconds) {
-    const minutes = Math.floor(seconds / 60);
-    return `${minutes}:${String(seconds % 60).padStart(2, "0")}`;
-}
-
 export function findQueuedQuestion(questions, activeIndex, direction) {
     for (
         let index = activeIndex + direction;
@@ -131,7 +128,7 @@ export function findQueuedQuestion(questions, activeIndex, direction) {
 export function createPlayViewModel({
     stageId,
     userId,
-    api = bridge,
+    api = defaultApi,
     now = () => performance.now(),
     random = Math.random
 }) {

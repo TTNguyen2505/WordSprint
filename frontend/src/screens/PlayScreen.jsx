@@ -3,17 +3,17 @@ import { useStore } from "zustand";
 import ClockIcon from "../assets/icons/clock.svg?react";
 import PauseIcon from "../assets/icons/pause.svg?react";
 import TopicIcon from "../assets/icons/topic.svg?react";
-import Badge from "../components/Badge";
-import Button from "../components/Button";
-import InfoPill from "../components/InfoPill";
-import PipelineItem from "../components/PipelineItem";
-import Quiz from "../components/Quiz";
-import PauseModal from "./PauseModal";
+import Badge from "../components/primitives/Badge";
+import Button from "../components/primitives/Button";
+import InfoPill from "../components/primitives/InfoPill";
+import PipelineItem from "../components/composite/PipelineItem";
+import Quiz from "../components/composite/Quiz/Quiz";
+import PauseModal from "../modals/PauseModal";
 import {
     createPlayViewModel,
-    findQueuedQuestion,
-    formatTime
+    findQueuedQuestion
 } from "../viewModels/playViewModel";
+import { formatTime } from "../utils/formatTime";
 
 function PlayScreen({
     username = "Player_1",
