@@ -1,14 +1,14 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import sampleThumbnail from "../../assets/sample-stage-card-thumbnail.jpg";
-import BoltIcon from "../../assets/icons/bolt.svg?react";
-import CheckIcon from "../../assets/icons/check.svg?react";
-import LockIcon from "../../assets/icons/lock.svg?react";
-import PlayIcon from "../../assets/icons/play.svg?react";
-import ReplayIcon from "../../assets/icons/replay.svg?react";
-import ScoreIcon from "../../assets/icons/score.svg?react";
-import Badge from "../primitives/Badge";
-import Button from "../primitives/Button";
+import sampleThumbnail from "@/assets/sample-stage-card-thumbnail.jpg";
+import BoltIcon from "@/assets/icons/bolt.svg?react";
+import CheckIcon from "@/assets/icons/check.svg?react";
+import LockIcon from "@/assets/icons/lock.svg?react";
+import PlayIcon from "@/assets/icons/play.svg?react";
+import ReplayIcon from "@/assets/icons/replay.svg?react";
+import ScoreIcon from "@/assets/icons/score.svg?react";
+import Badge from "@/components/primitives/Badge";
+import Button from "@/components/primitives/Button";
 
 function StageCard({
     stageId = "STAGE ID",

@@ -1,10 +1,10 @@
 import { useId, useState } from "react";
-import CloseIcon from "../assets/icons/close.svg?react";
-import SaveIcon from "../assets/icons/save.svg?react";
-import AudioSettings from "../components/composite/AudioSettings";
-import Button from "../components/primitives/Button";
-import Modal from "../components/primitives/Modal";
-import ModalTitle from "../components/primitives/ModalTitle";
+import CloseIcon from "@/assets/icons/close.svg?react";
+import SaveIcon from "@/assets/icons/save.svg?react";
+import AudioSettings from "@/components/composite/AudioSettings";
+import Button from "@/components/primitives/Button";
+import Modal from "@/components/primitives/Modal";
+import ModalTitle from "@/components/primitives/ModalTitle";
 
 function GameSettingsModal({
     isOpen = true,

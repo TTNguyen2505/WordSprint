@@ -10,6 +10,8 @@ Shared CSS tokens and typography utilities are defined in [`src/index.css`](src/
 
 Reusable UI components are in [`src/components/`](src/components/), including buttons, badges, tabs, inputs, modals, cards, and quiz elements. Keep component styles bound to the shared tokens when their existing values match exactly; retain one-off values that do not have a corresponding token.
 
+In Vite-loaded frontend code, use `@/` for imports from other directories under `src/`. Same-directory imports can remain relative. Modules and tests loaded directly by Node use relative imports because Node does not resolve the Vite alias.
+
 TextInput keeps long input and supporting text horizontally scrollable without visible scrollbars.
 Focused supporting text can be scrolled with the arrow, Home, and End keys.
 
@@ -54,16 +56,22 @@ The application needs the Qt WebChannel to load its data, so run it in the deskt
 
 Run these commands from `frontend/`:
 
-| Command                                                         | Purpose                                                      |
-| --------------------------------------------------------------- | ------------------------------------------------------------ |
-| `pnpm build`                                                    | Create the production frontend in `dist/`                    |
-| `pnpm preview`                                                  | Preview the production build locally; run `pnpm build` first |
-| `pnpm lint`                                                     | Run ESLint                                                   |
-| `node --test src\viewModels\*.test.js src\components\*.test.js` | Run frontend tests                                           |
-| `pnpm format:check`                                             | Check formatting with Prettier                               |
-| `pnpm format`                                                   | Format files with Prettier                                   |
+| Command                    | Purpose                                                      |
+| -------------------------- | ------------------------------------------------------------ |
+| `pnpm build`               | Create the production frontend in `dist/`                    |
+| `pnpm preview`             | Preview the production build locally; run `pnpm build` first |
+| `pnpm lint`                | Run ESLint                                                   |
+| Frontend tests (see below) | Run frontend tests                                           |
+| `pnpm format:check`        | Check formatting with Prettier                               |
+| `pnpm format`              | Format files with Prettier                                   |
 
 `dist/` is generated output and is excluded from version control.
+
+Run all frontend tests in PowerShell:
+
+```powershell
+node --test (Get-ChildItem src -Recurse -Filter *.test.js | ForEach-Object { $_.FullName })
+```
 
 ## Use the frontend in the desktop app
 

@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import PlayIcon from "../../assets/icons/play.svg?react";
+import PlayIcon from "@/assets/icons/play.svg?react";
 
 function InfoPill({
     label = "Key",

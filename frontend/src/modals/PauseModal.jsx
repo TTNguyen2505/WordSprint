@@ -1,12 +1,12 @@
 import { useId, useState } from "react";
-import ExitIcon from "../assets/icons/exit.svg?react";
-import PlayIcon from "../assets/icons/play.svg?react";
-import ReplayIcon from "../assets/icons/replay.svg?react";
-import AudioSettings from "../components/composite/AudioSettings";
-import Button from "../components/primitives/Button";
-import InfoPill from "../components/primitives/InfoPill";
-import Modal from "../components/primitives/Modal";
-import ModalTitle from "../components/primitives/ModalTitle";
+import ExitIcon from "@/assets/icons/exit.svg?react";
+import PlayIcon from "@/assets/icons/play.svg?react";
+import ReplayIcon from "@/assets/icons/replay.svg?react";
+import AudioSettings from "@/components/composite/AudioSettings";
+import Button from "@/components/primitives/Button";
+import InfoPill from "@/components/primitives/InfoPill";
+import Modal from "@/components/primitives/Modal";
+import ModalTitle from "@/components/primitives/ModalTitle";
 
 function PauseModal({
     isOpen = true,

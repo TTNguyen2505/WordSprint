@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import Badge from "../primitives/Badge";
+import Badge from "@/components/primitives/Badge";
 
 const statusStyles = {
     Solved: {

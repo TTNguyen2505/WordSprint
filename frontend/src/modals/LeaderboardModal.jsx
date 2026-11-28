@@ -1,16 +1,16 @@
 import { useEffect, useId, useRef } from "react";
-import ArrowBackIcon from "../assets/icons/arrow-back-1.svg?react";
-import ArrowForwardIcon from "../assets/icons/arrow-forward-1.svg?react";
-import CloseIcon from "../assets/icons/close.svg?react";
-import Button from "../components/primitives/Button";
-import IconButton from "../components/primitives/IconButton";
-import LeaderboardRecord from "../components/composite/LeaderboardRecord";
-import Modal from "../components/primitives/Modal";
-import ModalTitle from "../components/primitives/ModalTitle";
-import Navigation from "../components/composite/Navigation/Navigation";
-import { useLeaderboardViewModel } from "../viewModels/leaderboardViewModel";
-import { useActiveProfile } from "../stores/session.store";
-import { formatTime } from "../utils/formatTime";
+import ArrowBackIcon from "@/assets/icons/arrow-back-1.svg?react";
+import ArrowForwardIcon from "@/assets/icons/arrow-forward-1.svg?react";
+import CloseIcon from "@/assets/icons/close.svg?react";
+import Button from "@/components/primitives/Button";
+import IconButton from "@/components/primitives/IconButton";
+import LeaderboardRecord from "@/components/composite/LeaderboardRecord";
+import Modal from "@/components/primitives/Modal";
+import ModalTitle from "@/components/primitives/ModalTitle";
+import Navigation from "@/components/composite/Navigation/Navigation";
+import { useLeaderboardViewModel } from "@/viewModels/leaderboardViewModel";
+import { useActiveProfile } from "@/stores/session.store";
+import { formatTime } from "@/utils/formatTime";
 
 function LeaderboardModal({ isOpen = true, onClose }) {
     const titleId = useId();

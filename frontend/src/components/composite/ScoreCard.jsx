@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import TrophyIcon from "../../assets/icons/trophy.svg?react";
-import ArrowForwardIcon from "../../assets/icons/arrow-forward-1.svg?react";
-import Button from "../primitives/Button";
+import TrophyIcon from "@/assets/icons/trophy.svg?react";
+import ArrowForwardIcon from "@/assets/icons/arrow-forward-1.svg?react";
+import Button from "@/components/primitives/Button";
 
 function ScoreCard({
     label = "TOTAL SCORE",

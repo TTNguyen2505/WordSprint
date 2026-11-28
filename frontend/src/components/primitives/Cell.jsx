@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import DeleteIcon from "../../assets/icons/delete.svg?react";
+import DeleteIcon from "@/assets/icons/delete.svg?react";
 import Badge from "./Badge";
 import IconButton from "./IconButton";
 

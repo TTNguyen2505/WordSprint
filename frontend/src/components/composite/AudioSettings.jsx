@@ -1,4 +1,4 @@
-import Slider from "../primitives/Slider";
+import Slider from "@/components/primitives/Slider";
 
 function AudioSettings({
     musicEnabled,

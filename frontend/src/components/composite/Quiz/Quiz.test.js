@@ -27,6 +27,11 @@ test("audio questions show their hint image, blank slots and sound controls", ()
     assert.match(markup, /aria-label="Space"/);
 });
 
+test("does not substitute a thumbnail when no question image is provided", () => {
+    const markup = renderToStaticMarkup(React.createElement(Quiz));
+    assert.doesNotMatch(markup, /<img\b[^>]*\bsrc=/);
+});
+
 test("incorrect answers show accessible supporting text", () => {
     const markup = renderToStaticMarkup(
         React.createElement(Quiz, {
