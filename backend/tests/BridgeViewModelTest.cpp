@@ -160,6 +160,7 @@ int main(int argc, char **argv) {
         require(stage->time_limit == expectedTimeLimits[i] &&
                         started.value("timeLimit").toInt() == expectedTimeLimits[i],
                 "Seeded stage has an incorrect time limit");
+        require(started.value("passScore").toInt(-1) == stage->pass_score, "Stage pass score was not returned");
         require(started.value("status") == "ok" && words.size() == expectedQuestionCounts[i] &&
                         started.value("questionCount").toInt() == expectedQuestionCounts[i],
                 "Seeded stage returned an incorrect number of questions");
@@ -173,8 +174,14 @@ int main(int argc, char **argv) {
             selectedWord.addBindValue(word.value("word_id").toInt());
             require(selectedWord.exec() && selectedWord.next(), "Could not query selected word");
             require(!selectedWord.value(0).isNull(), "Seeded word has no audio path");
-            require(word.value("audioFallbackStatus") == "not_found",
-                    "Unembedded audio fallback was not reported");
+            if (selectedWord.value(0).toString() == QStringLiteral("storage/audio/hello.mp3")) {
+                require(word.value("audioFallbackStatus") == "available" &&
+                                word.value("audio_path").toString() == selectedWord.value(0).toString(),
+                        "Embedded audio path was not returned");
+            } else {
+                require(word.value("audioFallbackStatus") == "not_found" && word.value("audio_path").isNull(),
+                        "Unembedded audio path should not be playable");
+            }
         }
     }
     QSqlQuery audioChanges(db.connection());
@@ -191,7 +198,8 @@ int main(int argc, char **argv) {
         require(result.value("status") == "ok", "Could not start stage for audio fallback validation");
         for (const QJsonValue &value: result.value("words").toArray()) {
             require(value.toObject().value("audioFallbackStatus") == QString::fromLatin1(test.second) &&
-                            value.toObject().value("audioFallbackUrl").toString().isEmpty(),
+                            value.toObject().value("audioFallbackUrl").toString().isEmpty() &&
+                            value.toObject().value("audio_path").isNull(),
                     "Audio fallback status was not reported correctly");
         }
     }

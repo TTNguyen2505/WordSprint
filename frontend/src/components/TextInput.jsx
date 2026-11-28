@@ -54,6 +54,7 @@ function TextInput({
     maxLength,
     id,
     autoFocus = false,
+    inputRef,
     "aria-label": ariaLabel
 }) {
     const [internalValue, setInternalValue] = useState(defaultValue);
@@ -97,6 +98,7 @@ function TextInput({
                         </span>
                     )}
                     <input
+                        ref={inputRef}
                         aria-label={ariaLabel}
                         aria-describedby={
                             showSupportingText

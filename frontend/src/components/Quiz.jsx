@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import { playQuestionAudio } from "../audioQuestion.js";
 import thumbnail from "../assets/quiz-question-thumbnail.png";
 import ArrowBackIcon from "../assets/icons/arrow_back_1.svg?react";
 import ArrowForwardIcon from "../assets/icons/arrow_forward_1.svg?react";
@@ -22,8 +21,10 @@ function Quiz({
     badgeLabel,
     imageSrc = thumbnail,
     imageAlt = "Quiz clue illustration",
+    onImageError,
     letters,
     answer,
+    answerError = "",
     onChange,
     onSubmit,
     onClear,
@@ -31,13 +32,12 @@ function Quiz({
     hasPrevious = true,
     onNext,
     hasNext = true,
-    audioQuestionId,
-    audioText,
-    audioFallbackUrl,
-    audioFallbackStatus,
+    onPlaySound,
+    playsRemaining = 3,
     maxPlays = 3,
     instruction,
     disabled = false,
+    answerDisabled = false,
     className
 }) {
     const modeLabels = {
@@ -48,11 +48,7 @@ function Quiz({
     const currentBadgeLabel =
         badgeLabel ?? modeLabels[mode] ?? modeLabels.scramble;
     const [internalAnswer, setInternalAnswer] = useState(answer ?? "");
-    const [playsRemaining, setPlaysRemaining] = useState(maxPlays);
-    const [audioStatus, setAudioStatus] = useState("idle");
-    const [audioError, setAudioError] = useState("");
-    const remainingPlaysRef = useRef(maxPlays);
-    const activePlaybackRef = useRef(null);
+    const inputRef = useRef(null);
     const effectiveLetters = letters ?? DEFAULT_LETTERS[mode] ?? [];
     const currentInstruction =
         instruction ??
@@ -77,62 +73,13 @@ function Quiz({
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        onSubmit?.((answer ?? internalAnswer).trim());
+        if (onSubmit?.((answer ?? internalAnswer).trim()) === false) {
+            inputRef.current?.select();
+        }
     };
 
     const currentAnswer = answer ?? internalAnswer;
-    const playAudio = useCallback(
-        async (manual = false) => {
-            if (activePlaybackRef.current) return;
-            if (manual && remainingPlaysRef.current <= 0) return;
-
-            const controller = new AbortController();
-            activePlaybackRef.current = controller;
-            setAudioStatus("playing");
-            setAudioError("");
-
-            try {
-                await playQuestionAudio({
-                    targetWord: audioText,
-                    fallbackUrl: audioFallbackUrl,
-                    fallbackStatus: audioFallbackStatus,
-                    signal: controller.signal
-                });
-                if (controller.signal.aborted) return;
-                if (manual) {
-                    remainingPlaysRef.current -= 1;
-                    setPlaysRemaining(remainingPlaysRef.current);
-                }
-                setAudioStatus("idle");
-            } catch (error) {
-                if (!controller.signal.aborted) {
-                    setAudioError(error.message);
-                    setAudioStatus("error");
-                }
-            } finally {
-                if (activePlaybackRef.current === controller) {
-                    activePlaybackRef.current = null;
-                }
-            }
-        },
-        [audioFallbackStatus, audioFallbackUrl, audioText]
-    );
-
-    useEffect(() => {
-        if (mode !== "audio") return undefined;
-
-        const timeoutId = window.setTimeout(() => {
-            void playAudio();
-        }, 0);
-        return () => {
-            window.clearTimeout(timeoutId);
-            activePlaybackRef.current?.abort();
-            activePlaybackRef.current = null;
-        };
-    }, [audioQuestionId, mode, playAudio]);
-
-    const isPlayDisabled =
-        disabled || playsRemaining <= 0 || audioStatus === "playing";
+    const isPlayDisabled = disabled || playsRemaining <= 0;
     return (
         <section
             className={twMerge(
@@ -174,66 +121,59 @@ function Quiz({
                 </nav>
             </header>
 
-            {mode !== "audio" && (
-                <div className="aspect-[16/9] w-full max-w-[480px] overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
-                    <img
-                        src={imageSrc}
-                        alt={imageAlt}
-                        className="size-full object-cover"
-                    />
-                </div>
-            )}
+            <div className="aspect-[16/9] w-full max-w-[480px] overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
+                <img
+                    src={imageSrc}
+                    alt={imageAlt}
+                    onError={onImageError}
+                    className="size-full object-cover"
+                />
+            </div>
 
             {mode === "audio" && (
-                <>
-                    <Button
-                        label={`PLAY SOUND (${playsRemaining}/${maxPlays})`}
-                        variant="primary"
-                        size="large"
-                        leadingIcon={<MusicNoteIcon className="size-full" />}
-                        showTrailingIcon={false}
-                        onClick={() => void playAudio(true)}
-                        disabled={isPlayDisabled}
-                    />
-                    {audioStatus === "playing" && (
-                        <p role="status">Playing pronunciation...</p>
-                    )}
-                    {audioError && (
-                        <p
-                            role="alert"
-                            className="text-body-default text-center"
-                        >
-                            {audioError}
-                        </p>
-                    )}
-                </>
+                <Button
+                    label={`PLAY SOUND (${playsRemaining}/${maxPlays})`}
+                    variant="primary"
+                    size="large"
+                    leadingIcon={<MusicNoteIcon className="size-full" />}
+                    showTrailingIcon={false}
+                    onClick={onPlaySound}
+                    disabled={isPlayDisabled || answerDisabled}
+                />
             )}
 
             <div className="flex w-full flex-wrap items-start justify-center gap-sm">
-                {effectiveLetters.map((letter, index) => (
-                    <QuizLetter
-                        key={`${letter}-${index}`}
-                        letter={letter}
-                        blank={String(letter).trim().length === 0}
-                        disabled={disabled}
-                    />
-                ))}
+                {effectiveLetters.map((letter, index) =>
+                    letter === " " ? (
+                        <span key={index} className="w-4" aria-label="Space" />
+                    ) : (
+                        <QuizLetter
+                            key={`${letter}-${index}`}
+                            letter={letter}
+                            blank={String(letter).trim().length === 0}
+                            disabled={disabled || answerDisabled}
+                        />
+                    )
+                )}
             </div>
 
             <form
                 onSubmit={handleSubmit}
-                className="flex w-full max-w-[480px] flex-col gap-md"
+                className="flex w-[480px] flex-col gap-md"
             >
                 <TextInput
                     className="w-full"
                     value={currentAnswer}
+                    inputRef={inputRef}
                     onChange={handleInputChange}
                     placeholder="Enter your answer here"
                     showTitle={false}
-                    showSupportingText={false}
+                    state={answerError ? "error" : "default"}
+                    showSupportingText={Boolean(answerError)}
+                    supportingText={answerError}
                     showLeadingIcon={false}
                     aria-label="Enter your answer here"
-                    disabled={disabled}
+                    disabled={disabled || answerDisabled}
                 />
                 <div className="flex w-full items-center justify-end gap-sm">
                     <Button
@@ -243,7 +183,7 @@ function Quiz({
                         showLeadingIcon={false}
                         showTrailingIcon={false}
                         onClick={handleClear}
-                        disabled={disabled}
+                        disabled={disabled || answerDisabled}
                         type="button"
                     />
                     <Button
@@ -252,7 +192,7 @@ function Quiz({
                         size="default"
                         showLeadingIcon={false}
                         showTrailingIcon={false}
-                        disabled={disabled}
+                        disabled={disabled || answerDisabled}
                         type="submit"
                     />
                 </div>

@@ -1,71 +1,130 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useStore } from "zustand";
 import ClockIcon from "../assets/icons/clock.svg?react";
 import PauseIcon from "../assets/icons/pause.svg?react";
 import TopicIcon from "../assets/icons/topic.svg?react";
-import { getAudioReplayLimit } from "../audioQuestion.js";
 import Badge from "../components/Badge";
 import Button from "../components/Button";
 import InfoPill from "../components/InfoPill";
 import PipelineItem from "../components/PipelineItem";
 import Quiz from "../components/Quiz";
 import PauseModal from "./PauseModal";
+import {
+    createPlayViewModel,
+    findQueuedQuestion,
+    formatTime
+} from "../viewModels/playViewModel";
 
 function PlayScreen({
-    questions = [],
     username = "Player_1",
-    score = 0,
+    stageId,
+    userId,
     topic = "SCHOOL",
     level = "A1",
-    time = "10:00",
     initialMusicEnabled = true,
     initialMusicVolume = 100,
     initialSoundEnabled = true,
     initialSoundVolume = 100,
     onAudioSettingsChange,
     onSaveAudioSettings,
-    onPreviewResult,
+    onComplete,
     onReplay,
     onQuit
 }) {
-    const questionCount = questions.length;
-    const [activeQuestion, setActiveQuestion] = useState(0);
-    const [answers, setAnswers] = useState(() => Array(questionCount).fill(""));
-    const [paused, setPaused] = useState(false);
-    const [message, setMessage] = useState("");
-    const [countdown, setCountdown] = useState(3);
-    const currentQuestion = questions[activeQuestion];
+    const [store] = useState(() => createPlayViewModel({ stageId, userId }));
+    const state = useStore(store);
+    const audioRef = useRef(null);
+    const reportedResult = useRef(false);
+    const question = state.questions[state.activeQuestion];
+    const previousQueued = findQueuedQuestion(
+        state.questions,
+        state.activeQuestion,
+        -1
+    );
+    const nextQueued = findQueuedQuestion(
+        state.questions,
+        state.activeQuestion,
+        1
+    );
+    const paused = state.status === "paused";
+    const time = formatTime(state.remaining);
 
     useEffect(() => {
-        if (countdown === 0) return undefined;
+        store.getState().start();
+        const timer = window.setInterval(() => store.getState().tick(), 200);
+        return () => window.clearInterval(timer);
+    }, [store]);
 
-        const timeoutId = window.setTimeout(() => {
-            setCountdown((current) => current - 1);
-        }, 1000);
-        return () => window.clearTimeout(timeoutId);
-    }, [countdown]);
+    useEffect(() => {
+        if (state.status === "complete" && !reportedResult.current) {
+            reportedResult.current = true;
+            onComplete?.(state.result);
+        }
+    }, [state.status, state.result, onComplete]);
 
-    const selectQuestion = (index) => {
-        setActiveQuestion(index);
-        setMessage("");
-    };
+    const playAudio = useCallback(
+        (path) => {
+            if (!path) return;
+            audioRef.current?.pause();
+            const audio = new Audio(`qrc:///${path}`);
+            audioRef.current = audio;
+            audio.play().catch(() => {
+                if (audioRef.current === audio)
+                    store.getState().reportAudioError();
+            });
+        },
+        [store]
+    );
 
-    const updateAnswer = (answer) => {
-        setAnswers((current) =>
-            current.map((value, index) =>
-                index === activeQuestion ? answer : value
-            )
+    useEffect(() => {
+        audioRef.current?.pause();
+        audioRef.current = null;
+        const timer =
+            state.status === "playing"
+                ? window.setTimeout(
+                      () => playAudio(store.getState().takeAudioPlay(true)),
+                      0
+                  )
+                : null;
+        return () => {
+            if (timer !== null) window.clearTimeout(timer);
+            audioRef.current?.pause();
+            audioRef.current = null;
+        };
+    }, [store, playAudio, state.status, state.activeQuestion]);
+
+    if (
+        state.status === "idle" ||
+        state.status === "loading" ||
+        state.status === "error" ||
+        state.status === "saveError"
+    ) {
+        return (
+            <main className="flex h-[900px] w-[1200px] flex-col items-center justify-center gap-lg bg-surface-canvas">
+                <p role={state.error ? "alert" : "status"}>
+                    {state.error || "Loading stage..."}
+                </p>
+                {state.status === "error" && (
+                    <Button
+                        label="Retry"
+                        showLeadingIcon={false}
+                        showTrailingIcon={false}
+                        onClick={() => store.getState().start()}
+                    />
+                )}
+                <Button
+                    label="Quit to menu"
+                    showLeadingIcon={false}
+                    showTrailingIcon={false}
+                    onClick={onQuit}
+                />
+            </main>
         );
-        setMessage("");
-    };
-
-    const resume = () => {
-        setPaused(false);
-        setCountdown(3);
-    };
+    }
 
     return (
         <>
-            {countdown > 0 ? (
+            {state.status === "countdown" ? (
                 <main className="flex h-[900px] w-[1200px] items-center justify-center bg-surface-canvas text-content-primary">
                     <p
                         role="status"
@@ -73,7 +132,7 @@ function PlayScreen({
                         className="text-display-hero"
                     >
                         <span className="sr-only">Starting in </span>
-                        {countdown}
+                        {state.countdown}
                     </p>
                 </main>
             ) : (
@@ -90,7 +149,7 @@ function PlayScreen({
                                         <PauseIcon className="size-full" />
                                     }
                                     showTrailingIcon={false}
-                                    onClick={() => setPaused(true)}
+                                    onClick={state.pause}
                                 />
                             </header>
                             <section
@@ -98,26 +157,31 @@ function PlayScreen({
                                 className="flex min-h-0 flex-1 flex-col gap-lg overflow-y-auto border-x-[length:var(--border-width-heavy)] border-b-[length:var(--border-width-heavy)] border-stroke-default px-md pt-2xl pb-sm"
                             >
                                 <h2 className="text-heading-sm">
-                                    QUESTIONS (0/{questionCount})
+                                    QUESTIONS ({state.solved}/
+                                    {state.questions.length})
                                 </h2>
                                 <div className="flex flex-col gap-md">
                                     {Array.from(
-                                        { length: questionCount },
+                                        { length: state.questions.length },
                                         (_, index) => (
                                             <PipelineItem
                                                 key={index}
                                                 questionOrdinary={`Question ${index + 1}`}
                                                 status={
-                                                    index === activeQuestion
-                                                        ? "Active"
-                                                        : "Queued"
+                                                    state.questions[index]
+                                                        .solved
+                                                        ? "Solved"
+                                                        : index ===
+                                                            state.activeQuestion
+                                                          ? "Active"
+                                                          : "Queued"
                                                 }
                                                 className="w-full"
                                                 onClick={
                                                     paused
                                                         ? undefined
                                                         : () =>
-                                                              selectQuestion(
+                                                              state.selectQuestion(
                                                                   index
                                                               )
                                                 }
@@ -141,7 +205,7 @@ function PlayScreen({
                                         ACCUMULATED SCORE:
                                     </span>
                                     <Badge type="Highlight" showIcon={false}>
-                                        {score}
+                                        {state.score}
                                     </Badge>
                                 </div>
                             </footer>
@@ -179,92 +243,75 @@ function PlayScreen({
                             </header>
                             <div className="relative w-full">
                                 <Quiz
-                                    key={`${activeQuestion}:${currentQuestion?.word_id ?? ""}`}
                                     className="max-w-none"
-                                    mode={currentQuestion?.mode ?? "scramble"}
-                                    audioQuestionId={`${activeQuestion}:${currentQuestion?.word_id ?? ""}`}
-                                    audioText={currentQuestion?.target_word}
-                                    audioFallbackUrl={
-                                        currentQuestion?.audioFallbackUrl
-                                    }
-                                    audioFallbackStatus={
-                                        currentQuestion?.audioFallbackStatus
-                                    }
-                                    maxPlays={getAudioReplayLimit(level)}
-                                    answer={answers[activeQuestion]}
-                                    onChange={updateAnswer}
-                                    onSubmit={() =>
-                                        setMessage(
-                                            "Answer checking is unavailable in this preview."
-                                        )
-                                    }
+                                    mode={question.mode}
+                                    imageSrc={`qrc:///${question.image_path}`}
+                                    onImageError={state.reportImageError}
+                                    letters={question.letters}
+                                    answer={question.answer}
+                                    answerError={state.answerError}
+                                    onChange={state.updateAnswer}
+                                    onSubmit={state.submitAnswer}
+                                    answerDisabled={question.solved}
                                     onPrevious={() =>
-                                        selectQuestion(activeQuestion - 1)
+                                        state.selectQuestion(previousQueued)
                                     }
                                     onNext={() =>
-                                        selectQuestion(activeQuestion + 1)
+                                        state.selectQuestion(nextQueued)
                                     }
-                                    hasPrevious={activeQuestion > 0}
-                                    hasNext={activeQuestion < questionCount - 1}
-                                    disabled={paused}
+                                    hasPrevious={previousQueued !== -1}
+                                    hasNext={nextQueued !== -1}
+                                    playsRemaining={question.playsRemaining}
+                                    maxPlays={
+                                        {
+                                            A1: 3,
+                                            A2: 3,
+                                            B1: 2,
+                                            B2: 2,
+                                            C1: 1,
+                                            C2: 1
+                                        }[state.level]
+                                    }
+                                    onPlaySound={() =>
+                                        playAudio(state.takeAudioPlay())
+                                    }
+                                    disabled={state.status !== "playing"}
                                 />
-                                {message && (
+                                {state.message && (
                                     <p
                                         role="status"
                                         className="text-body-default absolute top-full mt-xs w-full text-center"
                                     >
-                                        {message}
+                                        {state.message}
+                                    </p>
+                                )}
+                                {state.status === "saving" && (
+                                    <p
+                                        role="status"
+                                        className="text-body-default absolute top-full mt-xs w-full text-center"
+                                    >
+                                        Saving result...
                                     </p>
                                 )}
                             </div>
-                            {onPreviewResult ? (
-                                <div className="flex items-center gap-sm pb-lg">
-                                    <span className="text-body-default">
-                                        Mock results:
-                                    </span>
-                                    <Button
-                                        label="Stage cleared"
-                                        size="small"
-                                        variant="secondary"
-                                        showLeadingIcon={false}
-                                        showTrailingIcon={false}
-                                        disabled={paused}
-                                        onClick={() =>
-                                            onPreviewResult("cleared")
-                                        }
-                                    />
-                                    <Button
-                                        label="Time's up"
-                                        size="small"
-                                        variant="secondary"
-                                        showLeadingIcon={false}
-                                        showTrailingIcon={false}
-                                        disabled={paused}
-                                        onClick={() =>
-                                            onPreviewResult("timeUp")
-                                        }
-                                    />
-                                </div>
-                            ) : (
-                                <div />
-                            )}
+                            <div />
                         </section>
                     </main>
                 </div>
             )}
             <PauseModal
-                isOpen={paused && countdown === 0}
-                solved={0}
-                total={questionCount}
+                isOpen={paused}
+                solved={state.solved}
+                total={state.questions.length}
                 timeLeft={time}
-                score={score}
+                score={state.score}
                 initialMusicEnabled={initialMusicEnabled}
                 initialMusicVolume={initialMusicVolume}
                 initialSoundEnabled={initialSoundEnabled}
                 initialSoundVolume={initialSoundVolume}
                 onAudioSettingsChange={onAudioSettingsChange}
                 onSaveSettings={onSaveAudioSettings}
-                onResume={resume}
+                onResume={state.resume}
                 onReplay={onReplay}
                 onQuit={onQuit}
             />
