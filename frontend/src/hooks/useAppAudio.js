@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
-import backgroundMusicUrl from "../assets/sounds/background_music.mp3";
-import clickEffectUrl from "../assets/sounds/click_effect.mp3";
-import hoverEffectUrl from "../assets/sounds/hover_effect.mp3";
+import backgroundMusicUrl from "../assets/sounds/background-music.mp3";
+import clickEffectUrl from "../assets/sounds/click-effect.mp3";
+import hoverEffectUrl from "../assets/sounds/hover-effect.mp3";
 
 const DEFAULT_SETTINGS = {
     musicEnabled: true,

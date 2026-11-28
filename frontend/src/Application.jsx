@@ -1,18 +1,17 @@
 import { useEffect, useId, useState } from "react";
-import Button from "./components/Button";
-import Modal from "./components/Modal";
-import ModalTitle from "./components/ModalTitle";
-import CreateUserModal from "./screens/CreateUserModal";
-import GameSettingsModal from "./screens/GameSettingsModal";
-import LeaderboardModal from "./screens/LeaderboardModal";
+import Button from "./components/primitives/Button";
+import Modal from "./components/primitives/Modal";
+import ModalTitle from "./components/primitives/ModalTitle";
+import CreateUserModal from "./modals/CreateUserModal";
+import GameSettingsModal from "./modals/GameSettingsModal";
+import LeaderboardModal from "./modals/LeaderboardModal";
 import MenuScreen from "./screens/MenuScreen";
 import PlayScreen from "./screens/PlayScreen";
-import SelectProfileModal from "./screens/SelectProfileModal";
-import StageResultModal from "./screens/StageResultModal";
+import SelectProfileModal from "./modals/SelectProfileModal";
+import StageResultModal from "./modals/StageResultModal";
 import { useAppAudio } from "./hooks/useAppAudio";
-import { useAppSessionStore } from "./viewModels/appSessionStore";
-import { useMenuViewModel } from "./viewModels/menuViewModel";
-import { formatTime } from "./viewModels/playViewModel";
+import { useActiveProfile, useAppSessionStore } from "./stores/session.store";
+import { formatTime } from "./utils/formatTime";
 
 function Application() {
     const [modal, setModal] = useState(null);
@@ -20,7 +19,7 @@ function Application() {
     const [stageRun, setStageRun] = useState(0);
     const [stageResult, setStageResult] = useState(null);
     const unavailableTitleId = useId();
-    const activeProfile = useMenuViewModel();
+    const activeProfile = useActiveProfile();
     const status = useAppSessionStore((state) => state.status);
     const error = useAppSessionStore((state) => state.error);
     const loadProfiles = useAppSessionStore((state) => state.loadProfiles);
@@ -217,10 +216,7 @@ function Application() {
                     aria-labelledby={unavailableTitleId}
                     maxWidth="max-w-[580px]"
                     header={
-                        <ModalTitle
-                            id={unavailableTitleId}
-                            className="w-full text-center"
-                        >
+                        <ModalTitle id={unavailableTitleId}>
                             {modal.unavailable}
                         </ModalTitle>
                     }

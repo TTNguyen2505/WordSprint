@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getLeaderboard } from "../qtBridge.js";
+import { getLeaderboard } from "../services/qtBridge.js";
 
 export function createLeaderboardViewModel(loadLeaderboard = getLeaderboard) {
     let requestId = 0;

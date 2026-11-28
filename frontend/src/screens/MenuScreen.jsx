@@ -1,16 +1,15 @@
 import { useRef } from "react";
-import ArrowBackIcon from "../assets/icons/arrow_back_1.svg?react";
-import ArrowForwardIcon from "../assets/icons/arrow_forward_1.svg?react";
+import ArrowBackIcon from "../assets/icons/arrow-back-1.svg?react";
+import ArrowForwardIcon from "../assets/icons/arrow-forward-1.svg?react";
 import ExitIcon from "../assets/icons/exit.svg?react";
 import HelpIcon from "../assets/icons/help.svg?react";
 import SettingsIcon from "../assets/icons/settings.svg?react";
-import stagePreview from "../assets/menu-stage-preview.png";
-import Button from "../components/Button";
-import IconButton from "../components/IconButton";
-import ProfileCard from "../components/ProfileCard";
-import ProgressBar from "../components/ProgressBar";
-import ScoreCard from "../components/ScoreCard";
-import StageCard from "../components/StageCard";
+import Button from "../components/primitives/Button";
+import IconButton from "../components/primitives/IconButton";
+import ProfileCard from "../components/composite/ProfileCard";
+import ProgressBar from "../components/primitives/ProgressBar";
+import ScoreCard from "../components/composite/ScoreCard";
+import StageCard from "../components/composite/StageCard";
 
 function MenuScreen({
     username = "TTNguyen2505",
@@ -129,7 +128,7 @@ function MenuScreen({
                             key={stage.stageId}
                             {...stage}
                             className="shrink-0"
-                            imageSrc={stage.imageSrc ?? stagePreview}
+                            imageSrc={stage.imageSrc ?? undefined}
                             imageAlt={stage.imageAlt ?? ""}
                             onAction={
                                 onStageAction
