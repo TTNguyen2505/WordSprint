@@ -32,6 +32,13 @@ const mockResults = {
         playTime: "10:00",
         score: 120
     },
+    stageCompleted: {
+        badge: "STAGE COMPLETED",
+        stageTitle: "Stage 1: School",
+        solved: 0,
+        playTime: "0:00",
+        score: 0
+    },
     failed: {
         badge: "STAGE NOT CLEARED",
         stageTitle: "Stage 1: School",
@@ -55,7 +62,9 @@ function StageResultModal({
     campaignScore = 5420,
     unlockRequirement = 4,
     passScore,
-    passed = result !== "timeUp" && result !== "failed",
+    passed = result !== "timeUp" &&
+        result !== "failed" &&
+        result !== "stageCompleted",
     onClose,
     onNextStage,
     onLeaderboard,
@@ -63,7 +72,7 @@ function StageResultModal({
     onQuit
 }) {
     const titleId = useId();
-    const mock = mockResults[result];
+    const mock = mockResults[result] ?? mockResults.stageCompleted;
     const isCampaignCleared = result === "campaignCleared";
     const canAdvance = passed && Boolean(onNextStage);
     const retryFirst = !passed;
@@ -123,7 +132,7 @@ function StageResultModal({
                     {!passed ? (
                         <p className="text-body-default text-center">
                             {passScore != null
-                                ? `Score at least ${passScore} points to pass this stage.`
+                                ? `Score at least ${passScore} points to unlock new stage`
                                 : `Solve at least ${unlockRequirement} quizzes to unlock new stage`}
                         </p>
                     ) : canAdvance || isCampaignCleared ? (

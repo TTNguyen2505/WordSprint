@@ -135,8 +135,10 @@ function Application() {
                             stageResult.reason === "timeUp"
                                 ? "timeUp"
                                 : !stageResult.passed
-                                  ? "failed"
-                                  : "stageCleared"
+                                  ? "stageCompleted"
+                                  : nextStage
+                                    ? "stageCleared"
+                                    : "campaignCleared"
                         }
                         passed={stageResult.passed}
                         stageTitle={`${selectedStage.stageId}: ${selectedStage.topic}`}
