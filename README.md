@@ -35,18 +35,23 @@ The planned **Neo-brutalism** visual style uses bold borders, sharp corners, har
 
 Qt/QML provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service; the C++ repositories use a local SQLite database. Gameplay does not yet write progress from the frontend.
 
-Seeded words use placeholder image paths under `storage/images/`; the image files are not included yet.
+The seed contains one topic with A1 and A2 pools of 10 words and B1 and B2 pools of 12 words.
+Their generated images and pronunciation audio are included under `storage/images/` and `storage/audio/`.
 Files in `storage/` are embedded at build time under `qrc:/storage/`, preserving their subdirectories.
 The WebChannel returns non-audio database paths as relative strings. For stage questions, it validates
 optional audio files and returns an embedded `qrc:/storage/audio/...` URL only when the resource exists.
-The current seed data has no audio resources (`audio_path` is `NULL`), so pronunciation currently
-depends on browser speech synthesis; fallback playback requires adding matching files and database paths.
 Audio paths are optional and point to `storage/audio/` when a pronunciation resource is available.
 The backend validates fallback audio paths against embedded `qrc:/storage/audio/` resources and sends
 the resolved URL to React. Audio questions use browser speech synthesis first; they try the resource
 only when speech synthesis fails. On the first launch of this version, the application resets an
 existing unversioned database, deleting its old profiles, progress, and vocabulary. Later launches
 retain the new data.
+
+To generate missing audio and update the seed paths, install `edge-tts` and run
+`py scripts\generate_word_audio.py`. To generate missing images, install `Pillow`, set
+`CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`, then run `py scripts\generate_word_images.py`.
+Image generation uses Cloudflare Workers AI and may incur charges. Both scripts reuse existing files;
+rebuild the app to embed new resources. Seed changes do not update existing databases.
 
 ## Clone the repository
 
