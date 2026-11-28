@@ -250,6 +250,7 @@ std::vector<WordItem> StageRepository::getRandomWords(int topicId, CEFRLevel lev
     QSqlQuery query(database);
     if (!query.prepare(QStringLiteral("SELECT word_id, topic_id, cefr_level, target_word, hint_image_path, audio_path "
                                       "FROM word_pool WHERE topic_id = ? AND cefr_level = ? "
+                                      "AND TRIM(target_word) <> '' "
                                       "ORDER BY RANDOM() LIMIT ?"))) {
         SqliteRepositoryUtils::warnQueryFailure("StageRepository", "getRandomWords.prepare", query);
         return words;

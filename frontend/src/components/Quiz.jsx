@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
+import { playQuestionAudio } from "../audioQuestion.js";
 import thumbnail from "../assets/quiz-question-thumbnail.png";
 import ArrowBackIcon from "../assets/icons/arrow_back_1.svg?react";
 import ArrowForwardIcon from "../assets/icons/arrow_forward_1.svg?react";
@@ -30,8 +31,10 @@ function Quiz({
     hasPrevious = true,
     onNext,
     hasNext = true,
-    onPlaySound,
-    playsRemaining = 3,
+    audioQuestionId,
+    audioText,
+    audioFallbackUrl,
+    audioFallbackStatus,
     maxPlays = 3,
     instruction,
     disabled = false,
@@ -45,6 +48,11 @@ function Quiz({
     const currentBadgeLabel =
         badgeLabel ?? modeLabels[mode] ?? modeLabels.scramble;
     const [internalAnswer, setInternalAnswer] = useState(answer ?? "");
+    const [playsRemaining, setPlaysRemaining] = useState(maxPlays);
+    const [audioStatus, setAudioStatus] = useState("idle");
+    const [audioError, setAudioError] = useState("");
+    const remainingPlaysRef = useRef(maxPlays);
+    const activePlaybackRef = useRef(null);
     const effectiveLetters = letters ?? DEFAULT_LETTERS[mode] ?? [];
     const currentInstruction =
         instruction ??
@@ -73,7 +81,58 @@ function Quiz({
     };
 
     const currentAnswer = answer ?? internalAnswer;
-    const isPlayDisabled = disabled || playsRemaining <= 0;
+    const playAudio = useCallback(
+        async (manual = false) => {
+            if (activePlaybackRef.current) return;
+            if (manual && remainingPlaysRef.current <= 0) return;
+
+            const controller = new AbortController();
+            activePlaybackRef.current = controller;
+            setAudioStatus("playing");
+            setAudioError("");
+
+            try {
+                await playQuestionAudio({
+                    targetWord: audioText,
+                    fallbackUrl: audioFallbackUrl,
+                    fallbackStatus: audioFallbackStatus,
+                    signal: controller.signal
+                });
+                if (controller.signal.aborted) return;
+                if (manual) {
+                    remainingPlaysRef.current -= 1;
+                    setPlaysRemaining(remainingPlaysRef.current);
+                }
+                setAudioStatus("idle");
+            } catch (error) {
+                if (!controller.signal.aborted) {
+                    setAudioError(error.message);
+                    setAudioStatus("error");
+                }
+            } finally {
+                if (activePlaybackRef.current === controller) {
+                    activePlaybackRef.current = null;
+                }
+            }
+        },
+        [audioFallbackStatus, audioFallbackUrl, audioText]
+    );
+
+    useEffect(() => {
+        if (mode !== "audio") return undefined;
+
+        const timeoutId = window.setTimeout(() => {
+            void playAudio();
+        }, 0);
+        return () => {
+            window.clearTimeout(timeoutId);
+            activePlaybackRef.current?.abort();
+            activePlaybackRef.current = null;
+        };
+    }, [audioQuestionId, mode, playAudio]);
+
+    const isPlayDisabled =
+        disabled || playsRemaining <= 0 || audioStatus === "playing";
     return (
         <section
             className={twMerge(
@@ -115,24 +174,39 @@ function Quiz({
                 </nav>
             </header>
 
-            <div className="aspect-[16/9] w-full max-w-[480px] overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
-                <img
-                    src={imageSrc}
-                    alt={imageAlt}
-                    className="size-full object-cover"
-                />
-            </div>
+            {mode !== "audio" && (
+                <div className="aspect-[16/9] w-full max-w-[480px] overflow-hidden border-[length:var(--border-width-default)] border-stroke-default bg-surface-panel shadow-elevation-200">
+                    <img
+                        src={imageSrc}
+                        alt={imageAlt}
+                        className="size-full object-cover"
+                    />
+                </div>
+            )}
 
             {mode === "audio" && (
-                <Button
-                    label={`PLAY SOUND (${playsRemaining}/${maxPlays})`}
-                    variant="primary"
-                    size="large"
-                    leadingIcon={<MusicNoteIcon className="size-full" />}
-                    showTrailingIcon={false}
-                    onClick={onPlaySound}
-                    disabled={isPlayDisabled}
-                />
+                <>
+                    <Button
+                        label={`PLAY SOUND (${playsRemaining}/${maxPlays})`}
+                        variant="primary"
+                        size="large"
+                        leadingIcon={<MusicNoteIcon className="size-full" />}
+                        showTrailingIcon={false}
+                        onClick={() => void playAudio(true)}
+                        disabled={isPlayDisabled}
+                    />
+                    {audioStatus === "playing" && (
+                        <p role="status">Playing pronunciation...</p>
+                    )}
+                    {audioError && (
+                        <p
+                            role="alert"
+                            className="text-body-default text-center"
+                        >
+                            {audioError}
+                        </p>
+                    )}
+                </>
             )}
 
             <div className="flex w-full flex-wrap items-start justify-center gap-sm">

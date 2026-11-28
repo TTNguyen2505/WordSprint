@@ -11,12 +11,16 @@
 #include "repositories/UserRepository.h"
 
 #include <QDebug>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QRegularExpression>
+#include <QStringList>
+#include <QUrl>
 
 #include <algorithm>
 #include <map>
+#include <optional>
 #include <vector>
 
 BridgeController::BridgeController(StageRepository *stageRepository, RecordRepository *recordRepository,
@@ -25,6 +29,34 @@ BridgeController::BridgeController(StageRepository *stageRepository, RecordRepos
     m_userRepository(userRepository) {}
 
 namespace {
+    struct AudioFallbackResource {
+        QString url;
+        QString status;
+    };
+
+    AudioFallbackResource audioFallbackResource(const std::optional<std::string> &audioPath) {
+        if (!audioPath.has_value() || audioPath->empty()) {
+            return {{}, QStringLiteral("missing")};
+        }
+
+        QString path = QString::fromStdString(*audioPath).trimmed();
+        path.replace(QLatin1Char('\\'), QLatin1Char('/'));
+        const QStringList pathParts = path.split(QLatin1Char('/'));
+        if (!path.startsWith(QStringLiteral("storage/audio/")) || pathParts.contains(QStringLiteral(".")) ||
+            pathParts.contains(QStringLiteral(".."))) {
+            return {{}, QStringLiteral("invalid_path")};
+        }
+
+        if (!QFile::exists(QStringLiteral(":/") + path)) {
+            return {{}, QStringLiteral("not_found")};
+        }
+
+        QUrl resourceUrl;
+        resourceUrl.setScheme(QStringLiteral("qrc"));
+        resourceUrl.setPath(QStringLiteral("/") + path);
+        return {resourceUrl.toString(QUrl::FullyEncoded), QStringLiteral("available")};
+    }
+
     QVariantMap userToVariant(const User &user) {
         return {{QStringLiteral("id"), user.user_id},
                 {QStringLiteral("name"), QString::fromStdString(user.username)},
@@ -144,6 +176,9 @@ QString BridgeController::startStage(const QString &requestJson) {
     if (wordItems.empty()) {
         return buildErrorResponse(QStringLiteral("No vocabulary is available for this stage"));
     }
+    if (static_cast<int>(wordItems.size()) < stage->question_count) {
+        return buildErrorResponse(QStringLiteral("Not enough vocabulary with valid target words is available"));
+    }
 
     QVariantList words;
     for (const WordItem &word: wordItems) {
@@ -154,8 +189,9 @@ QString BridgeController::startStage(const QString &requestJson) {
         item[QStringLiteral("target_word")] = QString::fromStdString(word.target_word);
         item[QStringLiteral("hint_text")] = QString();
         item[QStringLiteral("image_path")] = QString::fromStdString(word.hint_image_path);
-        item[QStringLiteral("audio_path")] =
-                word.audio_path.has_value() ? QVariant(QString::fromStdString(*word.audio_path)) : QVariant();
+        const AudioFallbackResource audioFallback = audioFallbackResource(word.audio_path);
+        item[QStringLiteral("audioFallbackUrl")] = audioFallback.url;
+        item[QStringLiteral("audioFallbackStatus")] = audioFallback.status;
         words.append(item);
     }
 
