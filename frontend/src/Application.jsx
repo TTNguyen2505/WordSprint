@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Button from "./components/Button";
 import Modal from "./components/Modal";
 import ModalTitle from "./components/ModalTitle";
@@ -12,17 +12,13 @@ import StageResultModal from "./screens/StageResultModal";
 import { useAppAudio } from "./hooks/useAppAudio";
 import { useAppSessionStore } from "./viewModels/appSessionStore";
 import { useMenuViewModel } from "./viewModels/menuViewModel";
-import { buildStageQuestions } from "./audioQuestion.js";
-import { startStage as requestStartStage } from "./qtBridge.js";
+import { formatTime } from "./viewModels/playViewModel";
 
 function Application() {
     const [modal, setModal] = useState(null);
     const [selectedStage, setSelectedStage] = useState(null);
-    const [stageData, setStageData] = useState(null);
-    const [stageError, setStageError] = useState("");
     const [stageRun, setStageRun] = useState(0);
     const [stageResult, setStageResult] = useState(null);
-    const stageRequestId = useRef(0);
     const unavailableTitleId = useId();
     const activeProfile = useMenuViewModel();
     const status = useAppSessionStore((state) => state.status);
@@ -47,38 +43,18 @@ function Application() {
 
     const unavailable = (feature) => setModal({ unavailable: feature });
 
-    const startStage = async (stage) => {
-        const requestId = ++stageRequestId.current;
+    const startStage = (stage) => {
         setSelectedStage(stage);
-        setStageData(null);
-        setStageError("");
         setStageRun((current) => current + 1);
         setStageResult(null);
         setModal(null);
-
-        try {
-            const response = await requestStartStage({
-                userId: activeProfile.id,
-                stageId: stage.id
-            });
-            const questions = buildStageQuestions(response.words ?? []);
-            if (requestId === stageRequestId.current) {
-                setStageData({ ...response, questions });
-            }
-        } catch (error) {
-            if (requestId === stageRequestId.current) {
-                setStageError(error.message);
-            }
-        }
     };
 
     const quitStage = () => {
-        stageRequestId.current += 1;
         setSelectedStage(null);
-        setStageData(null);
-        setStageError("");
         setStageResult(null);
         setModal(null);
+        loadProfiles().catch(() => {});
     };
 
     if (status !== "ready") {
@@ -125,30 +101,8 @@ function Application() {
     }
 
     if (selectedStage) {
-        if (stageError) {
-            return (
-                <main className="flex h-[900px] w-[1200px] flex-col items-center justify-center gap-md bg-surface-canvas">
-                    <p role="alert">{stageError}</p>
-                    <Button
-                        label="Back to stages"
-                        showLeadingIcon={false}
-                        showTrailingIcon={false}
-                        onClick={quitStage}
-                    />
-                </main>
-            );
-        }
-
-        if (!stageData) {
-            return (
-                <main className="flex h-[900px] w-[1200px] items-center justify-center bg-surface-canvas">
-                    <p role="status">Loading stage questions...</p>
-                </main>
-            );
-        }
-
         const nextStage = activeProfile.stages.find(
-            (stage) => stage.id === selectedStage.previewNextStageId
+            (stage) => stage.id === stageResult?.nextStageId
         );
 
         return (
@@ -156,10 +110,11 @@ function Application() {
                 <div inert={Boolean(stageResult)}>
                     <PlayScreen
                         key={stageRun}
-                        questions={stageData.questions}
+                        stageId={selectedStage.id}
+                        userId={activeProfile.id}
                         username={activeProfile.name}
                         topic={selectedStage.topic}
-                        level={stageData.cefrLevel}
+                        level={selectedStage.level}
                         initialMusicEnabled={activeProfile.musicEnabled}
                         initialMusicVolume={activeProfile.musicVolume}
                         initialSoundEnabled={activeProfile.soundEnabled}
@@ -168,28 +123,39 @@ function Application() {
                         onSaveAudioSettings={updateAudio}
                         onReplay={() => startStage(selectedStage)}
                         onQuit={quitStage}
-                        onPreviewResult={(result) =>
-                            setStageResult(
-                                result === "timeUp"
-                                    ? "timeUp"
-                                    : nextStage
-                                      ? "stageCleared"
-                                      : "campaignCleared"
-                            )
-                        }
+                        onComplete={(result) => {
+                            setStageResult(result);
+                            loadProfiles().catch(() => {});
+                        }}
                     />
                 </div>
                 {stageResult && modal !== "leaderboard" && (
                     <StageResultModal
-                        result={stageResult}
+                        result={
+                            stageResult.reason === "timeUp"
+                                ? "timeUp"
+                                : !stageResult.passed
+                                  ? "failed"
+                                  : "stageCleared"
+                        }
+                        passed={stageResult.passed}
                         stageTitle={`${selectedStage.stageId}: ${selectedStage.topic}`}
+                        solved={stageResult.solved}
+                        total={stageResult.total}
+                        playTime={formatTime(stageResult.completionTime)}
+                        score={stageResult.score}
+                        passScore={stageResult.passScore}
                         nextStageTitle={
                             nextStage
                                 ? `${nextStage.stageId}: ${nextStage.topic}`
                                 : undefined
                         }
                         nextStageLevel={nextStage?.level}
-                        onNextStage={() => startStage(nextStage)}
+                        onNextStage={
+                            nextStage && stageResult.nextStageUnlocked
+                                ? () => startStage(nextStage)
+                                : undefined
+                        }
                         onReplay={() => startStage(selectedStage)}
                         onQuit={quitStage}
                         onLeaderboard={() => setModal("leaderboard")}

@@ -192,6 +192,9 @@ QString BridgeController::startStage(const QString &requestJson) {
         const AudioFallbackResource audioFallback = audioFallbackResource(word.audio_path);
         item[QStringLiteral("audioFallbackUrl")] = audioFallback.url;
         item[QStringLiteral("audioFallbackStatus")] = audioFallback.status;
+        item[QStringLiteral("audio_path")] = audioFallback.status == QStringLiteral("available")
+                                                     ? QVariant(QString::fromStdString(*word.audio_path))
+                                                     : QVariant();
         words.append(item);
     }
 
@@ -202,6 +205,7 @@ QString BridgeController::startStage(const QString &requestJson) {
     response[QStringLiteral("cefrLevel")] = QString::fromStdString(stage->cefr_level);
     response[QStringLiteral("timeLimit")] = stage->time_limit;
     response[QStringLiteral("questionCount")] = words.size();
+    response[QStringLiteral("passScore")] = stage->pass_score;
     response[QStringLiteral("words")] = words;
 
     emit stageStarted(stage->stage_id);

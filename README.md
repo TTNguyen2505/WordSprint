@@ -2,7 +2,7 @@
 
 WordSprint is a desktop English vocabulary puzzle game. It aims to help learners practice vocabulary, listening, reaction speed, and typing through short, timed challenges.
 
-> **Current status:** The menu, profiles, stage progress, and leaderboards load from SQLite through Qt WebChannel. Profile creation and audio settings are saved; profile deletion is disabled. Stage cards load stage questions through Qt WebChannel. Audio questions use browser speech synthesis with an embedded audio resource as a fallback, hide the hint image, and allow CEFR-based manual replays. Gameplay answer checking, the timer, saved results, and other menu screens are not yet implemented.
+> **Current status:** The menu, profiles, stage progress, and leaderboards load from SQLite through Qt WebChannel. Stage cards start timed vocabulary puzzles and save results; profile creation and audio settings persist, while profile deletion and some menu screens are not implemented.
 
 ## Product vision
 
@@ -12,7 +12,7 @@ Players solve vocabulary puzzles organized by topic and CEFR level (A1–C2). Ea
 
 - **Scramble:** Rearrange shuffled letters to form a word, using an image as a hint.
 - **Fill in the Blank:** Complete a word with missing letters using the available word and context clues.
-- **Audio:** Listen to a pronunciation a limited number of times, then type the matching word.
+- **Audio:** Listen to a pronunciation a limited number of times and use an image hint to type the matching word.
 
 The planned answer flow gives immediate visual feedback and advances to the next question after a correct answer. After an incorrect answer, the entered text is selected so the player can try again. Each stage has a countdown timer.
 
@@ -33,7 +33,7 @@ The planned **Neo-brutalism** visual style uses bold borders, sharp corners, har
 - **Frontend state and data tools:** Zustand and TanStack Query.
 - **Build:** CMake builds the desktop application; Vite builds the frontend, which Qt can embed as application resources.
 
-Qt/QML provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service; the C++ repositories use a local SQLite database. Gameplay does not yet write progress from the frontend.
+Qt/QML provide the desktop shell and display the React frontend in a `WebEngineView`. There is no separate backend service; the C++ repositories use a local SQLite database.
 
 The seed contains one topic with A1 and A2 pools of 10 words and B1 and B2 pools of 12 words.
 Their generated images and pronunciation audio are included under `storage/images/` and `storage/audio/`.
@@ -41,9 +41,9 @@ Files in `storage/` are embedded at build time under `qrc:/storage/`, preserving
 The WebChannel returns non-audio database paths as relative strings. For stage questions, it validates
 optional audio files and returns an embedded `qrc:/storage/audio/...` URL only when the resource exists.
 Audio paths are optional and point to `storage/audio/` when a pronunciation resource is available.
-The backend validates fallback audio paths against embedded `qrc:/storage/audio/` resources and sends
-the resolved URL to React. Audio questions use browser speech synthesis first; they try the resource
-only when speech synthesis fails. On the first launch of this version, the application resets an
+The backend validates audio paths against embedded `qrc:/storage/audio/` resources. Audio questions use
+the embedded pronunciation and are assigned only to words with an available audio resource.
+On the first launch of this version, the application resets an
 existing unversioned database, deleting its old profiles, progress, and vocabulary. Later launches
 retain the new data.
 

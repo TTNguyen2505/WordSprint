@@ -2,7 +2,7 @@
 
 This directory contains WordSprint's React frontend. It can be installed, run, checked, and built independently of the Qt desktop application. The same frontend is also used by the root project, where Qt WebEngine displays it inside the desktop shell.
 
-> **Current status:** The menu, profiles, audio settings, leaderboards, and stage questions load through the Qt backend and require the desktop application. Profile creation and audio settings persist in SQLite; profile deletion is disabled. Audio questions use browser speech synthesis with an embedded Qt audio resource as a fallback, hide the hint image, and allow CEFR-based manual replays. Gameplay still does not check answers or save results.
+> **Current status:** The menu, profiles, audio settings, gameplay, and leaderboards use the Qt backend and require the desktop application. Stage results, profile creation, and audio settings persist in SQLite; profile deletion is disabled. Audio questions show an image hint and use embedded pronunciation resources with CEFR-based manual replays.
 
 ## Design system
 
@@ -51,14 +51,14 @@ The application needs the Qt WebChannel to load its data, so run it in the deskt
 
 Run these commands from `frontend/`:
 
-| Command                                         | Purpose                                                      |
-| ----------------------------------------------- | ------------------------------------------------------------ |
-| `pnpm build`                                    | Create the production frontend in `dist/`                    |
-| `pnpm preview`                                  | Preview the production build locally; run `pnpm build` first |
-| `pnpm lint`                                     | Run ESLint                                                   |
-| `node --test src\viewModels\viewModels.test.js` | Run the focused view-model tests                             |
-| `pnpm format:check`                             | Check formatting with Prettier                               |
-| `pnpm format`                                   | Format files with Prettier                                   |
+| Command                                                         | Purpose                                                      |
+| --------------------------------------------------------------- | ------------------------------------------------------------ |
+| `pnpm build`                                                    | Create the production frontend in `dist/`                    |
+| `pnpm preview`                                                  | Preview the production build locally; run `pnpm build` first |
+| `pnpm lint`                                                     | Run ESLint                                                   |
+| `node --test src\viewModels\*.test.js src\components\*.test.js` | Run frontend tests                                           |
+| `pnpm format:check`                                             | Check formatting with Prettier                               |
+| `pnpm format`                                                   | Format files with Prettier                                   |
 
 `dist/` is generated output and is excluded from version control.
 

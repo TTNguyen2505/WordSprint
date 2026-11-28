@@ -31,6 +31,13 @@ const mockResults = {
         solved: 3,
         playTime: "10:00",
         score: 120
+    },
+    failed: {
+        badge: "STAGE NOT CLEARED",
+        stageTitle: "Stage 1: School",
+        solved: 0,
+        playTime: "0:00",
+        score: 0
     }
 };
 
@@ -42,11 +49,13 @@ function StageResultModal({
     total = 8,
     playTime,
     score,
-    rank = "#3",
-    nextStageTitle = "Stage 2: Family",
+    rank,
+    nextStageTitle,
     nextStageLevel = "A2",
     campaignScore = 5420,
     unlockRequirement = 4,
+    passScore,
+    passed = result !== "timeUp" && result !== "failed",
     onClose,
     onNextStage,
     onLeaderboard,
@@ -55,8 +64,9 @@ function StageResultModal({
 }) {
     const titleId = useId();
     const mock = mockResults[result];
-    const isTimeUp = result === "timeUp";
     const isCampaignCleared = result === "campaignCleared";
+    const canAdvance = passed && Boolean(onNextStage);
+    const retryFirst = !passed;
 
     return (
         <Modal
@@ -66,7 +76,7 @@ function StageResultModal({
             header={
                 <div className="flex w-full flex-col items-center gap-lg">
                     <Badge
-                        type={isTimeUp ? "Danger" : "Success"}
+                        type={passed ? "Success" : "Danger"}
                         showIcon={false}
                     >
                         {mock.badge}
@@ -100,7 +110,7 @@ function StageResultModal({
                             showLeadingIcon={false}
                             showTrailingIcon={false}
                         />
-                        {!isTimeUp && (
+                        {rank != null && (
                             <InfoPill
                                 type="Highlight"
                                 label="Rank"
@@ -110,12 +120,13 @@ function StageResultModal({
                             />
                         )}
                     </div>
-                    {isTimeUp ? (
+                    {!passed ? (
                         <p className="text-body-default text-center">
-                            Solve at least {unlockRequirement} quizzes to unlock
-                            new stage
+                            {passScore != null
+                                ? `Score at least ${passScore} points to pass this stage.`
+                                : `Solve at least ${unlockRequirement} quizzes to unlock new stage`}
                         </p>
-                    ) : (
+                    ) : canAdvance || isCampaignCleared ? (
                         <ProgressSummaryCard
                             type={
                                 isCampaignCleared
@@ -133,6 +144,10 @@ function StageResultModal({
                                     : nextStageLevel
                             }
                         />
+                    ) : (
+                        <p className="text-body-default text-center">
+                            Stage complete.
+                        </p>
                     )}
                 </div>
             }
@@ -140,36 +155,36 @@ function StageResultModal({
                 <div className="flex w-[640px] flex-col gap-lg">
                     <Button
                         label={
-                            isTimeUp
+                            retryFirst
                                 ? "TRY AGAIN"
-                                : isCampaignCleared
+                                : !canAdvance
                                   ? "VIEW LEADERBOARD"
                                   : "NEXT STAGE"
                         }
                         size="large"
                         className="w-full"
                         leadingIcon={
-                            isTimeUp ? (
+                            retryFirst ? (
                                 <ReplayIcon className="size-full" />
-                            ) : isCampaignCleared ? (
+                            ) : !canAdvance ? (
                                 <TrophyIcon className="size-full" />
                             ) : undefined
                         }
-                        showLeadingIcon={isTimeUp || isCampaignCleared}
+                        showLeadingIcon={retryFirst || !canAdvance}
                         trailingIcon={
                             <ArrowForwardIcon className="size-full" />
                         }
-                        showTrailingIcon={!isTimeUp && !isCampaignCleared}
+                        showTrailingIcon={!retryFirst && canAdvance}
                         onClick={
-                            isTimeUp
+                            retryFirst
                                 ? onReplay
-                                : isCampaignCleared
+                                : !canAdvance
                                   ? onLeaderboard
                                   : onNextStage
                         }
                     />
                     <div className="flex gap-lg">
-                        {isTimeUp ? (
+                        {retryFirst ? (
                             <Button
                                 label="NEXT STAGE"
                                 size="large"

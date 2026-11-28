@@ -184,6 +184,11 @@ if(BUILD_TESTING)
         src/repositories/StageRepository.cpp
         src/repositories/RecordRepository.cpp
     )
+    qt_add_resources(BridgeViewModelTest "test_audio"
+        PREFIX "/storage"
+        BASE "${STORAGE_DIR}"
+        FILES "${STORAGE_DIR}/audio/hello.mp3"
+    )
     target_include_directories(BridgeViewModelTest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/src")
     target_compile_definitions(BridgeViewModelTest PRIVATE WORDSPRINT_SQL_DIR="${CMAKE_CURRENT_SOURCE_DIR}/sql")
     target_link_libraries(BridgeViewModelTest PRIVATE Qt6::Core Qt6::Sql)
