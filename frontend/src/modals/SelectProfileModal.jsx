@@ -1,11 +1,11 @@
 import { useId } from "react";
-import AddIcon from "../assets/icons/add.svg?react";
-import CloseIcon from "../assets/icons/close.svg?react";
-import Button from "../components/primitives/Button";
-import Modal from "../components/primitives/Modal";
-import ModalTitle from "../components/primitives/ModalTitle";
-import ProfileRecord from "../components/composite/ProfileRecord";
-import { useAppSessionStore } from "../stores/session.store";
+import AddIcon from "@/assets/icons/add.svg?react";
+import CloseIcon from "@/assets/icons/close.svg?react";
+import Button from "@/components/primitives/Button";
+import Modal from "@/components/primitives/Modal";
+import ModalTitle from "@/components/primitives/ModalTitle";
+import ProfileRecord from "@/components/composite/ProfileRecord";
+import { useAppSessionStore } from "@/stores/session.store";
 
 function SelectProfileModal({ isOpen = true, onClose, onAdd }) {
     const titleId = useId();

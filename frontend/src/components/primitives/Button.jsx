@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import PlayIcon from "../../assets/icons/play.svg?url";
+import PlayIcon from "@/assets/icons/play.svg?url";
 import { twMerge } from "tailwind-merge";
 
 const sizeStyles = {

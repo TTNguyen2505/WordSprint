@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import SuccessIcon from "../../assets/icons/success.svg?react";
+import SuccessIcon from "@/assets/icons/success.svg?react";
 
 function ProgressBar({
     value = 0,

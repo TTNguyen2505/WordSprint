@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import BoltIcon from "../../assets/icons/bolt.svg?react";
-import CheckIcon from "../../assets/icons/check.svg?react";
-import Badge from "../primitives/Badge";
-import InfoPill from "../primitives/InfoPill";
+import BoltIcon from "@/assets/icons/bolt.svg?react";
+import CheckIcon from "@/assets/icons/check.svg?react";
+import Badge from "@/components/primitives/Badge";
+import InfoPill from "@/components/primitives/InfoPill";
 
 function ProgressSummaryCard({
     type = "Next stage",

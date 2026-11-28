@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import Badge from "../primitives/Badge";
-import Cell from "../primitives/Cell";
+import Badge from "@/components/primitives/Badge";
+import Cell from "@/components/primitives/Cell";
 
 const legacyTypes = {
     header: "Header",

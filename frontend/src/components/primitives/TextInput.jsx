@@ -1,9 +1,9 @@
 import clsx from "clsx";
 import { useId, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import AccountIcon from "../../assets/icons/account.svg?react";
-import ErrorIcon from "../../assets/icons/wrong.svg?url";
-import SuccessIcon from "../../assets/icons/check.svg?url";
+import AccountIcon from "@/assets/icons/account.svg?react";
+import ErrorIcon from "@/assets/icons/wrong.svg?url";
+import SuccessIcon from "@/assets/icons/check.svg?url";
 
 const stateStyles = {
     default: {

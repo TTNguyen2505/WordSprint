@@ -1,14 +1,13 @@
 import { useRef, useState } from "react";
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import thumbnail from "../../../assets/quiz-question-thumbnail.png";
-import ArrowBackIcon from "../../../assets/icons/arrow-back-1.svg?react";
-import ArrowForwardIcon from "../../../assets/icons/arrow-forward-1.svg?react";
-import MusicNoteIcon from "../../../assets/icons/music_note.svg?react";
-import Badge from "../../primitives/Badge";
-import Button from "../../primitives/Button";
+import ArrowBackIcon from "@/assets/icons/arrow-back-1.svg?react";
+import ArrowForwardIcon from "@/assets/icons/arrow-forward-1.svg?react";
+import MusicNoteIcon from "@/assets/icons/music_note.svg?react";
+import Badge from "@/components/primitives/Badge";
+import Button from "@/components/primitives/Button";
 import QuizLetter from "./QuizLetter";
-import TextInput from "../../primitives/TextInput";
+import TextInput from "@/components/primitives/TextInput";
 
 const DEFAULT_LETTERS = {
     scramble: ["U", "Q", "S", "E", "T", "O", "I", "N"],
@@ -19,7 +18,7 @@ const DEFAULT_LETTERS = {
 function Quiz({
     mode = "scramble",
     badgeLabel,
-    imageSrc = thumbnail,
+    imageSrc,
     imageAlt = "Quiz clue illustration",
     onImageError,
     letters,

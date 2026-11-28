@@ -1,10 +1,10 @@
 import { useId, useState } from "react";
-import AddIcon from "../assets/icons/add.svg?react";
-import CloseIcon from "../assets/icons/close.svg?react";
-import Button from "../components/primitives/Button";
-import Modal from "../components/primitives/Modal";
-import ModalTitle from "../components/primitives/ModalTitle";
-import TextInput from "../components/primitives/TextInput";
+import AddIcon from "@/assets/icons/add.svg?react";
+import CloseIcon from "@/assets/icons/close.svg?react";
+import Button from "@/components/primitives/Button";
+import Modal from "@/components/primitives/Modal";
+import ModalTitle from "@/components/primitives/ModalTitle";
+import TextInput from "@/components/primitives/TextInput";
 
 function CreateUserModal({ isOpen = true, onClose, onCreate }) {
     const titleId = useId();

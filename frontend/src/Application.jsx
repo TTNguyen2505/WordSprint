@@ -1,17 +1,17 @@
 import { useEffect, useId, useState } from "react";
-import Button from "./components/primitives/Button";
-import Modal from "./components/primitives/Modal";
-import ModalTitle from "./components/primitives/ModalTitle";
-import CreateUserModal from "./modals/CreateUserModal";
-import GameSettingsModal from "./modals/GameSettingsModal";
-import LeaderboardModal from "./modals/LeaderboardModal";
-import MenuScreen from "./screens/MenuScreen";
-import PlayScreen from "./screens/PlayScreen";
-import SelectProfileModal from "./modals/SelectProfileModal";
-import StageResultModal from "./modals/StageResultModal";
-import { useAppAudio } from "./hooks/useAppAudio";
-import { useActiveProfile, useAppSessionStore } from "./stores/session.store";
-import { formatTime } from "./utils/formatTime";
+import Button from "@/components/primitives/Button";
+import Modal from "@/components/primitives/Modal";
+import ModalTitle from "@/components/primitives/ModalTitle";
+import CreateUserModal from "@/modals/CreateUserModal";
+import GameSettingsModal from "@/modals/GameSettingsModal";
+import LeaderboardModal from "@/modals/LeaderboardModal";
+import MenuScreen from "@/screens/MenuScreen";
+import PlayScreen from "@/screens/PlayScreen";
+import SelectProfileModal from "@/modals/SelectProfileModal";
+import StageResultModal from "@/modals/StageResultModal";
+import { useAppAudio } from "@/hooks/useAppAudio";
+import { useActiveProfile, useAppSessionStore } from "@/stores/session.store";
+import { formatTime } from "@/utils/formatTime";
 
 function Application() {
     const [modal, setModal] = useState(null);

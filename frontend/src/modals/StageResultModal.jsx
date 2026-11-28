@@ -1,14 +1,14 @@
 import { useId } from "react";
-import ArrowForwardIcon from "../assets/icons/arrow-forward-2.svg?react";
-import ExitIcon from "../assets/icons/exit.svg?react";
-import ReplayIcon from "../assets/icons/replay.svg?react";
-import TrophyIcon from "../assets/icons/trophy.svg?react";
-import Badge from "../components/primitives/Badge";
-import Button from "../components/primitives/Button";
-import InfoPill from "../components/primitives/InfoPill";
-import Modal from "../components/primitives/Modal";
-import ModalTitle from "../components/primitives/ModalTitle";
-import ProgressSummaryCard from "../components/composite/ProgressSummaryCard";
+import ArrowForwardIcon from "@/assets/icons/arrow-forward-2.svg?react";
+import ExitIcon from "@/assets/icons/exit.svg?react";
+import ReplayIcon from "@/assets/icons/replay.svg?react";
+import TrophyIcon from "@/assets/icons/trophy.svg?react";
+import Badge from "@/components/primitives/Badge";
+import Button from "@/components/primitives/Button";
+import InfoPill from "@/components/primitives/InfoPill";
+import Modal from "@/components/primitives/Modal";
+import ModalTitle from "@/components/primitives/ModalTitle";
+import ProgressSummaryCard from "@/components/composite/ProgressSummaryCard";
 
 const mockResults = {
     stageCleared: {

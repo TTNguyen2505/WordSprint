@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import { twMerge } from "tailwind-merge";
-import TextButton from "../primitives/TextButton";
-import UserIcon from "../../assets/icons/account.svg?react";
+import TextButton from "@/components/primitives/TextButton";
+import UserIcon from "@/assets/icons/account.svg?react";
 
 function ProfileCard({
     label = "CURRENT PLAYER",
